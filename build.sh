@@ -8,13 +8,10 @@ mkdir -p $BUILD_DIR
 mkdir -p $INCLUDE_DIR
 
 echo "📝 Generating parser..."
-cd $SRC_DIR
-bison -d -o ../$BUILD_DIR/Parser.cpp --defines=../$BUILD_DIR/Parser.hpp grammar.y
-cd ..
-
+cd $BUILD_DIR
+bison -d ../$SRC_DIR/grammar.y
 echo "🔤 Generating lexer..."
-cd $SRC_DIR
-flex -o ../$BUILD_DIR/Scanner.cpp --header-file=../$BUILD_DIR/Scanner.hpp lexer.l
+flex ../$SRC_DIR/lexer.l
 cd ..
 
 cp $BUILD_DIR/Parser.hpp $INCLUDE_DIR/
