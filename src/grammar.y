@@ -3,6 +3,7 @@
 #include <string>
 #include <cmath>
 #include "Scanner.hpp"
+#include "AST.h"
 %}
 
 %require "3.7.4"

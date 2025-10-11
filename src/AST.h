@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 
+namespace syntax_tree {
+
 class ASTNode {
 private:
     std::string text;
@@ -55,7 +57,10 @@ public:
         if (root) {
             root->print(0);
         } else {
-            std::cout << "Empty AST\n";
+            std::cout << "AST is empty.\n";
         }
     }
 };
+
+};
+

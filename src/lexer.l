@@ -1,6 +1,7 @@
 %{
 #include <cstdlib>
 #include "Parser.hpp"
+#include "AST.h"
 
 using namespace haskell_subset;
 void set_input_file(yyscan_t scanner, const char* filename);
@@ -79,10 +80,10 @@ void set_input_file(yyscan_t scanner, const char* filename) {
     }
 }
 
-int main(int argc, char* argv[]) {
+syntax_tree::AST analize(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <input_file>" << std::endl;
-        return 1;
+        return syntax_tree::AST();
     }
     
     yyscan_t scanner;
@@ -95,4 +96,6 @@ int main(int argc, char* argv[]) {
     parser.parse();
     
     yylex_destroy(scanner);
+
+    return syntax_tree::AST();
 }
