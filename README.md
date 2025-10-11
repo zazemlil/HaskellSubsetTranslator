@@ -1,6 +1,6 @@
 # Haskell Subset Parser
 
-C++ parser for a subset of Haskell language syntax.
+C++ parser for a subset of Haskell language syntax with flex & bison.
 
 ## Features
 
