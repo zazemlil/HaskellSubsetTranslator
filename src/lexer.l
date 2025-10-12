@@ -8,7 +8,7 @@ void set_input_file(yyscan_t scanner, const char* filename);
 
 %}
 
-%option reentrant interactive noyywrap noyylineno nodefault outfile="Scanner.cpp" header="Scanner.hpp"
+%option reentrant batch noyywrap noyylineno nodefault outfile="Scanner.cpp" header="Scanner.hpp"
 
 %%
 
@@ -91,11 +91,13 @@ syntax_tree::AST analize(int argc, char* argv[]) {
     
     set_input_file(scanner, argv[1]);
     
-    haskell_subset::Parser parser{ scanner };
-    std::cout.precision(10);
-    parser.parse();
+    syntax_tree::AST result;
+    haskell_subset::Parser parser{ scanner, result };
+    if (parser.parse() != 0) {
+        std::cerr << "Parse error!" << std::endl;
+    }
     
     yylex_destroy(scanner);
 
-    return syntax_tree::AST();
+    return result;
 }

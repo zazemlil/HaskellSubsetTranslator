@@ -1,9 +1,9 @@
 %{
 #include <iostream>
+#include <memory>
 #include <string>
 #include <cmath>
 #include "Scanner.hpp"
-#include "AST.h"
 %}
 
 %require "3.7.4"
@@ -15,6 +15,11 @@
 %define api.namespace {haskell_subset}
 %define api.value.type variant
 %param {yyscan_t scanner}
+%parse-param {syntax_tree::AST& result}
+
+%code requires {
+    #include "AST.h"
+}
 
 %code provides
 {
@@ -22,6 +27,8 @@
         int yylex(haskell_subset::Parser::semantic_type *yylval, yyscan_t yyscanner)
     YY_DECL;
 }
+
+%type <std::unique_ptr<syntax_tree::ASTNode>> expr
 
 %token T_END_OF_FILE
 %token <std::string> T_IDENTIFIER
@@ -56,11 +63,17 @@
 
 %%
 
-program: T_LITERAL_INT T_IF T_THEN T_ELSE T_IDENTIFIER T_END_OF_FILE {
-    std::cout << "Token value = " << $1 << "\n";
-    std::cout << "Token value = " << $5 << "\n";
+program: expr T_LITERAL_INT T_IF T_THEN T_ELSE T_IDENTIFIER T_END_OF_FILE {
+    //($1)->print(0);
+    result = syntax_tree::AST(std::move($1));
+    std::cout << "Token value = " << $2 << "\n";
+    std::cout << "Token value = " << $6 << "\n";
     std::cout << "Success!" << std::endl;
     YYACCEPT;
+};
+
+expr: %empty {
+    $$ = std::make_unique<syntax_tree::ASTNode>("testNode");
 };
 
 %%
