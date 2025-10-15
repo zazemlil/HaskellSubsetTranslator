@@ -1,8 +1,4 @@
 %{
-#include <iostream>
-#include <memory>
-#include <string>
-#include <cmath>
 #include "Scanner.hpp"
 %}
 
@@ -17,6 +13,8 @@
 %param {yyscan_t scanner}
 %parse-param {syntax_tree::AST& result}
 
+%locations
+
 %code requires {
     #include "AST.h"
 }
@@ -24,13 +22,14 @@
 %code provides
 {
     #define YY_DECL \
-        int yylex(haskell_subset::Parser::semantic_type *yylval, yyscan_t yyscanner)
+        int yylex(haskell_subset::Parser::semantic_type *yylval, \
+        haskell_subset::Parser::location_type* yylloc, \
+        yyscan_t yyscanner)
     YY_DECL;
 }
 
 %type <std::unique_ptr<syntax_tree::ASTNode>> expr
 
-%token T_END_OF_FILE
 %token <std::string> T_IDENTIFIER
 %token <int> T_LITERAL_INT
 %token <float> T_LITERAL_FLOAT 
@@ -61,14 +60,12 @@
 %token T_PARENTHESIS_OPEN T_PARENTHESIS_CLOSE
 %token T_BRACKET_OPEN T_BRACKET_CLOSE
 
+%token T_END_OF_FILE
+
 %%
 
 program: expr T_LITERAL_INT T_IF T_THEN T_ELSE T_IDENTIFIER T_END_OF_FILE {
-    //($1)->print(0);
     result = syntax_tree::AST(std::move($1));
-    std::cout << "Token value = " << $2 << "\n";
-    std::cout << "Token value = " << $6 << "\n";
-    std::cout << "Success!" << std::endl;
     YYACCEPT;
 };
 
@@ -78,6 +75,10 @@ expr: %empty {
 
 %%
 
-void haskell_subset::Parser::error(const std::string& msg) {
-    std::cerr << msg << '\n';
+void haskell_subset::Parser::error(const location_type& loc, const std::string& msg) {
+    const char* text = yyget_text(scanner);
+    int length = yyget_leng(scanner);
+    
+    std::cerr << msg << " at (Line: " << loc.begin.line << ", Column: " << loc.begin.column
+            << ", Last token: '" << std::string(text, length) << "')\n";
 }
