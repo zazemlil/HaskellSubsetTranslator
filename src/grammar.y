@@ -28,8 +28,6 @@
     YY_DECL;
 }
 
-%type <std::unique_ptr<syntax_tree::ASTNode>> expr
-
 %token <std::string> T_IDENTIFIER
 %token <int> T_LITERAL_INT
 %token <float> T_LITERAL_FLOAT 
@@ -62,17 +60,87 @@
 
 %token T_END_OF_FILE
 
-%%
+%type <std::unique_ptr<syntax_tree::ASTNode>> s expr literal  
+%type <std::unique_ptr<syntax_tree::ASTNode>> infix_expr or_expr and_expr and_expr_tail
+%type <std::unique_ptr<syntax_tree::ASTNode>> comp_expr comp_expr_tail comp_op
+%type <std::unique_ptr<syntax_tree::ASTNode>> additive_expr additive_expr_tail additive_op
+%type <std::unique_ptr<syntax_tree::ASTNode>> multiplicative_expr multiplicative_expr_tail multiplicative_op
+%type <std::unique_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
+%type <std::unique_ptr<syntax_tree::ASTNode>> function_call arg_list arg_list1 arg_list2
 
-program: expr T_LITERAL_INT T_IF T_THEN T_ELSE T_IDENTIFIER T_END_OF_FILE {
-    result = syntax_tree::AST(std::move($1));
+%%
+// ===============================================================
+
+s: expr T_END_OF_FILE {
+    // just for example
+    std::unique_ptr<syntax_tree::ASTNode> node = std::make_unique<syntax_tree::ASTNode>("testNode");
+    result = syntax_tree::AST(std::move(node));
     YYACCEPT;
 };
 
-expr: %empty {
-    $$ = std::make_unique<syntax_tree::ASTNode>("testNode");
-};
+// ============= ПРОДУКЦИИ С ИНФИКСНЫМИ ОПЕРАТОРАМИ (9) ==========
 
+infix_expr: and_expr or_expr {};
+or_expr: T_LOGIC_OP_OR and_expr or_expr {}
+    | %empty {};
+
+and_expr: comp_expr and_expr_tail {};
+and_expr_tail: T_LOGIC_OP_AND comp_expr and_expr_tail {}
+    | %empty {};
+
+comp_expr: additive_expr comp_expr_tail {};
+comp_expr_tail: comp_op additive_expr comp_expr_tail {}
+    | %empty {};
+comp_op: T_LOGIC_OP_EQUAL {}
+    | T_LOGIC_OP_NOT_EQUAL {}
+    | T_LOGIC_OP_LESS {}
+    | T_LOGIC_OP_MORE {}
+    | T_LOGIC_OP_LESS_OR_EQUAL {}
+    | T_LOGIC_OP_MORE_OR_EQUAL {};
+
+additive_expr: multiplicative_expr additive_expr_tail {};
+additive_expr_tail: additive_op multiplicative_expr additive_expr_tail {}
+    | %empty {};
+additive_op: T_ARITHMETIC_OP_PLUS {}
+    | T_ARITHMETIC_OP_MINUS {};
+
+multiplicative_expr: term multiplicative_expr_tail {};
+multiplicative_expr_tail: multiplicative_op term multiplicative_expr_tail {}
+    | %empty {};
+multiplicative_op: T_ARITHMETIC_OP_MULTIPLY {}
+    | T_ARITHMETIC_OP_DIVIDE {};
+
+term: literal {}
+    | T_IDENTIFIER {}
+    | T_TYPE_CONSTRUCTOR {}
+    | T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE {}
+    | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE {}
+    | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE {};
+
+list_elements: expr list_elements_tail {}
+    | %empty {};
+list_elements_tail: T_COMMA expr list_elements_tail {}
+    | %empty {};
+
+function_call: T_IDENTIFIER arg_list {};
+arg_list: T_PARENTHESIS_OPEN arg_list1 T_PARENTHESIS_CLOSE {}
+    | term {};
+arg_list1: expr arg_list2 {}
+    | %empty {};
+arg_list2: T_COMMA expr arg_list2 {}
+    | %empty {};
+
+// ==================== БАЗОВЫЕ ПРОДУКЦИИ (1) ====================
+
+expr: infix_expr {};
+
+literal: T_LITERAL_INT {}
+    | T_LITERAL_FLOAT {}
+    | T_LITERAL_CHAR {}
+    | T_LITERAL_BOOLEAN_TRUE {}
+    | T_LITERAL_BOOLEAN_FALSE {};
+
+// ===============================================================
 %%
 
 void haskell_subset::Parser::error(const location_type& loc, const std::string& msg) {

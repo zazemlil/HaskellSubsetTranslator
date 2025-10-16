@@ -131,23 +131,30 @@ ADDITIVE_EXPR` -> ADDITIVE_OP MULTIPLICATIVE_EXPR ADDITIVE_EXPR`
         | ε
 ADDITIVE_OP -> "+" | "-"
 
-MULTIPLICATIVE_EXPR -> APPLICATION MULTIPLICATIVE_EXPR`
-MULTIPLICATIVE_EXPR` -> ("*" | "/") APPLICATION MULTIPLICATIVE_EXPR`
+MULTIPLICATIVE_EXPR -> TERM MULTIPLICATIVE_EXPR`
+MULTIPLICATIVE_EXPR` -> MULTIPLICATIVE_OP TERM MULTIPLICATIVE_EXPR`
         | ε
+MULTIPLICATIVE_OP -> "*" | "/"
 
-APPLICATION -> PRIMARY APPLICATION`
-APPLICATION` -> PRIMARY APPLICATION`
-        | ε
-
-PRIMARY -> LITERAL
+TERM -> LITERAL
         | id
         | data_type
         | LIST_COMPREHENSION
         | "(" EXPR ")"
         | "[" LIST_ELEMENTS "]"
+        | "(" FUNCTION_CALL ")"
+
 LIST_ELEMENTS -> EXPR LIST_ELEMENTS`
         | ε
 LIST_ELEMENTS` -> "," EXPR LIST_ELEMENTS`
+        | ε
+
+FUNCTION_CALL -> id ARG_LIST
+ARG_LIST -> "(" ARG_LIST1 ")"
+        | TERM
+ARG_LIST1 -> EXPR ARG_LIST2
+        | ε
+ARG_LIST2 -> "," EXPR ARG_LIST2
         | ε
 #} 9
 
@@ -173,5 +180,6 @@ num_float -> [-]?[0-9]+"."[0-9]+
 char -> "'"[a-zA-z|0-9]"'"
 #} 1
 
-#+ case of, + паттерн-мэтчинг, + вызов функции  
-# не LL(1)-грамматика (без левой факторизации)
+#+ case of 
+# нужно ли параметризованное определение (data Maybe a = Nothing | Just a)?
+# не LL(1)-грамматика (в некоторых случаях без левой факторизации)
