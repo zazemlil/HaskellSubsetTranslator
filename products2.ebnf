@@ -6,31 +6,30 @@ DEFINITIONS` -> DEFINITION DEFINITIONS`
         | ε
 
 DEFINITION -> SIGNATURE SUPERCOMBINATOR
-        | DATA_DATA_TYPE_DECL
+        | DATA_TYPE_DECL
 
 SIGNATURE -> id "::" DATA_TYPE_SIGNATURE
 #} 5
 
 
 #{ 6
-DATA_TYPE_SIGNATURE -> data_type DATA_TYPE_SIGNATURE`
-DATA_TYPE_SIGNATURE` -> "->" data_type DATA_TYPE_SIGNATURE`
+TYPE_SIGNATURE -> TYPE TYPE_SIGNATURE`
+TYPE_SIGNATURE` -> "->" TYPE TYPE_SIGNATURE`
         | ε
 
-data_type -> SIMPLE_DATA_TYPE
-        | "(" DATA_TYPE_SIGNATURE ")"
+TYPE -> SIMPLE_TYPE
+        | "(" TYPE_SIGNATURE ")"
 
-SIMPLE_DATA_TYPE -> "Int"
+SIMPLE_TYPE -> "Int"
         | "Float"
-        | "Char"
+        | "literal_char"
         | "Bool"
-        | LIST_DATA_TYPE
-        | data_type DATA_TYPE_ARGUMENTS
+        | LIST_TYPE
+        | type_constructor TYPE_ARGUMENTS
 
-LIST_DATA_TYPE -> "[" data_type "]"
+LIST_TYPE -> "[" TYPE "]"
 
-DATA_TYPE_ARGUMENTS -> data_type DATA_TYPE_ARGUMENTS`
-DATA_TYPE_ARGUMENTS` -> data_type DATA_TYPE_ARGUMENTS`
+TYPE_ARGUMENTS -> TYPE TYPE_ARGUMENTS
         | ε
 #} 6
 
@@ -47,21 +46,21 @@ VARIABLE_DECL -> id "=" EXPR
 
 
 #{ 8 (нужно ли параметризованное определение?)
-DATA_DATA_TYPE_DECL -> "data" data_type DATA_TYPE_DECL
-DATA_TYPE_DECL -> "=" CONSTRUCTORS
-        | DATA_TYPE_PARAMETERS "=" CONSTRUCTORS
+DATA_TYPE_DECL -> "data" type_constructor TYPE_DECL
+TYPE_DECL -> "=" CONSTRUCTORS
+        | TYPE_PARAMETERS "=" CONSTRUCTORS
 
-DATA_TYPE_PARAMETERS -> DATA_TYPE_VARIABLE DATA_TYPE_PARAMETERS`
-DATA_TYPE_PARAMETERS` -> DATA_TYPE_VARIABLE DATA_TYPE_PARAMETERS`
+TYPE_PARAMETERS -> type_constructor TYPE_PARAMETERS`
+TYPE_PARAMETERS` -> type_constructor TYPE_PARAMETERS`
         | ε
 
 CONSTRUCTORS -> CONS CONSTRUCTORS`
 CONSTRUCTORS` -> "|" CONS CONSTRUCTORS`
         | ε
-CONS -> data_type 
-        | data_type FIELD_DATA_TYPES
-FIELD_DATA_TYPES -> data_type FIELD_DATA_TYPES`
-FIELD_DATA_TYPES` -> data_type FIELD_DATA_TYPES`
+CONS -> type_constructor 
+        | type_constructor FIELD_TYPES
+FIELD_TYPES -> TYPE FIELD_TYPES`
+FIELD_TYPES` -> TYPE FIELD_TYPES`
         | ε
 #} 8
 
@@ -77,8 +76,8 @@ PATTERN -> id
         | CONSTRUCTOR_PATTERN
         | LIST_PATTERN
 
-CONSTRUCTOR_PATTERN -> data_type PATTERNS
-        | data_type
+CONSTRUCTOR_PATTERN -> type_constructor PATTERNS
+        | type_constructor
 
 LIST_PATTERN -> "[" LIST_PATTERNS "]"
         | "(" id ":" id ")"
@@ -138,7 +137,7 @@ MULTIPLICATIVE_OP -> "*" | "/"
 
 TERM -> LITERAL
         | id
-        | data_type
+        | type_constructor
         | LIST_COMPREHENSION
         | "(" EXPR ")"
         | "[" LIST_ELEMENTS "]"
@@ -167,19 +166,33 @@ EXPR -> LET_EXPR
         | INFIX_EXPR
 
 
-LITERAL -> num_int
-        | num_float
-        | char
+LITERAL -> literal_int
+        | literal_float
+        | literal_char
         | "True"
         | "False"
 
 id -> [a-z][a-zA-z|0-9]*
-data_type -> [A-Z][a-zA-z|0-9]*
-num_int -> [-]?[0-9]+
-num_float -> [-]?[0-9]+"."[0-9]+
-char -> "'"[a-zA-z|0-9]"'"
+type_constructor -> [A-Z][a-zA-z|0-9]*
+literal_int -> [-]?[0-9]+
+literal_float -> [-]?[0-9]+"."[0-9]+
+literal_char -> "'"[a-zA-z|0-9]"'"
+
 #} 1
 
-#+ case of 
+# нужен ли case of? 
 # нужно ли параметризованное определение (data Maybe a = Nothing | Just a)?
-# не LL(1)-грамматика (в некоторых случаях без левой факторизации)
+# в некоторых случаях без левой факторизации. может ее вообще убрать (для удобства чтения)?
+# ошибка после добавления продукции FUNCTION_CALL:
+#  .././src/grammar.y: warning: 1 shift/reduce conflict [-Wconflicts-sr]
+#  .././src/grammar.y: warning: shift/reduce conflict on token T_PARENTHESIS_CLOSE [-Wcounterexamples]
+#    Example: T_PARENTHESIS_OPEN expr • T_PARENTHESIS_CLOSE
+#    Shift derivation
+#      arg_list
+#      ↳ 39: term
+#            ↳ 30: T_PARENTHESIS_OPEN expr • T_PARENTHESIS_CLOSE
+#    Reduce derivation
+#      arg_list
+#      ↳ 38: T_PARENTHESIS_OPEN arg_list1            T_PARENTHESIS_CLOSE
+#                               ↳ 40: expr arg_list2
+#                                          ↳ 43: ε •
