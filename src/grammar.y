@@ -66,7 +66,7 @@
 %type <std::unique_ptr<syntax_tree::ASTNode>> additive_expr additive_expr_tail additive_op
 %type <std::unique_ptr<syntax_tree::ASTNode>> multiplicative_expr multiplicative_expr_tail multiplicative_op
 %type <std::unique_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
-%type <std::unique_ptr<syntax_tree::ASTNode>> function_call arg_list arg_list1 arg_list2
+%type <std::unique_ptr<syntax_tree::ASTNode>> function_call arg_list
 
 %%
 // ===============================================================
@@ -122,12 +122,8 @@ list_elements: expr list_elements_tail {}
 list_elements_tail: T_COMMA expr list_elements_tail {}
     | %empty {};
 
-function_call: T_IDENTIFIER arg_list {};
-arg_list: T_PARENTHESIS_OPEN arg_list1 T_PARENTHESIS_CLOSE {}
-    | term {};
-arg_list1: expr arg_list2 {}
-    | %empty {};
-arg_list2: T_COMMA expr arg_list2 {}
+function_call: T_IDENTIFIER term arg_list {};
+arg_list: term arg_list {}
     | %empty {};
 
 // ==================== БАЗОВЫЕ ПРОДУКЦИИ (1) ====================
