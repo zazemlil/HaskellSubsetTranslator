@@ -22,7 +22,7 @@ TYPE -> SIMPLE_TYPE
 
 SIMPLE_TYPE -> "Int"
         | "Float"
-        | "literal_char"
+        | "String"
         | "Bool"
         | LIST_TYPE
         | type_constructor TYPE_ARGUMENTS
@@ -164,7 +164,7 @@ EXPR -> LET_EXPR
 
 LITERAL -> literal_int
         | literal_float
-        | literal_char
+        | literal_string
         | "True"
         | "False"
 
@@ -172,8 +172,9 @@ id -> [a-z][a-zA-z|0-9]*
 type_constructor -> [A-Z][a-zA-z|0-9]*
 literal_int -> [-]?[0-9]+
 literal_float -> [-]?[0-9]+"."[0-9]+
-literal_char -> "'"[a-zA-z|0-9]"'"
+literal_string -> \"[^"]*\"
 
+"
 #} 1
 
 # нужен ли case of? 

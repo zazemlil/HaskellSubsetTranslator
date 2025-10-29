@@ -75,7 +75,7 @@ static int current_column = 1;
 [A-Z][a-zA-z|0-9]* { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_TYPE_CONSTRUCTOR; }
 [-]?[0-9]+ { yylval->emplace<int>(atoi(yytext)); return Parser::token::T_LITERAL_INT; }
 [-]?[0-9]+"."[0-9]+ { yylval->emplace<float>(atof(yytext)); return Parser::token::T_LITERAL_FLOAT; }
-"'"[a-zA-z|0-9]"'" { yylval->emplace<char>(yytext[1]); return Parser::token::T_LITERAL_CHAR; }
+\"[^"]*\" { yylval->emplace<std::string>(std::string(yytext + 1, yyleng - 2)); return Parser::token::T_LITERAL_STRING; }
 
 \n { current_line++; current_column = 1; }
 \r { current_column = 1; }

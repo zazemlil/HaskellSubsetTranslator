@@ -31,7 +31,7 @@
 %token <std::string> T_IDENTIFIER
 %token <int> T_LITERAL_INT
 %token <float> T_LITERAL_FLOAT 
-%token <char> T_LITERAL_CHAR 
+%token <std::string> T_LITERAL_STRING
 %token T_LITERAL_BOOLEAN_TRUE T_LITERAL_BOOLEAN_FALSE
 
 %token T_TYPE_INT T_TYPE_FLOAT T_TYPE_CHAR T_TYPE_BOOLEAN T_TYPE_LIST
@@ -132,7 +132,7 @@ expr: infix_expr {};
 
 literal: T_LITERAL_INT {}
     | T_LITERAL_FLOAT {}
-    | T_LITERAL_CHAR {}
+    | T_LITERAL_STRING {}
     | T_LITERAL_BOOLEAN_TRUE {}
     | T_LITERAL_BOOLEAN_FALSE {};
 
