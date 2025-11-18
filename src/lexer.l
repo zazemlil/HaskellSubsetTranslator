@@ -47,8 +47,6 @@ static int current_column = 1;
 "Char"  { return Parser::token::T_TYPE_CHAR; }
 "Bool"  { return Parser::token::T_TYPE_BOOLEAN; }
 
-"True"  { return Parser::token::T_LITERAL_BOOLEAN_TRUE; }
-"False"  { return Parser::token::T_LITERAL_BOOLEAN_FALSE; }
 
 "if"  { return Parser::token::T_IF; }
 "then"  { return Parser::token::T_THEN; }
@@ -71,14 +69,16 @@ static int current_column = 1;
 "[" { return Parser::token::T_BRACKET_OPEN; }
 "]" { return Parser::token::T_BRACKET_CLOSE; }
 
-[a-z][a-zA-z|0-9]* { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_IDENTIFIER; }
-[A-Z][a-zA-z|0-9]* { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_TYPE_CONSTRUCTOR; }
-[-]?[0-9]+ { yylval->emplace<int>(atoi(yytext)); return Parser::token::T_LITERAL_INT; }
+"True"              { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_BOOLEAN; }
+"False"             { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_BOOLEAN; }
+[a-z][a-zA-z|0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_IDENTIFIER; }
+[A-Z][a-zA-z|0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_TYPE_CONSTRUCTOR; }
+[-]?[0-9]+          { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_INT; }
 [-]?[0-9]+"."[0-9]+ { yylval->emplace<float>(atof(yytext)); return Parser::token::T_LITERAL_FLOAT; }
-\"[^"]*\" { yylval->emplace<std::string>(std::string(yytext + 1, yyleng - 2)); return Parser::token::T_LITERAL_STRING; }
+\"[^"]*\"           { yylval->emplace<std::string>(std::string(yytext + 1, yyleng - 2)); return Parser::token::T_LITERAL_STRING; }
 
-\n { current_line++; current_column = 1; }
-\r { current_column = 1; }
+\n     { current_line++; current_column = 1; }
+\r     { current_column = 1; }
 [ \t]+ {}
 
 <<EOF>> { return Parser::token::T_END_OF_FILE; }
