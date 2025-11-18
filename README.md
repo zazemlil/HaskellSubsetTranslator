@@ -1,11 +1,11 @@
 # Haskell Subset Translator
 
-C++ translator for a subset of Haskell language syntax with flex & bison.
+C++ implementation of a translator for a subset of the Haskell language into extended λ-calculus.
 
 ## Features
 
-- Lexical analysis
-- Syntactic analysis (lalr1)
+- Lexical analysis (flex)
+- Syntactic analysis (bison)
 - Abstract Syntax Tree generation
 - Basic Haskell syntax support
 - Cross-platform (Linux/Windows)
