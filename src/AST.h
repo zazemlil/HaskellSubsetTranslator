@@ -10,6 +10,11 @@
 
 namespace syntax_tree {
 
+class LiteralInt;
+class LiteralFloat;
+class LiteralBoolean;
+class LiteralString;
+class LiteralTypeConstructor;
 class ListNode;
 class LiteralNil;
 
@@ -153,7 +158,7 @@ public:
     LiteralFloat(std::string t, float v) : ASTNode(t), value(v) {}
 };
 
-class LiteralBool : public ASTNode {
+class LiteralBoolean : public ASTNode {
     bool value;
 public:
     void printValue(std::ostream& os = std::cout) const override {
@@ -161,7 +166,7 @@ public:
         else { os << "FALSE"; }
     }
     bool getValue() { return value; }
-    LiteralBool(std::string t, bool v) : ASTNode(t), value(v) {}
+    LiteralBoolean(std::string t, bool v) : ASTNode(t), value(v) {}
 };
 
 class LiteralString : public ASTNode {

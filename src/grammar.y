@@ -32,7 +32,7 @@
 %token <std::string> T_LITERAL_INT
 %token <float> T_LITERAL_FLOAT 
 %token <std::string> T_LITERAL_STRING
-%token <std::string> T_LITERAL_BOOLEAN
+%token <bool> T_LITERAL_BOOLEAN
 
 %token T_TYPE_INT T_TYPE_FLOAT T_TYPE_CHAR T_TYPE_BOOLEAN T_TYPE_LIST
 
@@ -60,20 +60,20 @@
 
 %token T_END_OF_FILE
 
-%type <std::unique_ptr<syntax_tree::ASTNode>> s expr literal  
-%type <std::unique_ptr<syntax_tree::ASTNode>> infix_expr or_expr and_expr and_expr_tail
-%type <std::unique_ptr<syntax_tree::ASTNode>> comp_expr comp_expr_tail comp_op
-%type <std::unique_ptr<syntax_tree::ASTNode>> additive_expr additive_expr_tail additive_op
-%type <std::unique_ptr<syntax_tree::ASTNode>> multiplicative_expr multiplicative_expr_tail multiplicative_op
-%type <std::unique_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
-%type <std::unique_ptr<syntax_tree::ASTNode>> function_call arg_list
+%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal  
+%type <std::shared_ptr<syntax_tree::ASTNode>> infix_expr or_expr and_expr and_expr_tail
+%type <std::shared_ptr<syntax_tree::ASTNode>> comp_expr comp_expr_tail comp_op
+%type <std::shared_ptr<syntax_tree::ASTNode>> additive_expr additive_expr_tail additive_op
+%type <std::shared_ptr<syntax_tree::ASTNode>> multiplicative_expr multiplicative_expr_tail multiplicative_op
+%type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
+%type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
 %%
 // ===============================================================
 
 s: expr T_END_OF_FILE {
     // just for example
-    std::unique_ptr<syntax_tree::ASTNode> node = std::make_unique<syntax_tree::ASTNode>("testNode");
+    std::shared_ptr<syntax_tree::ASTNode> node = std::make_shared<syntax_tree::ASTNode>("testNode");
     result = syntax_tree::AST(std::move(node));
     YYACCEPT;
 };
@@ -130,10 +130,10 @@ arg_list: term arg_list {}
 
 expr: infix_expr {};
 
-literal: T_LITERAL_INT {}
-    | T_LITERAL_FLOAT {}
-    | T_LITERAL_STRING {}
-    | T_LITERAL_BOOLEAN {};
+literal: T_LITERAL_INT { $$ = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber($1.c_str(), 10)); }
+    | T_LITERAL_FLOAT { $$ = std::make_shared<syntax_tree::LiteralFloat>("LiteralFloat", $1); }
+    | T_LITERAL_STRING { $$ = std::make_shared<syntax_tree::LiteralString>("LiteralString", $1); }
+    | T_LITERAL_BOOLEAN { $$ = std::make_shared<syntax_tree::LiteralBoolean>("LiteralBool", $1); };
 
 // ===============================================================
 %%

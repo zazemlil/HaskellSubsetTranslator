@@ -69,8 +69,8 @@ static int current_column = 1;
 "[" { return Parser::token::T_BRACKET_OPEN; }
 "]" { return Parser::token::T_BRACKET_CLOSE; }
 
-"True"              { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_BOOLEAN; }
-"False"             { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_BOOLEAN; }
+"True"              { yylval->emplace<bool>(true); return Parser::token::T_LITERAL_BOOLEAN; }
+"False"             { yylval->emplace<bool>(false); return Parser::token::T_LITERAL_BOOLEAN; }
 [a-z][a-zA-z|0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_IDENTIFIER; }
 [A-Z][a-zA-z|0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_TYPE_CONSTRUCTOR; }
 [-]?[0-9]+          { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_INT; }
