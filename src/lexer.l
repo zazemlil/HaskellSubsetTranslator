@@ -26,6 +26,8 @@ static int current_column = 1;
 
 %%
 
+--.* { /* ignore comment */ }
+
 "-" { return Parser::token::T_ARITHMETIC_OP_MINUS; }
 "+" { return Parser::token::T_ARITHMETIC_OP_PLUS; }
 "*" { return Parser::token::T_ARITHMETIC_OP_MULTIPLY; }

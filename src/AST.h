@@ -172,7 +172,7 @@ public:
 class LiteralString : public ASTNode {
     std::string value;
 public:
-    void printValue(std::ostream& os = std::cout) const override { os << value; }
+    void printValue(std::ostream& os = std::cout) const override { os << "\"" << value << "\""; }
     std::string getValue() { return value; }
     LiteralString(std::string t, std::string v) : ASTNode(t), value(v) {}
 };

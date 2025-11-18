@@ -60,7 +60,7 @@
 
 %token T_END_OF_FILE
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal  
+%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string literal_boolean type_constructor
 %type <std::shared_ptr<syntax_tree::ASTNode>> infix_expr or_expr and_expr and_expr_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> comp_expr comp_expr_tail comp_op
 %type <std::shared_ptr<syntax_tree::ASTNode>> additive_expr additive_expr_tail additive_op
@@ -71,18 +71,29 @@
 %%
 // ===============================================================
 
-s: expr T_END_OF_FILE {
-    // just for example
-    std::shared_ptr<syntax_tree::ASTNode> node = std::make_shared<syntax_tree::ASTNode>("testNode");
-    result = syntax_tree::AST(std::move(node));
+s: function_call T_END_OF_FILE { // expr
+    result = syntax_tree::AST($1);
     YYACCEPT;
 };
 
 // ============= ПРОДУКЦИИ С ИНФИКСНЫМИ ОПЕРАТОРАМИ (9) ==========
 
-infix_expr: and_expr or_expr {};
-or_expr: T_LOGIC_OP_OR and_expr or_expr {}
-    | %empty {};
+infix_expr: and_expr or_expr {
+    auto n = std::make_shared<syntax_tree::ASTNode>("OR_EXPR");
+    n->addStatement($1);
+    n->addStatements($2->getStatements());
+    $$ = n;
+};
+or_expr: T_LOGIC_OP_OR and_expr or_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("OR_TAIL");
+        n->addStatement(
+            std::make_shared<syntax_tree::ASTNode>("T_LOGIC_OP_OR")
+        );
+        n->addStatement($2);
+        n->addStatements($3->getStatements());
+        $$ = n;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 and_expr: comp_expr and_expr_tail {};
 and_expr_tail: T_LOGIC_OP_AND comp_expr and_expr_tail {}
@@ -110,30 +121,60 @@ multiplicative_expr_tail: multiplicative_op term multiplicative_expr_tail {}
 multiplicative_op: T_ARITHMETIC_OP_MULTIPLY {}
     | T_ARITHMETIC_OP_DIVIDE {};
 
-term: literal {}
-    | T_IDENTIFIER {}
-    | T_TYPE_CONSTRUCTOR {}
-    | T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE {}
-    | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE {}
-    | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE {};
+term: literal { $$ = $1; }
+    | id { $$ = $1; }
+    | type_constructor { $$ = $1; }
+    | T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE { $$ = $2; }
+    | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE { $$ = $2; }
+    | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; };
 
-list_elements: expr list_elements_tail {}
-    | %empty {};
-list_elements_tail: T_COMMA expr list_elements_tail {}
-    | %empty {};
+list_elements: expr list_elements_tail {
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        l->addStatement($1);
+        l->addStatements($2->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+list_elements_tail: T_COMMA expr list_elements_tail {
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        l->addStatement($2);
+        l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-function_call: T_IDENTIFIER term arg_list {};
-arg_list: term arg_list {}
-    | %empty {};
+function_call: id term arg_list {
+    auto n = std::make_shared<syntax_tree::ASTNode>("FUNCTION_CALL");
+    n->addStatement($1);
+    auto args = std::make_shared<syntax_tree::ListNode>("LIST");
+    args->addStatement($2);
+    args->addStatements($3->getStatements());
+    n->addStatement(args);
+    $$ = n;
+};
+arg_list: term arg_list {
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        l->addStatement($1);
+        l->addStatements($2->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 // ==================== БАЗОВЫЕ ПРОДУКЦИИ (1) ====================
 
-expr: infix_expr {};
+expr: infix_expr { $$ = $1; };
 
-literal: T_LITERAL_INT { $$ = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber($1.c_str(), 10)); }
-    | T_LITERAL_FLOAT { $$ = std::make_shared<syntax_tree::LiteralFloat>("LiteralFloat", $1); }
-    | T_LITERAL_STRING { $$ = std::make_shared<syntax_tree::LiteralString>("LiteralString", $1); }
-    | T_LITERAL_BOOLEAN { $$ = std::make_shared<syntax_tree::LiteralBoolean>("LiteralBool", $1); };
+literal: literal_int { $$ = $1; }
+    | literal_float { $$ = $1; }
+    | literal_string { $$ = $1; }
+    | literal_boolean { $$ = $1; };
+
+id: T_IDENTIFIER { $$ = std::make_shared<syntax_tree::Identifier>("Identifier", $1); };
+type_constructor: T_TYPE_CONSTRUCTOR { $$ = std::make_shared<syntax_tree::LiteralTypeConstructor>("LiteralTypeConstructor", $1); };
+literal_int: T_LITERAL_INT { $$ = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber($1.c_str(), 10)); };
+literal_float: T_LITERAL_FLOAT { $$ = std::make_shared<syntax_tree::LiteralFloat>("LiteralFloat", $1); };
+literal_string: T_LITERAL_STRING { $$ = std::make_shared<syntax_tree::LiteralString>("LiteralString", $1); };
+literal_boolean: T_LITERAL_BOOLEAN { $$ = std::make_shared<syntax_tree::LiteralBoolean>("LiteralBool", $1); };
 
 // ===============================================================
 %%
