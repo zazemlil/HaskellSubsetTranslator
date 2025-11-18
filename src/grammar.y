@@ -61,65 +61,109 @@
 %token T_END_OF_FILE
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string literal_boolean type_constructor
-%type <std::shared_ptr<syntax_tree::ASTNode>> infix_expr or_expr and_expr and_expr_tail
-%type <std::shared_ptr<syntax_tree::ASTNode>> comp_expr comp_expr_tail comp_op
-%type <std::shared_ptr<syntax_tree::ASTNode>> additive_expr additive_expr_tail additive_op
-%type <std::shared_ptr<syntax_tree::ASTNode>> multiplicative_expr multiplicative_expr_tail multiplicative_op
+%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> comp_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> additive_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> multiplicative_expr
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
 %%
 // ===============================================================
 
-s: function_call T_END_OF_FILE { // expr
+s: expr T_END_OF_FILE { 
     result = syntax_tree::AST($1);
     YYACCEPT;
 };
 
 // ============= ПРОДУКЦИИ С ИНФИКСНЫМИ ОПЕРАТОРАМИ (9) ==========
 
-infix_expr: and_expr or_expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("OR_EXPR");
-    n->addStatement($1);
-    n->addStatements($2->getStatements());
-    $$ = n;
-};
-or_expr: T_LOGIC_OP_OR and_expr or_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("OR_TAIL");
-        n->addStatement(
-            std::make_shared<syntax_tree::ASTNode>("T_LOGIC_OP_OR")
-        );
-        n->addStatement($2);
-        n->addStatements($3->getStatements());
+or_expr:
+    or_expr T_LOGIC_OP_OR and_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("||");
+        n->addStatement($1);
+        n->addStatement($3);
         $$ = n;
     }
-    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+    | and_expr { $$ = $1; };
 
-and_expr: comp_expr and_expr_tail {};
-and_expr_tail: T_LOGIC_OP_AND comp_expr and_expr_tail {}
-    | %empty {};
+and_expr:
+    and_expr T_LOGIC_OP_AND comp_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("&&");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | comp_expr { $$ = $1; };
 
-comp_expr: additive_expr comp_expr_tail {};
-comp_expr_tail: comp_op additive_expr comp_expr_tail {}
-    | %empty {};
-comp_op: T_LOGIC_OP_EQUAL {}
-    | T_LOGIC_OP_NOT_EQUAL {}
-    | T_LOGIC_OP_LESS {}
-    | T_LOGIC_OP_MORE {}
-    | T_LOGIC_OP_LESS_OR_EQUAL {}
-    | T_LOGIC_OP_MORE_OR_EQUAL {};
+comp_expr:
+    comp_expr T_LOGIC_OP_EQUAL additive_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("==");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | comp_expr T_LOGIC_OP_NOT_EQUAL additive_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("/=");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | comp_expr T_LOGIC_OP_LESS additive_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("<");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | comp_expr T_LOGIC_OP_MORE additive_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>(">");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | comp_expr T_LOGIC_OP_LESS_OR_EQUAL additive_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("<=");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | comp_expr T_LOGIC_OP_MORE_OR_EQUAL additive_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>(">=");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | additive_expr { $$ = $1; };
 
-additive_expr: multiplicative_expr additive_expr_tail {};
-additive_expr_tail: additive_op multiplicative_expr additive_expr_tail {}
-    | %empty {};
-additive_op: T_ARITHMETIC_OP_PLUS {}
-    | T_ARITHMETIC_OP_MINUS {};
+additive_expr:
+    additive_expr T_ARITHMETIC_OP_PLUS multiplicative_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("+");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | additive_expr T_ARITHMETIC_OP_MINUS multiplicative_expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("-");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | multiplicative_expr { $$ = $1; };
 
-multiplicative_expr: term multiplicative_expr_tail {};
-multiplicative_expr_tail: multiplicative_op term multiplicative_expr_tail {}
-    | %empty {};
-multiplicative_op: T_ARITHMETIC_OP_MULTIPLY {}
-    | T_ARITHMETIC_OP_DIVIDE {};
+multiplicative_expr:
+    multiplicative_expr T_ARITHMETIC_OP_MULTIPLY term {
+        auto n = std::make_shared<syntax_tree::ASTNode>("*");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | multiplicative_expr T_ARITHMETIC_OP_DIVIDE term {
+        auto n = std::make_shared<syntax_tree::ASTNode>("/");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | term { $$ = $1; };
 
 term: literal { $$ = $1; }
     | id { $$ = $1; }
@@ -162,7 +206,7 @@ arg_list: term arg_list {
 
 // ==================== БАЗОВЫЕ ПРОДУКЦИИ (1) ====================
 
-expr: infix_expr { $$ = $1; };
+expr: or_expr { $$ = $1; };
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }

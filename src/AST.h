@@ -33,7 +33,8 @@ public:
 
     std::shared_ptr<ASTNode>& getStatement(size_t index) { return statements.at(index); }
     void addStatement(std::shared_ptr<ASTNode> stmt) { statements.push_back(stmt); }
-
+    void addStatementFront(std::shared_ptr<ASTNode> stmt) { statements.insert(statements.begin(), stmt); }
+    
     void setStatements(std::vector<std::shared_ptr<ASTNode>>& new_statements) { this->statements = new_statements; }
     std::vector<std::shared_ptr<ASTNode>>& getStatements() { return statements; }
     
