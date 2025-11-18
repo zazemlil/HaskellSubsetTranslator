@@ -61,12 +61,12 @@
 %token T_END_OF_FILE
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string literal_boolean type_constructor
-%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr
-%type <std::shared_ptr<syntax_tree::ASTNode>> comp_expr
-%type <std::shared_ptr<syntax_tree::ASTNode>> additive_expr
-%type <std::shared_ptr<syntax_tree::ASTNode>> multiplicative_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
+
+%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr bindings bind
+%type <std::shared_ptr<syntax_tree::ASTNode>> if_expr lambda_expr
 
 %%
 // ===============================================================
@@ -74,6 +74,16 @@
 s: expr T_END_OF_FILE { 
     result = syntax_tree::AST($1);
     YYACCEPT;
+};
+
+// ============= Let, if, lambda (2) ==========
+
+if_expr: T_IF expr T_THEN expr T_ELSE expr {
+    auto n = std::make_shared<syntax_tree::ASTNode>("COND");
+    n->addStatement($2);
+    n->addStatement($4);
+    n->addStatement($6);
+    $$ = n;
 };
 
 // ============= ПРОДУКЦИИ С ИНФИКСНЫМИ ОПЕРАТОРАМИ (9) ==========
@@ -188,7 +198,7 @@ list_elements_tail: T_COMMA expr list_elements_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 function_call: id term arg_list {
-    auto n = std::make_shared<syntax_tree::ASTNode>("FUNCTION_CALL");
+    auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
     n->addStatement($1);
     auto args = std::make_shared<syntax_tree::ListNode>("LIST");
     args->addStatement($2);
@@ -206,7 +216,8 @@ arg_list: term arg_list {
 
 // ==================== БАЗОВЫЕ ПРОДУКЦИИ (1) ====================
 
-expr: or_expr { $$ = $1; };
+expr: or_expr { $$ = $1; }
+    | if_expr { $$ = $1; };
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }
