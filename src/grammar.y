@@ -42,7 +42,8 @@
 %token T_ASSIGNMENT
 
 %token T_IF T_THEN T_ELSE
-%token T_LET T_IN
+%right T_LET // assoc for list comprehension
+%token T_IN
 %token T_DO
 %token T_DATA
 %token <std::string> T_TYPE_CONSTRUCTOR
@@ -51,7 +52,7 @@
 %token T_ARROW_RIGHT T_ARROW_LEFT
 %token T_UNDERSCORE
 %token T_DEVIDING_LINE
-%token T_COMMA
+%left T_COMMA // assoc for list comprehension
 %token T_COLON_DOUBLE
 %token T_COLON
 %token T_SINGLE_QUOTE
@@ -78,7 +79,7 @@ s: expr T_END_OF_FILE {
     YYACCEPT;
 };
 
-// ============= List comprehension (without let) (3) ==========
+// ============= List comprehension (3) ==========
 
 list_comprehension: T_BRACKET_OPEN expr T_DEVIDING_LINE qualifiers T_BRACKET_CLOSE {
     auto n = std::make_shared<syntax_tree::ASTNode>("LIST_COMPREHENSION");
@@ -108,6 +109,7 @@ qualifier: id T_ARROW_LEFT expr {
         n->addStatement($3);
         $$ = n;
     }
+    | T_LET bind { $$ = $2; }
     | expr { $$ = $1; };
 
 // ============= Let+-, if+, lambda- (2) ==========

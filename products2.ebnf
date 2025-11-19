@@ -94,6 +94,7 @@ QUALIFIERS -> QUALIFIER QUALIFIERS`
 QUALIFIERS` -> "," QUALIFIER QUALIFIERS`
         | ε
 QUALIFIER -> id "<-" EXPR
+        | "let" BIND
         | EXPR
 #} 3
 
