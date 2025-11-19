@@ -65,8 +65,10 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr bindings bind
+%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr bindings bindings_tail bind
 %type <std::shared_ptr<syntax_tree::ASTNode>> if_expr lambda_expr
+
+%type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
 
 %%
 // ===============================================================
@@ -76,7 +78,39 @@ s: expr T_END_OF_FILE {
     YYACCEPT;
 };
 
-// ============= Let, if, lambda (2) ==========
+// ============= List comprehension (without let) (3) ==========
+
+list_comprehension: T_BRACKET_OPEN expr T_DEVIDING_LINE qualifiers T_BRACKET_CLOSE {
+    auto n = std::make_shared<syntax_tree::ASTNode>("LIST_COMPREHENSION");
+    n->addStatement($2);
+    n->addStatement($4);
+    $$ = n;
+};
+
+qualifiers: qualifier qualifiers_tail {
+    auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+    l->addStatement($1);
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
+
+qualifiers_tail: T_COMMA qualifier qualifiers_tail {
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        l->addStatement($2);
+        l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+qualifier: id T_ARROW_LEFT expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("<-");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | expr { $$ = $1; };
+
+// ============= Let+-, if+, lambda- (2) ==========
 
 if_expr: T_IF expr T_THEN expr T_ELSE expr {
     auto n = std::make_shared<syntax_tree::ASTNode>("COND");
@@ -86,7 +120,37 @@ if_expr: T_IF expr T_THEN expr T_ELSE expr {
     $$ = n;
 };
 
-// ============= ПРОДУКЦИИ С ИНФИКСНЫМИ ОПЕРАТОРАМИ (9) ==========
+let_expr: T_LET bindings T_IN expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("LET");
+        n->addStatement($2);
+        n->addStatement($4);
+        $$ = n;
+    };
+
+bindings: bind bindings_tail {
+    auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+    l->addStatement($1);
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
+
+bindings_tail: T_COMMA bind bindings_tail {
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        l->addStatement($2);
+        l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+bind: id T_ASSIGNMENT expr {
+    auto n = std::make_shared<syntax_tree::ASTNode>("=");
+    n->addStatement($1);
+    n->addStatement($3);
+    $$ = n;
+}; // | id PATTERNS "=" EXPR
+
+
+// ============= infix operators+ (9) ==========
 
 or_expr:
     or_expr T_LOGIC_OP_OR and_expr {
@@ -214,10 +278,12 @@ arg_list: term arg_list {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-// ==================== БАЗОВЫЕ ПРОДУКЦИИ (1) ====================
+// ==================== expr+-, literal+, etc.+ (1) ====================
 
 expr: or_expr { $$ = $1; }
-    | if_expr { $$ = $1; };
+    | if_expr { $$ = $1; }
+    | let_expr { $$ = $1; }
+    | list_comprehension { $$ = $1; };
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }
