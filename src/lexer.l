@@ -13,6 +13,10 @@ static int current_column = 1;
 static std::stack<int> indentStack;
 static std::queue<int> pendingTokens;
 
+void pushToken(int tok) {
+    pendingTokens.push(tok);
+}
+
 %}
 
 %option reentrant batch noyywrap yylineno nodefault outfile="Scanner.cpp" header="Scanner.hpp"
@@ -63,7 +67,11 @@ static std::queue<int> pendingTokens;
 "if"  { return Parser::token::T_IF; }
 "then"  { return Parser::token::T_THEN; }
 "else"  { return Parser::token::T_ELSE; }
-"let"  { return Parser::token::T_LET; }
+"let"  {
+    indentStack.push(current_column-3);
+    pushToken(Parser::token::T_CURLY_BRACKET_OPEN); 
+    return Parser::token::T_LET; 
+}
 "in"  { return Parser::token::T_IN; }
 "data"  { return Parser::token::T_DATA; }
 
@@ -92,7 +100,25 @@ static std::queue<int> pendingTokens;
 [-]?[0-9]+"."[0-9]+ { yylval->emplace<float>(atof(yytext)); return Parser::token::T_LITERAL_FLOAT; }
 \"[^"]*\"           { yylval->emplace<std::string>(std::string(yytext + 1, yyleng - 2)); return Parser::token::T_LITERAL_STRING; }
 
-\n     { current_line++; current_column = 1; }
+\n[ \t]*     { 
+    current_line++; current_column = yyleng; 
+
+    int indent = yyleng;
+
+    if (!indentStack.empty()) {
+        int top = indentStack.top();
+        std::cout << "indent = " << indent << ", top = " << top << "\n";
+        if (indent == top) {
+            pushToken(Parser::token::T_SEMICOLON);
+        } else if (indent < top) {
+            while (!indentStack.empty() && indent < indentStack.top()) {
+                indentStack.pop();
+                pushToken(Parser::token::T_CURLY_BRACKET_CLOSE);
+            }
+        }
+        std::cout << "pendingTokens(front) = " << pendingTokens.front() << "\n";
+    }
+}
 \r     { current_column = 1; }
 [ \t]+ {}
 
@@ -107,10 +133,13 @@ int yylex(haskell_subset::Parser::semantic_type *yylval,
 {
     if (!pendingTokens.empty()) {
         int tok = pendingTokens.front();
+        std::cout << tok << "\n"; //
         pendingTokens.pop();
         return tok;
     }
-    return yylex_core(yylval, yylloc, yyscanner);
+    int r = yylex_core(yylval, yylloc, yyscanner);
+    std::cout << r << "\n";
+    return r;
 }
 
 void set_input_file(yyscan_t scanner, const char* filename) {
