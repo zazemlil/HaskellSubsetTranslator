@@ -15,7 +15,7 @@ cd ..
 
 
 echo "⚙️ Compiling project..."
-g++ -std=c++17 -I$SRC_DIR \
+g++ -w -std=c++17 -I$SRC_DIR \
     $SRC_DIR/main.cpp \
     $BUILD_DIR/Parser.cpp \
     $BUILD_DIR/Scanner.cpp \
@@ -27,7 +27,7 @@ g++ -std=c++17 -I$SRC_DIR \
     $SRC_DIR/cBigNumber/Prime.cpp \
     -o $BUILD_DIR/linux/main
 
-x86_64-w64-mingw32-g++ -static -I$SRC_DIR \
+x86_64-w64-mingw32-g++ -w -static -I$SRC_DIR \
     $SRC_DIR/main.cpp \
     $BUILD_DIR/Parser.cpp \
     $BUILD_DIR/Scanner.cpp \

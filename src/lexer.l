@@ -1,12 +1,17 @@
 %{
 #include "Parser.hpp"
 #include "AST.h"
+#include <stack>
+#include <queue>
 
 using namespace haskell_subset;
 void set_input_file(yyscan_t scanner, const char* filename);
 
 static int current_line = 1;
 static int current_column = 1;
+
+static std::stack<int> indentStack;
+static std::queue<int> pendingTokens;
 
 %}
 
@@ -22,6 +27,11 @@ static int current_column = 1;
         } \
         current_column += yyleng; \
     } while (0);
+
+#define YY_DECL \
+    int yylex_core(haskell_subset::Parser::semantic_type *yylval, \
+                   haskell_subset::Parser::location_type* yylloc, \
+                   yyscan_t yyscanner)
 %}
 
 %%
@@ -90,6 +100,18 @@ static int current_column = 1;
 . { return yytext[0]; }
 
 %%
+
+int yylex(haskell_subset::Parser::semantic_type *yylval,
+          haskell_subset::Parser::location_type* yylloc,
+          yyscan_t yyscanner) 
+{
+    if (!pendingTokens.empty()) {
+        int tok = pendingTokens.front();
+        pendingTokens.pop();
+        return tok;
+    }
+    return yylex_core(yylval, yylloc, yyscanner);
+}
 
 void set_input_file(yyscan_t scanner, const char* filename) {
     FILE* file = fopen(filename, "r");
