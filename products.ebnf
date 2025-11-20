@@ -177,19 +177,4 @@ literal_string -> \"[^"]*\"
 "
 #} 1
 
-# нужен ли case of? 
-# нужно ли параметризованное определение (data Maybe a = Nothing | Just a)?
-# в некоторых случаях без левой факторизации. может ее вообще убрать (для удобства чтения)?
-# ошибка после добавления продукции FUNCTION_CALL:
-#  .././src/grammar.y: warning: 1 shift/reduce conflict [-Wconflicts-sr]
-#  .././src/grammar.y: warning: shift/reduce conflict on token T_PARENTHESIS_CLOSE [-Wcounterexamples]
-#    Example: T_PARENTHESIS_OPEN expr • T_PARENTHESIS_CLOSE
-#    Shift derivation
-#      arg_list
-#      ↳ 39: term
-#            ↳ 30: T_PARENTHESIS_OPEN expr • T_PARENTHESIS_CLOSE
-#    Reduce derivation
-#      arg_list
-#      ↳ 38: T_PARENTHESIS_OPEN arg_list1            T_PARENTHESIS_CLOSE
-#                               ↳ 40: expr arg_list2
-#                                          ↳ 43: ε •
+# нужен ли case of?
