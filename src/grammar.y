@@ -42,7 +42,7 @@
 %token T_ASSIGNMENT
 
 %token T_IF T_THEN T_ELSE
-%right T_LET // assoc for list comprehension
+%token T_LET // assoc for list comprehension
 %token T_IN
 %token T_DO
 %token T_DATA
@@ -52,12 +52,13 @@
 %token T_ARROW_RIGHT T_ARROW_LEFT
 %token T_UNDERSCORE
 %token T_DEVIDING_LINE
-%left T_COMMA // assoc for list comprehension
+%token T_COMMA // assoc for list comprehension
 %token T_COLON_DOUBLE
-%token T_COLON
+%token T_COLON T_SEMICOLON
 %token T_SINGLE_QUOTE
 %token T_PARENTHESIS_OPEN T_PARENTHESIS_CLOSE
 %token T_BRACKET_OPEN T_BRACKET_CLOSE
+%token T_CURLY_BRACKET_OPEN T_CURLY_BRACKET_CLOSE
 
 %token T_END_OF_FILE
 
@@ -122,10 +123,10 @@ if_expr: T_IF expr T_THEN expr T_ELSE expr {
     $$ = n;
 };
 
-let_expr: T_LET bindings T_IN expr {
+let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
         auto n = std::make_shared<syntax_tree::ASTNode>("LET");
-        n->addStatement($2);
-        n->addStatement($4);
+        n->addStatement($3);
+        n->addStatement($6);
         $$ = n;
     };
 
@@ -136,7 +137,7 @@ bindings: bind bindings_tail {
     $$ = l;
 };
 
-bindings_tail: T_COMMA bind bindings_tail {
+bindings_tail: T_SEMICOLON bind bindings_tail {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");
         l->addStatement($2);
         l->addStatements($3->getStatements());

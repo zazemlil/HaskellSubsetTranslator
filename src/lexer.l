@@ -65,11 +65,14 @@ static int current_column = 1;
 "," { return Parser::token::T_COMMA; }
 "::" { return Parser::token::T_COLON_DOUBLE; }
 ":" { return Parser::token::T_COLON; }
+";" { return Parser::token::T_SEMICOLON; }
 "'" { return Parser::token::T_SINGLE_QUOTE; }
 "(" { return Parser::token::T_PARENTHESIS_OPEN; }
 ")" { return Parser::token::T_PARENTHESIS_CLOSE; }
 "[" { return Parser::token::T_BRACKET_OPEN; }
 "]" { return Parser::token::T_BRACKET_CLOSE; }
+"{" { return Parser::token::T_CURLY_BRACKET_OPEN; }
+"}" { return Parser::token::T_CURLY_BRACKET_CLOSE; }
 
 "True"              { yylval->emplace<bool>(true); return Parser::token::T_LITERAL_BOOLEAN; }
 "False"             { yylval->emplace<bool>(false); return Parser::token::T_LITERAL_BOOLEAN; }
