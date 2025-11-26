@@ -104,8 +104,8 @@ LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
 IF_EXPR -> "if" EXPR "then" EXPR "else" EXPR
 LAMBDA_EXPR -> "\\" PATTERNS "->" EXPR
 
-BINDINGS -> BIND BINDINGS`
-BINDINGS` -> ";" BIND BINDINGS`
+BINDINGS -> BIND ";" BINDINGS`
+BINDINGS` -> BIND ";" BINDINGS`
         | ε
 BIND -> id "=" EXPR 
         | id PATTERNS "=" EXPR 

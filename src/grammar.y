@@ -78,12 +78,12 @@
 %%
 // ===============================================================
 
-s: patterns T_END_OF_FILE { 
+s: expr T_END_OF_FILE { 
     result = syntax_tree::AST($1);
     YYACCEPT;
 };
 
-// ============= Patterns (4) ==========
+// ============= Patterns+- (4) ==========
 
 patterns: pattern patterns_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("PATTERNS");
@@ -172,7 +172,7 @@ qualifier: id T_ARROW_LEFT expr {
     | T_LET bind { $$ = $2; }
     | expr { $$ = $1; };
 
-// ============= Let+-, if+, lambda- (2) ==========
+// ============= Let+, if+, lambda- (2) ==========
 
 if_expr: T_IF expr T_THEN expr T_ELSE expr {
     auto n = std::make_shared<syntax_tree::ASTNode>("COND");
@@ -189,28 +189,34 @@ let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
         $$ = n;
     };
 
-bindings: bind bindings_tail {
+bindings: bind T_SEMICOLON bindings_tail {
     auto l = std::make_shared<syntax_tree::ListNode>("LIST");
     l->addStatement($1);
-    l->addStatements($2->getStatements());
+    l->addStatements($3->getStatements());
     $$ = l;
 };
 
-bindings_tail: T_SEMICOLON bind bindings_tail {
+bindings_tail: bind T_SEMICOLON bindings_tail {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");
-        l->addStatement($2);
+        l->addStatement($1);
         l->addStatements($3->getStatements());
         $$ = l;
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 bind: id T_ASSIGNMENT expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("=");
-    n->addStatement($1);
-    n->addStatement($3);
-    $$ = n;
-}; // | id PATTERNS "=" EXPR
-
+        auto n = std::make_shared<syntax_tree::ASTNode>("=");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | id patterns T_ASSIGNMENT expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("=");
+        $1->addStatement($2);
+        n->addStatement($1);
+        n->addStatement($4);
+        $$ = n;
+    };
 
 // ============= infix operators+ (9) ==========
 

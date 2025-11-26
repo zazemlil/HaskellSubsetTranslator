@@ -7,4 +7,4 @@
 -- let {a = 1; b = let {x=3.14} in x} in a*b
 -- let { a = 1; b = 1 && 2 && 3 } in v
 
-1 asd True "str123" 1.57 _ _ (Tree (Node a 123)) (x:xs) [x]
+let {f x = x; f2 x = x*x; } in (f (f2 12))
