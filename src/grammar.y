@@ -72,15 +72,74 @@
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
 
+%type <std::shared_ptr<syntax_tree::ASTNode>> patterns patterns_tail pattern
+%type <std::shared_ptr<syntax_tree::ASTNode>> constructor_pattern list_pattern list_patterns list_patterns_tail
+
 %%
 // ===============================================================
 
-s: expr T_END_OF_FILE { 
+s: patterns T_END_OF_FILE { 
     result = syntax_tree::AST($1);
     YYACCEPT;
 };
 
-// ============= List comprehension (3) ==========
+// ============= Patterns (4) ==========
+
+patterns: pattern patterns_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("PATTERNS");
+    l->addStatement($1);
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
+patterns_tail: pattern patterns_tail {
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        l->addStatement($1);
+        l->addStatements($2->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+pattern: id { $$ = $1; }
+    | literal { $$ = $1; }
+    | T_UNDERSCORE { $$ = std::make_shared<syntax_tree::ASTNode>("_"); }
+    | T_PARENTHESIS_OPEN constructor_pattern T_PARENTHESIS_CLOSE { $$ = $2; }
+    | list_pattern { $$ = $1; };
+
+constructor_pattern: type_constructor patterns {
+        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR_PATTERN");
+        l->addStatement($1);
+        l->addStatement($2);
+        $$ = l;
+    }
+    | type_constructor { $$ = $1; };
+
+list_pattern: T_BRACKET_OPEN list_patterns T_BRACKET_CLOSE {
+        $$ = $2;
+    }
+    | T_PARENTHESIS_OPEN id T_COLON id T_PARENTHESIS_CLOSE {
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST_HEAD_TAIL_PATTERN");
+        l->addStatement($2);
+        l->addStatement($4);
+        $$ = l;
+    };
+
+list_patterns: pattern list_patterns_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST_PATTERN");
+        l->addStatement($1);
+        l->addStatements($2->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+list_patterns_tail: T_COMMA pattern list_patterns_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST_PATTERN");
+        l->addStatement($2);
+        l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+// ============= List comprehension+ (3) ==========
 
 list_comprehension: T_BRACKET_OPEN expr T_DEVIDING_LINE qualifiers T_BRACKET_CLOSE {
     auto n = std::make_shared<syntax_tree::ASTNode>("LIST_COMPREHENSION");

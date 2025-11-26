@@ -73,7 +73,7 @@ PATTERNS` -> PATTERN PATTERNS`
 PATTERN -> id
         | LITERAL
         | "_"
-        | CONSTRUCTOR_PATTERN
+        | "(" CONSTRUCTOR_PATTERN ")"
         | LIST_PATTERN
 
 CONSTRUCTOR_PATTERN -> type_constructor PATTERNS
