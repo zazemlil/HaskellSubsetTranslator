@@ -75,12 +75,51 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> patterns patterns_tail pattern
 %type <std::shared_ptr<syntax_tree::ASTNode>> constructor_pattern list_pattern list_patterns list_patterns_tail
 
+%type <std::shared_ptr<syntax_tree::ASTNode>> definitions definition definitions_tail
+%type <std::shared_ptr<syntax_tree::ASTNode>> signature supercombinator data_type_decl
+
+%type <std::shared_ptr<syntax_tree::ASTNode>> type_signature type type_signature_tail
+%type <std::shared_ptr<syntax_tree::ASTNode>> simple_type list_type type_arguments
+
+%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl function_decl_tail variable_decl
+
 %%
 // ===============================================================
 
 s: expr T_END_OF_FILE { 
     result = syntax_tree::AST($1);
     YYACCEPT;
+};
+
+// ============= Definitions+-, signature+ (4) ==========
+
+definitions: definition definitions_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
+    l->addStatement($1);
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
+
+definitions_tail: definition definitions_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
+        l->addStatement($1);
+        l->addStatements($2->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+definition: signature supercombinator {
+    auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
+    l->addStatement($1);
+    l->addStatement($2);
+    $$ = l;
+}; // | data_type_decl {};
+
+signature: id T_COLON_DOUBLE type_signature {
+    auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
+    l->addStatement($1);
+    l->addStatement($3);
+    $$ = l;
 };
 
 // ============= Patterns+ (4) ==========
