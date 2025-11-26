@@ -1,8 +1,8 @@
 %{
 #include "Parser.hpp"
 #include "AST.h"
-#include <stack>
-#include <queue>
+//#include <stack>
+//#include <queue>
 
 using namespace haskell_subset;
 void set_input_file(yyscan_t scanner, const char* filename);
@@ -10,12 +10,12 @@ void set_input_file(yyscan_t scanner, const char* filename);
 static int current_line = 1;
 static int current_column = 1;
 
-static std::stack<int> indentStack;
-static std::queue<int> pendingTokens;
+// static std::stack<int> indentStack;
+// static std::queue<int> pendingTokens;
 
-void pushToken(int tok) {
-    pendingTokens.push(tok);
-}
+// void pushToken(int tok) {
+//     pendingTokens.push(tok);
+// }
 
 %}
 
@@ -68,8 +68,8 @@ void pushToken(int tok) {
 "then"  { return Parser::token::T_THEN; }
 "else"  { return Parser::token::T_ELSE; }
 "let"  {
-    indentStack.push(current_column-3);
-    pushToken(Parser::token::T_CURLY_BRACKET_OPEN); 
+    //indentStack.push(current_column-3);
+    //pushToken(Parser::token::T_CURLY_BRACKET_OPEN); 
     return Parser::token::T_LET; 
 }
 "in"  { return Parser::token::T_IN; }
@@ -103,21 +103,21 @@ void pushToken(int tok) {
 \n[ \t]*     { 
     current_line++; current_column = yyleng; 
 
-    int indent = yyleng;
+    // int indent = yyleng;
 
-    if (!indentStack.empty()) {
-        int top = indentStack.top();
-        std::cout << "indent = " << indent << ", top = " << top << "\n";
-        if (indent == top) {
-            pushToken(Parser::token::T_SEMICOLON);
-        } else if (indent < top) {
-            while (!indentStack.empty() && indent < indentStack.top()) {
-                indentStack.pop();
-                pushToken(Parser::token::T_CURLY_BRACKET_CLOSE);
-            }
-        }
-        std::cout << "pendingTokens(front) = " << pendingTokens.front() << "\n";
-    }
+    // if (!indentStack.empty()) {
+    //     int top = indentStack.top();
+    //     std::cout << "indent = " << indent << ", top = " << top << "\n";
+    //     if (indent == top) {
+    //         pushToken(Parser::token::T_SEMICOLON);
+    //     } else if (indent < top) {
+    //         while (!indentStack.empty() && indent < indentStack.top()) {
+    //             indentStack.pop();
+    //             pushToken(Parser::token::T_CURLY_BRACKET_CLOSE);
+    //         }
+    //     }
+    //     std::cout << "pendingTokens(front) = " << pendingTokens.front() << "\n";
+    // }
 }
 \r     { current_column = 1; }
 [ \t]+ {}
@@ -131,14 +131,14 @@ int yylex(haskell_subset::Parser::semantic_type *yylval,
           haskell_subset::Parser::location_type* yylloc,
           yyscan_t yyscanner) 
 {
-    if (!pendingTokens.empty()) {
-        int tok = pendingTokens.front();
-        std::cout << tok << "\n"; //
-        pendingTokens.pop();
-        return tok;
-    }
+    // if (!pendingTokens.empty()) {
+    //     int tok = pendingTokens.front();
+    //     std::cout << tok << "\n"; //
+    //     pendingTokens.pop();
+    //     return tok;
+    // }
     int r = yylex_core(yylval, yylloc, yyscanner);
-    std::cout << r << "\n";
+    //std::cout << r << "\n";
     return r;
 }
 
