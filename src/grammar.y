@@ -86,12 +86,12 @@
 %%
 // ===============================================================
 
-s: expr T_END_OF_FILE { 
+s: definitions T_END_OF_FILE { 
     result = syntax_tree::AST($1);
     YYACCEPT;
 };
 
-// ============= Definitions+-, signature+ (4) ==========
+// ============= Definitions+-, signature+ (5) ==========
 
 definitions: definition definitions_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
@@ -115,11 +115,48 @@ definition: signature supercombinator {
     $$ = l;
 }; // | data_type_decl {};
 
-signature: id T_COLON_DOUBLE type_signature {
+signature: id T_COLON_DOUBLE { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
     l->addStatement($1);
-    l->addStatement($3);
+    //l->addStatement($3);
     $$ = l;
+};
+
+// ============= Supercombinator- (7) ==========
+
+supercombinator: function_decl { $$ = $1; };
+    | variable_decl { $$ = $1; };
+
+function_decl: id patterns T_ASSIGNMENT expr function_decl_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("DECLS");
+    auto decl = std::make_shared<syntax_tree::ASTNode>("DECL");
+    $1->addStatement($2);
+    decl->addStatement($1);
+    decl->addStatement($4);
+    l->addStatement(decl);
+    l->addStatements($5->getStatements());
+    $$ = l;
+};
+
+function_decl_tail: id patterns T_ASSIGNMENT expr function_decl_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("DECLS");
+        auto decl = std::make_shared<syntax_tree::ASTNode>("DECL");
+        $1->addStatement($2);
+        decl->addStatement($1);
+        decl->addStatement($4);
+        l->addStatement(decl);
+        l->addStatements($5->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+variable_decl: id T_ASSIGNMENT expr {
+    auto n = std::make_shared<syntax_tree::ASTNode>("DECLS");
+    auto l = std::make_shared<syntax_tree::ASTNode>("DECL");
+    l->addStatement($1);
+    l->addStatement($3);
+    n->addStatement(l);
+    $$ = n;
 };
 
 // ============= Patterns+ (4) ==========

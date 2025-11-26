@@ -10,4 +10,19 @@
 -- let {f [1,2] = x; f2 x = x*x; } in (f (f2 12))
 -- \(x:xs) -> let { f = \x -> x*x; } in (f x)
 
-let { f2 [a] = 1; } in (f2 True)
+a :: _
+a = let { f2 [a] = 1; } in (f2 True)
+
+b :: _
+b = let { f2 [a] = 1; } in (f2 True)
+
+c :: _
+c = let { f2 [a] = 1; } in (f2 True)
+
+f :: _
+f _ = 123
+f 1 = 11
+f 2 = 22
+
+-- ff :: _
+-- ff 2 = -1
