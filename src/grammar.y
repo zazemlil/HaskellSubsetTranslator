@@ -83,7 +83,7 @@ s: expr T_END_OF_FILE {
     YYACCEPT;
 };
 
-// ============= Patterns+- ([x] - error, but [ x ] - success) (4) ==========
+// ============= Patterns+ (4) ==========
 
 patterns: pattern patterns_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("PATTERNS");
@@ -353,7 +353,7 @@ arg_list: term arg_list {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-// ==================== expr+-, literal+, etc.+ (1) ====================
+// ==================== expr+, literal+, etc.+ (1) ====================
 
 expr: or_expr { $$ = $1; }
     | if_expr { $$ = $1; }
