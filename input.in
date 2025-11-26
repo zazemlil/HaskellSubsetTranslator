@@ -8,4 +8,6 @@
 -- let { a = 1; b = 1 && 2 && 3 } in v
 
 -- let {f [1,2] = x; f2 x = x*x; } in (f (f2 12))
-\(x:xs) -> let { f = \x -> x*x; } in (f x)
+-- \(x:xs) -> let { f = \x -> x*x; } in (f x)
+
+let { f2 [a] = 1; } in (f2 True)

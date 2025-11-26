@@ -94,8 +94,8 @@ static int current_column = 1;
 
 "True"              { yylval->emplace<bool>(true); return Parser::token::T_LITERAL_BOOLEAN; }
 "False"             { yylval->emplace<bool>(false); return Parser::token::T_LITERAL_BOOLEAN; }
-[a-z][a-zA-z|0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_IDENTIFIER; }
-[A-Z][a-zA-z|0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_TYPE_CONSTRUCTOR; }
+[a-z][a-zA-Z0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_IDENTIFIER; }
+[A-Z][a-zA-Z0-9]*  { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_TYPE_CONSTRUCTOR; }
 [-]?[0-9]+          { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_INT; }
 [-]?[0-9]+"."[0-9]+ { yylval->emplace<float>(atof(yytext)); return Parser::token::T_LITERAL_FLOAT; }
 \"[^"]*\"           { yylval->emplace<std::string>(std::string(yytext + 1, yyleng - 2)); return Parser::token::T_LITERAL_STRING; }
