@@ -83,7 +83,7 @@ s: expr T_END_OF_FILE {
     YYACCEPT;
 };
 
-// ============= Patterns+- (4) ==========
+// ============= Patterns+- ([x] - error, but [ x ] - success) (4) ==========
 
 patterns: pattern patterns_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("PATTERNS");
@@ -172,7 +172,7 @@ qualifier: id T_ARROW_LEFT expr {
     | T_LET bind { $$ = $2; }
     | expr { $$ = $1; };
 
-// ============= Let+, if+, lambda- (2) ==========
+// ============= Let+, if+, lambda+ (2) ==========
 
 if_expr: T_IF expr T_THEN expr T_ELSE expr {
     auto n = std::make_shared<syntax_tree::ASTNode>("COND");
@@ -183,11 +183,18 @@ if_expr: T_IF expr T_THEN expr T_ELSE expr {
 };
 
 let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("LET");
-        n->addStatement($3);
-        n->addStatement($6);
-        $$ = n;
-    };
+    auto n = std::make_shared<syntax_tree::ASTNode>("LET");
+    n->addStatement($3);
+    n->addStatement($6);
+    $$ = n;
+};
+
+lambda_expr: T_LAMBDA patterns T_ARROW_RIGHT expr {
+    auto n = std::make_shared<syntax_tree::ASTNode>("LAMBDA");
+    n->addStatement($2);
+    n->addStatement($4);
+    $$ = n;
+};
 
 bindings: bind T_SEMICOLON bindings_tail {
     auto l = std::make_shared<syntax_tree::ListNode>("LIST");
@@ -351,7 +358,8 @@ arg_list: term arg_list {
 expr: or_expr { $$ = $1; }
     | if_expr { $$ = $1; }
     | let_expr { $$ = $1; }
-    | list_comprehension { $$ = $1; };
+    | list_comprehension { $$ = $1; }
+    | lambda_expr { $$ = $1; };
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }

@@ -7,4 +7,5 @@
 -- let {a = 1; b = let {x=3.14} in x} in a*b
 -- let { a = 1; b = 1 && 2 && 3 } in v
 
-let {f x = x; f2 x = x*x; } in (f (f2 12))
+-- let {f [1,2] = x; f2 x = x*x; } in (f (f2 12))
+\(x:xs) -> let { f = \x -> x*x; } in (f x)
