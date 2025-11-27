@@ -10,13 +10,13 @@
 -- let {f [1,2] = x; f2 x = x*x; } in (f (f2 12))
 -- \(x:xs) -> let { f = \x -> x*x; } in (f x)
 
-a ::
-a = let { f2 [a] = 1; } in (f2 True)
+v0 ::
+v0 = let { f [a, a] = 1; } in (f [True, False])
 
-b ::
-b = let { f2 [a] = 1; } in (f2 True)
+v1 ::
+v2 = let { f a = a; } in (f "asd123")
 
-c = let { f2 [a] = 1; } in (f2 True)
+v3 = let { f (x:xs) = x; } in (f [1, 2, 3])
 
 f ::
 f _ = 123
