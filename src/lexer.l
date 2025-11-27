@@ -60,7 +60,7 @@ static int current_column = 1;
 
 "Int"  { return Parser::token::T_TYPE_INT; }
 "Float"  { return Parser::token::T_TYPE_FLOAT; }
-"Char"  { return Parser::token::T_TYPE_CHAR; }
+"String"  { return Parser::token::T_TYPE_STRING; }
 "Bool"  { return Parser::token::T_TYPE_BOOLEAN; }
 
 

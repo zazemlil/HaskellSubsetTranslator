@@ -21,12 +21,13 @@ TYPE_SIGNATURE` -> "->" TYPE TYPE_SIGNATURE`
 TYPE -> SIMPLE_TYPE
         | "(" TYPE_SIGNATURE ")"
 
-SIMPLE_TYPE -> "Int"
+SIMPLE_TYPE -> id
+        | "Int"
         | "Float"
         | "String"
         | "Bool"
         | LIST_TYPE
-        | type_constructor TYPE_ARGUMENTS
+        | "(" type_constructor TYPE_ARGUMENTS ")"
 
 LIST_TYPE -> "[" TYPE "]"
 

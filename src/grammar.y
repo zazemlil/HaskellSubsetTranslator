@@ -34,7 +34,7 @@
 %token <std::string> T_LITERAL_STRING
 %token <bool> T_LITERAL_BOOLEAN
 
-%token T_TYPE_INT T_TYPE_FLOAT T_TYPE_CHAR T_TYPE_BOOLEAN T_TYPE_LIST
+%token T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING T_TYPE_BOOLEAN T_TYPE_LIST
 
 %token T_ARITHMETIC_OP_PLUS T_ARITHMETIC_OP_MINUS T_ARITHMETIC_OP_MULTIPLY T_ARITHMETIC_OP_DIVIDE
 %token T_LOGIC_OP_OR T_LOGIC_OP_AND T_LOGIC_OP_EQUAL T_LOGIC_OP_NOT_EQUAL T_LOGIC_OP_MORE T_LOGIC_OP_LESS T_LOGIC_OP_MORE_OR_EQUAL T_LOGIC_OP_LESS_OR_EQUAL
@@ -111,12 +111,34 @@ definitions_tail: definition definitions_tail {
 definition: signature { $$ = $1; }
     | supercombinator { $$ = $1; }; // | data_type_decl {};
 
-signature: id T_COLON_DOUBLE { // type_signature at the END
+signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
     l->addStatement($1);
     //l->addStatement($3);
     $$ = l;
 };
+
+// ============= type_signature- (6) ==========
+
+type_signature: type type_signature_tail {};
+type_signature_tail: T_ARROW_RIGHT type type_signature_tail {}
+    | %empty {};
+
+type: simple_type {}
+    | T_PARENTHESIS_OPEN type_signature T_PARENTHESIS_CLOSE {};
+
+simple_type: id {} 
+    | T_TYPE_INT {}
+    | T_TYPE_FLOAT {}
+    | T_TYPE_STRING {}
+    | T_TYPE_BOOLEAN {}
+    | list_type {}
+    | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {};
+
+list_type: T_BRACKET_OPEN type T_BRACKET_CLOSE {};
+
+type_arguments: type type_arguments {}
+    | %empty {};
 
 // ============= Supercombinator+ (7) ==========
 

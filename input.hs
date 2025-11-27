@@ -10,15 +10,16 @@
 -- let {f [1,2] = x; f2 x = x*x; } in (f (f2 12))
 -- \(x:xs) -> let { f = \x -> x*x; } in (f x)
 
-v0 ::
+v0 :: Int
 v0 = let { f [a, a] = 1; } in (f [True, False])
 
-v1 ::
+v1 :: String
 v2 = let { f a = a; } in (f "asd123")
 
-v3 = let { f (x:xs) = x; } in (f [1, 2, 3])
+v3 :: [Int]
+v3 = let { f (x:xs) = xs; } in (f [1, 2, 3])
 
-f ::
+f :: Int -> Int
 f _ = 123
 f 1 = 11
 f 2 = 22
