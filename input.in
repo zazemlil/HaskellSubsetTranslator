@@ -16,7 +16,6 @@ a = let { f2 [a] = 1; } in (f2 True)
 b ::
 b = let { f2 [a] = 1; } in (f2 True)
 
-c ::
 c = let { f2 [a] = 1; } in (f2 True)
 
 f ::

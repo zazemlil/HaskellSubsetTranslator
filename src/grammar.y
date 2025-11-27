@@ -81,7 +81,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> type_signature type type_signature_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> simple_type list_type type_arguments
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl function_decl_tail variable_decl
+%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl variable_decl
 
 %%
 // ===============================================================
@@ -91,7 +91,7 @@ s: definitions T_END_OF_FILE {
     YYACCEPT;
 };
 
-// ============= Definitions+-, signature+ (5) ==========
+// ============= Definitions+, signature+- (5) ==========
 
 definitions: definition definitions_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
@@ -108,12 +108,8 @@ definitions_tail: definition definitions_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-definition: signature supercombinator {
-    auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
-    l->addStatement($1);
-    l->addStatement($2);
-    $$ = l;
-}; // | data_type_decl {};
+definition: signature { $$ = $1; }
+    | supercombinator { $$ = $1; }; // | data_type_decl {};
 
 signature: id T_COLON_DOUBLE { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
@@ -122,41 +118,24 @@ signature: id T_COLON_DOUBLE { // type_signature at the END
     $$ = l;
 };
 
-// ============= Supercombinator- (7) ==========
+// ============= Supercombinator+ (7) ==========
 
-supercombinator: function_decl { $$ = $1; };
+supercombinator: function_decl { $$ = $1; }
     | variable_decl { $$ = $1; };
 
-function_decl: id patterns T_ASSIGNMENT expr function_decl_tail {
-    auto l = std::make_shared<syntax_tree::ASTNode>("DECLS");
-    auto decl = std::make_shared<syntax_tree::ASTNode>("DECL");
+function_decl: id patterns T_ASSIGNMENT expr {
+    auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
     $1->addStatement($2);
-    decl->addStatement($1);
-    decl->addStatement($4);
-    l->addStatement(decl);
-    l->addStatements($5->getStatements());
+    l->addStatement($1);
+    l->addStatement($4);
     $$ = l;
 };
 
-function_decl_tail: id patterns T_ASSIGNMENT expr function_decl_tail {
-        auto l = std::make_shared<syntax_tree::ASTNode>("DECLS");
-        auto decl = std::make_shared<syntax_tree::ASTNode>("DECL");
-        $1->addStatement($2);
-        decl->addStatement($1);
-        decl->addStatement($4);
-        l->addStatement(decl);
-        l->addStatements($5->getStatements());
-        $$ = l;
-    }
-    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
-
 variable_decl: id T_ASSIGNMENT expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("DECLS");
-    auto l = std::make_shared<syntax_tree::ASTNode>("DECL");
+    auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
     l->addStatement($1);
     l->addStatement($3);
-    n->addStatement(l);
-    $$ = n;
+    $$ = l;
 };
 
 // ============= Patterns+ (4) ==========
