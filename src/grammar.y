@@ -138,6 +138,10 @@ variable_decl: id T_ASSIGNMENT expr {
     $$ = l;
 };
 
+// ============= Data_type_decl- (8) ==========
+
+// ...
+
 // ============= Patterns+ (4) ==========
 
 patterns: pattern patterns_tail {
