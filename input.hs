@@ -25,3 +25,9 @@ f 1 = 11
 f 2 = 22
 
 ff :: (Type1 (Type2 a)) -> a
+
+ff2 :: (T3 (T4))
+
+ff3 :: (Tree a)
+
+data (Maybe a) = (Just a) | (Nothing)

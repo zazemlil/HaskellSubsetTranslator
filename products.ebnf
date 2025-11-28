@@ -45,23 +45,14 @@ VARIABLE_DECL -> id "=" EXPR
 #} 7
 
 
-#{ 8 (нужно параметризованное определение)
-DATA_TYPE_DECL -> "data" type_constructor TYPE_DECL
-TYPE_DECL -> "=" CONSTRUCTORS
-        | TYPE_PARAMETERS "=" CONSTRUCTORS
+#{ 8
+DATA_TYPE_DECL -> "data" CONSTRUCTOR "=" CONSTRUCTORS
 
-TYPE_PARAMETERS -> type_constructor TYPE_PARAMETERS`
-TYPE_PARAMETERS` -> type_constructor TYPE_PARAMETERS`
+CONSTRUCTORS -> CONSTRUCTOR CONSTRUCTORS`
+CONSTRUCTORS` -> "|" CONSTRUCTOR CONSTRUCTORS`
         | ε
 
-CONSTRUCTORS -> CONS CONSTRUCTORS`
-CONSTRUCTORS` -> "|" CONS CONSTRUCTORS`
-        | ε
-CONS -> type_constructor 
-        | type_constructor FIELD_TYPES
-FIELD_TYPES -> TYPE FIELD_TYPES`
-FIELD_TYPES` -> TYPE FIELD_TYPES`
-        | ε
+CONSTRUCTOR -> type_constructor TYPE_ARGUMENTS
 #} 8
 
 

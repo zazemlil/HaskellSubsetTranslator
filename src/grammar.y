@@ -83,6 +83,8 @@
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_decl variable_decl
 
+%type <std::shared_ptr<syntax_tree::ASTNode>> constructor constructors constructors_tail
+
 %%
 // ===============================================================
 
@@ -109,7 +111,8 @@ definitions_tail: definition definitions_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 definition: signature { $$ = $1; }
-    | supercombinator { $$ = $1; }; // | data_type_decl {};
+    | supercombinator { $$ = $1; }
+    | data_type_decl { $$ = $1; };
 
 signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
@@ -185,9 +188,36 @@ variable_decl: id T_ASSIGNMENT expr {
     $$ = l;
 };
 
-// ============= Data_type_decl- (8) ==========
+// ============= Data_type_decl+- (8) ==========
 
-// ...
+data_type_decl: T_DATA constructor T_ASSIGNMENT constructors {
+    auto l = std::make_shared<syntax_tree::ASTNode>("DATA");
+    l->addStatement($2);
+    l->addStatement($4);
+    $$ = l;
+};
+
+constructors: constructor constructors_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("|");
+    l->addStatement($1);
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
+
+constructors_tail: T_DEVIDING_LINE constructor constructors_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("|");
+        l->addStatement($2);
+        l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+constructor: T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
+    auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
+    l->addStatement($2);
+    l->addStatement($3);
+    $$ = l;
+};
 
 // ============= Patterns+ (4) ==========
 
