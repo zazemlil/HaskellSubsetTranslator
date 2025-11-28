@@ -114,31 +114,56 @@ definition: signature { $$ = $1; }
 signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
     l->addStatement($1);
-    //l->addStatement($3);
+    l->addStatement($3);
     $$ = l;
 };
 
-// ============= type_signature- (6) ==========
+// ============= type_signature+- (6) ==========
 
-type_signature: type type_signature_tail {};
-type_signature_tail: T_ARROW_RIGHT type type_signature_tail {}
-    | %empty {};
+type_signature: type type_signature_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("->");
+    l->addStatement($1);
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
 
-type: simple_type {}
-    | T_PARENTHESIS_OPEN type_signature T_PARENTHESIS_CLOSE {};
+type_signature_tail: T_ARROW_RIGHT type type_signature_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("->");
+        l->addStatement($2);
+        l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-simple_type: id {} 
-    | T_TYPE_INT {}
-    | T_TYPE_FLOAT {}
-    | T_TYPE_STRING {}
-    | T_TYPE_BOOLEAN {}
-    | list_type {}
-    | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {};
+type: simple_type { $$ = $1; }
+    | T_PARENTHESIS_OPEN type_signature T_PARENTHESIS_CLOSE { $$ = $2; };
 
-list_type: T_BRACKET_OPEN type T_BRACKET_CLOSE {};
+simple_type: id { $$ = $1; } 
+    | T_TYPE_INT { $$ = std::make_shared<syntax_tree::ASTNode>("T_INT"); }
+    | T_TYPE_FLOAT { $$ = std::make_shared<syntax_tree::ASTNode>("T_FLOAT"); }
+    | T_TYPE_STRING { $$ = std::make_shared<syntax_tree::ASTNode>("T_STRING"); }
+    | T_TYPE_BOOLEAN { $$ = std::make_shared<syntax_tree::ASTNode>("T_BOOLEAN"); }
+    | list_type { $$ = $1; }
+    | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
+        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
+        l->addStatement($2);
+        l->addStatement($3);
+        $$ = l;
+    };
 
-type_arguments: type type_arguments {}
-    | %empty {};
+list_type: T_BRACKET_OPEN type T_BRACKET_CLOSE {
+    auto l = std::make_shared<syntax_tree::ASTNode>("LIST_CONSTRUCTOR");
+    l->addStatement($2);
+    $$ = l;
+};
+
+type_arguments: type type_arguments {
+        auto l = std::make_shared<syntax_tree::ASTNode>("TYPE_ARGS");
+        l->addStatement($1);
+        l->addStatements($2->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 // ============= Supercombinator+ (7) ==========
 

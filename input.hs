@@ -16,7 +16,7 @@ v0 = let { f [a, a] = 1; } in (f [True, False])
 v1 :: String
 v2 = let { f a = a; } in (f "asd123")
 
-v3 :: [Int]
+v3 :: [a]
 v3 = let { f (x:xs) = xs; } in (f [1, 2, 3])
 
 f :: Int -> Int
@@ -24,5 +24,4 @@ f _ = 123
 f 1 = 11
 f 2 = 22
 
--- ff ::
--- ff 2 = -1
+ff :: (Type1 (Type2 a)) -> a
