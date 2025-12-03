@@ -43,3 +43,5 @@ analyzeGold standard = if {
     | standard == 585 -> "Not bad! 585 standard."
     | otherwise -> "I don't know such a standard..."
 };
+
+a = ((\x y -> x+y) 15+2*5 3*2);

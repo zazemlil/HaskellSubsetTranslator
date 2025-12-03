@@ -527,16 +527,14 @@ list_elements_tail: T_COMMA expr list_elements_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-function_call: id term arg_list {
+function_call: expr expr arg_list {
     auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
     n->addStatement($1);
-    auto args = std::make_shared<syntax_tree::ListNode>("LIST");
-    args->addStatement($2);
-    args->addStatements($3->getStatements());
-    n->addStatement(args);
+    n->addStatement($2);
+    n->addStatements($3->getStatements());
     $$ = n;
 };
-arg_list: term arg_list {
+arg_list: expr arg_list {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");
         l->addStatement($1);
         l->addStatements($2->getStatements());
