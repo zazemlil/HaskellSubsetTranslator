@@ -111,9 +111,9 @@ definitions_tail: definition definitions_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-definition: signature { $$ = $1; }
-    | supercombinator { $$ = $1; }
-    | data_type_decl { $$ = $1; };
+definition: signature T_SEMICOLON { $$ = $1; }
+    | supercombinator T_SEMICOLON { $$ = $1; }
+    | data_type_decl T_SEMICOLON { $$ = $1; };
 
 signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
