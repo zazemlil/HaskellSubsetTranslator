@@ -42,7 +42,7 @@
 %token T_ASSIGNMENT
 
 %token T_IF T_THEN T_ELSE
-%token T_LET // assoc for list comprehension
+%token T_LET
 %token T_IN
 %token T_DO
 %token T_DATA
@@ -53,7 +53,7 @@
 %token T_ARROW_RIGHT T_ARROW_LEFT
 %token T_UNDERSCORE
 %token T_DEVIDING_LINE
-%token T_COMMA // assoc for list comprehension
+%token T_COMMA
 %token T_COLON_DOUBLE
 %token T_COLON T_SEMICOLON
 %token T_SINGLE_QUOTE
@@ -94,7 +94,7 @@ s: definitions T_END_OF_FILE {
     YYACCEPT;
 };
 
-// ============= Definitions+, signature+- (5) ==========
+// ============= Definitions+, signature+ (5) ==========
 
 definitions: definition definitions_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
@@ -122,7 +122,7 @@ signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
     $$ = l;
 };
 
-// ============= type_signature+- (6) ==========
+// ============= type_signature+ (6) ==========
 
 type_signature: type type_signature_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("->");
@@ -225,7 +225,7 @@ variable_decl: id T_ASSIGNMENT expr {
     $$ = l;
 };
 
-// ============= Data_type_decl+- (8) ==========
+// ============= Data_type_decl+ (8) ==========
 
 data_type_decl: T_DATA constructor T_ASSIGNMENT constructors {
     auto l = std::make_shared<syntax_tree::ASTNode>("DATA");
@@ -312,7 +312,7 @@ list_patterns_tail: T_COMMA pattern list_patterns_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-// ============= List comprehension+ (3) ==========
+// ============= List comprehension+- (3) ==========
 
 list_comprehension: T_BRACKET_OPEN expr T_DEVIDING_LINE qualifiers T_BRACKET_CLOSE {
     auto n = std::make_shared<syntax_tree::ASTNode>("LIST_COMPREHENSION");
@@ -336,7 +336,7 @@ qualifiers_tail: T_COMMA qualifier qualifiers_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-qualifier: id T_ARROW_LEFT expr {
+qualifier: id T_ARROW_LEFT expr { // pattern вместо id = конфликт
         auto n = std::make_shared<syntax_tree::ASTNode>("<-");
         n->addStatement($1);
         n->addStatement($3);
