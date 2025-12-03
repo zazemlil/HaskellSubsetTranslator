@@ -74,8 +74,6 @@ static int current_column = 1;
 }
 "in"  { return Parser::token::T_IN; }
 "data"  { return Parser::token::T_DATA; }
-"head"  { return Parser::token::T_HEAD; }
-"tail"  { return Parser::token::T_TAIL; }
 
 \\ { return Parser::token::T_LAMBDA; }
 "->" { return Parser::token::T_ARROW_RIGHT; }

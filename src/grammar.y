@@ -47,7 +47,6 @@
 %token T_DO
 %token T_DATA
 %token <std::string> T_TYPE_CONSTRUCTOR
-%token T_HEAD T_TAIL
 
 %token T_LAMBDA
 %token T_ARROW_RIGHT T_ARROW_LEFT
@@ -474,30 +473,14 @@ list_elements_tail: T_COMMA expr list_elements_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 function_call: id term arg_list {
-        auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
-        n->addStatement($1);
-        auto args = std::make_shared<syntax_tree::ListNode>("LIST");
-        args->addStatement($2);
-        args->addStatements($3->getStatements());
-        n->addStatement(args);
-        $$ = n;
-    }
-    | T_HEAD term {
-        auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
-        n->addStatement(std::make_shared<syntax_tree::Identifier>("Identifier", "HEAD"));
-        auto args = std::make_shared<syntax_tree::ListNode>("LIST");
-        args->addStatement($2);
-        n->addStatement(args);
-        $$ = n;
-    }
-    | T_TAIL term {
-        auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
-        n->addStatement(std::make_shared<syntax_tree::Identifier>("Identifier", "TAIL"));
-        auto args = std::make_shared<syntax_tree::ListNode>("LIST");
-        args->addStatement($2);
-        n->addStatement(args);
-        $$ = n;
-    };
+    auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
+    n->addStatement($1);
+    auto args = std::make_shared<syntax_tree::ListNode>("LIST");
+    args->addStatement($2);
+    args->addStatements($3->getStatements());
+    n->addStatement(args);
+    $$ = n;
+};
 arg_list: term arg_list {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");
         l->addStatement($1);
