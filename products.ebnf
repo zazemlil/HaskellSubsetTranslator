@@ -140,6 +140,8 @@ LIST_ELEMENTS` -> "," EXPR LIST_ELEMENTS`
         | ε
 
 FUNCTION_CALL -> id TERM ARG_LIST
+        | "head" TERM
+        | "tail" TERM
 ARG_LIST -> TERM ARG_LIST
         | ε
 #} 9
