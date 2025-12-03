@@ -213,10 +213,10 @@ constructors_tail: T_DEVIDING_LINE constructor constructors_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-constructor: T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
+constructor: type_constructor type_arguments {
     auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
+    l->addStatement($1);
     l->addStatement($2);
-    l->addStatement($3);
     $$ = l;
 };
 

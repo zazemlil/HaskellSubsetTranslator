@@ -30,4 +30,4 @@ ff2 :: (T3 (T4));
 
 ff3 :: (Tree a);
 
-data (Maybe a) = (Just a) | (Nothing);
+data Maybe a = Just a | Nothing;
