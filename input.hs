@@ -31,3 +31,7 @@ ff2 :: (T3 (T4));
 ff3 :: (Tree a);
 
 data Maybe a = Just a | Nothing;
+
+func x | x > 0 = 123
+    | x < 0 && x / 2 == 0 = -123
+    | otherwise = 0;

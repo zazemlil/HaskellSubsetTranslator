@@ -47,6 +47,7 @@
 %token T_DO
 %token T_DATA
 %token <std::string> T_TYPE_CONSTRUCTOR
+%token T_OTHERWISE
 
 %token T_LAMBDA
 %token T_ARROW_RIGHT T_ARROW_LEFT
@@ -81,7 +82,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> type_signature type type_signature_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> simple_type list_type type_arguments
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl variable_decl
+%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl guard guards guards_tail variable_decl
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> constructor constructors constructors_tail
 
@@ -174,12 +175,48 @@ supercombinator: function_decl { $$ = $1; }
     | variable_decl { $$ = $1; };
 
 function_decl: id patterns T_ASSIGNMENT expr {
-    auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
-    $1->addStatement($2);
+        auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
+        $1->addStatement($2);
+        l->addStatement($1);
+        l->addStatement($4);
+        $$ = l;
+    }
+    | id patterns guards {
+        auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
+        $1->addStatement($2);
+        l->addStatement($1);
+        l->addStatement($3);
+        $$ = l;
+    };
+
+guards: guard T_ASSIGNMENT expr guards_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("GUARDS");
+    $1->addStatement($3);
     l->addStatement($1);
-    l->addStatement($4);
+    l->addStatements($4->getStatements());
     $$ = l;
 };
+
+guards_tail: guard T_ASSIGNMENT expr guards_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("GUARDS");
+        $1->addStatement($3);
+        l->addStatement($1);
+        l->addStatements($4->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+guard: T_DEVIDING_LINE expr {
+        auto l = std::make_shared<syntax_tree::ASTNode>("GUARD");
+        l->addStatement($2);
+        $$ = l;
+    }
+    | T_DEVIDING_LINE T_OTHERWISE {
+        auto l = std::make_shared<syntax_tree::ASTNode>("GUARD");
+        auto otherwise = std::make_shared<syntax_tree::ASTNode>("OTHERWISE");
+        l->addStatement(otherwise);
+        $$ = l;
+    };
 
 variable_decl: id T_ASSIGNMENT expr {
     auto l = std::make_shared<syntax_tree::ASTNode>("DEF");

@@ -41,6 +41,15 @@ SUPERCOMBINATOR -> FUNCTION_DECL
         |  VARIABLE_DECL
 
 FUNCTION_DECL -> id PATTERNS "=" EXPR
+        | id PATTERNS GUARDS
+
+GUARDS -> GUARD "=" EXPR GUARDS_TAIL
+GUARDS_TAIL -> GUARD "=" EXPR GUARDS_TAIL
+        | ε
+
+GUARD -> "|" EXPR
+        | "|" "otherwise"
+
 VARIABLE_DECL -> id "=" EXPR
 #} 7
 
