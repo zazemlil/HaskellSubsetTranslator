@@ -507,7 +507,6 @@ multiplicative_expr:
 
 term: literal { $$ = $1; }
     | id { $$ = $1; }
-    | type_constructor { $$ = $1; }
     | T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE { $$ = $2; }
     | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE { $$ = $2; }
     | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; };

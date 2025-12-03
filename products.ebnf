@@ -143,7 +143,6 @@ MULTIPLICATIVE_EXPR -> MULTIPLICATIVE_EXPR "*" TERM
 
 TERM -> LITERAL
         | id
-        | type_constructor
         | LIST_COMPREHENSION
         | "(" EXPR ")"
         | "[" LIST_ELEMENTS "]"
