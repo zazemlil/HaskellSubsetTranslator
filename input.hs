@@ -35,3 +35,11 @@ data Maybe a = Just a | Nothing;
 func x | x > 0 = 123
     | x < 0 && x / 2 == 0 = -123
     | otherwise = 0;
+
+analyzeGold :: Int -> String;
+analyzeGold standard = if {
+    | standard == 999 -> "Wow! 999 standard!"
+    | standard == 750 -> "Great! 750 standard."
+    | standard == 585 -> "Not bad! 585 standard."
+    | otherwise -> "I don't know such a standard..."
+};

@@ -100,8 +100,14 @@ QUALIFIER -> id "<-" EXPR
 
 
 #{ 2
-LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
 IF_EXPR -> "if" EXPR "then" EXPR "else" EXPR
+        | "if" "{" IF_GUARDS "}"
+
+IF_GUARDS -> GUARD "->" EXPR IF_GUARDS_TAIL
+IF_GUARDS_TAIL -> GUARD "->" EXPR IF_GUARDS_TAIL
+        | ε
+
+LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
 LAMBDA_EXPR -> "\\" PATTERNS "->" EXPR
 
 BINDINGS -> BIND ";" BINDINGS`

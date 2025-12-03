@@ -69,7 +69,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> let_expr bindings bindings_tail bind
-%type <std::shared_ptr<syntax_tree::ASTNode>> if_expr lambda_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> if_expr if_guards if_guards_tail lambda_expr
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
 
@@ -348,12 +348,30 @@ qualifier: id T_ARROW_LEFT expr {
 // ============= Let+, if+, lambda+ (2) ==========
 
 if_expr: T_IF expr T_THEN expr T_ELSE expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("COND");
-    n->addStatement($2);
-    n->addStatement($4);
-    n->addStatement($6);
-    $$ = n;
+        auto n = std::make_shared<syntax_tree::ASTNode>("COND");
+        n->addStatement($2);
+        n->addStatement($4);
+        n->addStatement($6);
+        $$ = n;
+    }
+    | T_IF T_CURLY_BRACKET_OPEN if_guards T_CURLY_BRACKET_CLOSE { $$ = $3; };
+
+if_guards: guard T_ARROW_RIGHT expr if_guards_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("IF-GUARDS");
+    $1->addStatement($3);
+    l->addStatement($1);
+    l->addStatements($4->getStatements());
+    $$ = l;
 };
+
+if_guards_tail: guard T_ARROW_RIGHT expr if_guards_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("GUARDS");
+        $1->addStatement($3);
+        l->addStatement($1);
+        l->addStatements($4->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
     auto n = std::make_shared<syntax_tree::ASTNode>("LET");
