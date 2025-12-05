@@ -35,3 +35,9 @@ analyzeGold standard = if {
 };
 
 a = ((\x y -> x+y) 15+2*5 3*2);
+
+b = if True then 1 else x+y where { x = 5; y = 4; };
+
+c = \z -> x+y+z where { x = 5; y = 4; };
+
+d = let { z = 3; } in x+y+z where { x = 5; y = 4; };

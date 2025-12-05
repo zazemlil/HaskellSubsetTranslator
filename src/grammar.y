@@ -28,47 +28,47 @@
     YY_DECL;
 }
 
-%token <std::string> T_IDENTIFIER
-%token <std::string> T_LITERAL_INT
-%token <float> T_LITERAL_FLOAT 
-%token <std::string> T_LITERAL_STRING
-%token <bool> T_LITERAL_BOOLEAN
+%nonassoc <std::string> T_IDENTIFIER
+%nonassoc <std::string> T_LITERAL_INT
+%nonassoc <float> T_LITERAL_FLOAT 
+%nonassoc <std::string> T_LITERAL_STRING
+%nonassoc <bool> T_LITERAL_BOOLEAN
 
-%token T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING T_TYPE_BOOLEAN T_TYPE_LIST
+%nonassoc T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING T_TYPE_BOOLEAN T_TYPE_LIST
 
-%token T_ARITHMETIC_OP_PLUS T_ARITHMETIC_OP_MINUS T_ARITHMETIC_OP_MULTIPLY T_ARITHMETIC_OP_DIVIDE
-%token T_LOGIC_OP_OR T_LOGIC_OP_AND T_LOGIC_OP_EQUAL T_LOGIC_OP_NOT_EQUAL T_LOGIC_OP_MORE T_LOGIC_OP_LESS T_LOGIC_OP_MORE_OR_EQUAL T_LOGIC_OP_LESS_OR_EQUAL
+%nonassoc T_ARITHMETIC_OP_PLUS T_ARITHMETIC_OP_MINUS T_ARITHMETIC_OP_MULTIPLY T_ARITHMETIC_OP_DIVIDE
+%nonassoc T_LOGIC_OP_OR T_LOGIC_OP_AND T_LOGIC_OP_EQUAL T_LOGIC_OP_NOT_EQUAL T_LOGIC_OP_MORE T_LOGIC_OP_LESS T_LOGIC_OP_MORE_OR_EQUAL T_LOGIC_OP_LESS_OR_EQUAL
 
-%token T_ASSIGNMENT
+%nonassoc T_ASSIGNMENT
 
-%token T_IF T_THEN T_ELSE
-%token T_LET
-%token T_IN
-%token T_DO
-%token T_DATA
-%token <std::string> T_TYPE_CONSTRUCTOR
-%token T_OTHERWISE
+%nonassoc T_IF T_THEN T_ELSE
+%nonassoc T_LET T_WHERE
+%nonassoc T_IN
+%nonassoc T_DO
+%nonassoc T_DATA
+%nonassoc <std::string> T_TYPE_CONSTRUCTOR
+%nonassoc T_OTHERWISE
 
-%token T_LAMBDA
-%token T_ARROW_RIGHT T_ARROW_LEFT
-%token T_UNDERSCORE
-%token T_DEVIDING_LINE
-%token T_COMMA
-%token T_COLON_DOUBLE
-%token T_COLON T_SEMICOLON
-%token T_SINGLE_QUOTE
-%token T_PARENTHESIS_OPEN T_PARENTHESIS_CLOSE
-%token T_BRACKET_OPEN T_BRACKET_CLOSE
-%token T_CURLY_BRACKET_OPEN T_CURLY_BRACKET_CLOSE
+%nonassoc T_LAMBDA
+%nonassoc T_ARROW_RIGHT T_ARROW_LEFT
+%nonassoc T_UNDERSCORE
+%nonassoc T_DEVIDING_LINE
+%nonassoc T_COMMA
+%nonassoc T_COLON_DOUBLE
+%nonassoc T_COLON T_SEMICOLON
+%nonassoc T_SINGLE_QUOTE
+%nonassoc T_PARENTHESIS_OPEN T_PARENTHESIS_CLOSE
+%nonassoc T_BRACKET_OPEN T_BRACKET_CLOSE
+%nonassoc T_CURLY_BRACKET_OPEN T_CURLY_BRACKET_CLOSE
 
-%token T_END_OF_FILE
+%nonassoc T_END_OF_FILE
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string literal_boolean type_constructor
 %type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr bindings bindings_tail bind
+%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr where_expr bindings bindings_tail bind
 %type <std::shared_ptr<syntax_tree::ASTNode>> if_expr if_guards if_guards_tail lambda_expr
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
@@ -380,6 +380,13 @@ let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
     $$ = n;
 };
 
+where_expr: expr T_WHERE T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE {
+    auto n = std::make_shared<syntax_tree::ASTNode>("WHERE");
+    n->addStatement($1);
+    n->addStatement($4);
+    $$ = n;
+};
+
 lambda_expr: T_LAMBDA patterns T_ARROW_RIGHT expr {
     auto n = std::make_shared<syntax_tree::ASTNode>("LAMBDA");
     n->addStatement($2);
@@ -547,7 +554,8 @@ expr: or_expr { $$ = $1; }
     | if_expr { $$ = $1; }
     | let_expr { $$ = $1; }
     | list_comprehension { $$ = $1; }
-    | lambda_expr { $$ = $1; };
+    | lambda_expr { $$ = $1; }
+    | where_expr { $$ = $1; };
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }

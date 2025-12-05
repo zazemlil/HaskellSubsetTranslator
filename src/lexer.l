@@ -72,6 +72,7 @@ static int current_column = 1;
     //pushToken(Parser::token::T_CURLY_BRACKET_OPEN); 
     return Parser::token::T_LET; 
 }
+"where" { return Parser::token::T_WHERE;  }
 "in"  { return Parser::token::T_IN; }
 "data"  { return Parser::token::T_DATA; }
 "otherwise"  { return Parser::token::T_OTHERWISE; }

@@ -108,6 +108,7 @@ IF_GUARDS_TAIL -> GUARD "->" EXPR IF_GUARDS_TAIL
         | ε
 
 LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
+WHERE_EXPR -> EXPR "where" "{" BINDINGS "}"
 LAMBDA_EXPR -> "\\" PATTERNS "->" EXPR
 
 BINDINGS -> BIND ";" BINDINGS`
@@ -165,6 +166,7 @@ EXPR -> LET_EXPR
         | LAMBDA_EXPR
         | LIST_COMPREHENSION
         | OR_EXPR
+        | WHERE_EXPR
 
 
 LITERAL -> literal_int
