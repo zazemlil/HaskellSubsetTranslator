@@ -188,5 +188,3 @@ literal_string -> \"[^"]*\"
 
 "
 #} 1
-
-# нужен ли case of?
