@@ -74,6 +74,8 @@ static int current_column = 1;
 }
 "where" { return Parser::token::T_WHERE;  }
 "in"  { return Parser::token::T_IN; }
+"case"  { return Parser::token::T_CASE; }
+"of"  { return Parser::token::T_OF; }
 "data"  { return Parser::token::T_DATA; }
 "otherwise"  { return Parser::token::T_OTHERWISE; }
 

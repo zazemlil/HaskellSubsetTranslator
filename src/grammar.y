@@ -44,6 +44,7 @@
 %nonassoc T_IF T_THEN T_ELSE
 %nonassoc T_LET T_WHERE
 %nonassoc T_IN
+%nonassoc T_CASE T_OF
 %nonassoc T_DO
 %nonassoc T_DATA
 %nonassoc <std::string> T_TYPE_CONSTRUCTOR
@@ -68,7 +69,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr where_expr bindings bindings_tail bind
+%type <std::shared_ptr<syntax_tree::ASTNode>> let_expr where_expr case_expr alts alts_tail bindings bindings_tail bind
 %type <std::shared_ptr<syntax_tree::ASTNode>> if_expr if_guards if_guards_tail lambda_expr
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
@@ -394,6 +395,32 @@ lambda_expr: T_LAMBDA patterns T_ARROW_RIGHT expr {
     $$ = n;
 };
 
+case_expr: T_CASE expr T_OF T_CURLY_BRACKET_OPEN alts T_CURLY_BRACKET_CLOSE {
+    auto l = std::make_shared<syntax_tree::ASTNode>("CASE");
+    l->addStatement($2);
+    l->addStatement($5);
+    $$ = l;
+};
+alts: pattern T_ARROW_RIGHT expr T_SEMICOLON alts_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("ALTS");
+    auto n = std::make_shared<syntax_tree::ASTNode>("ALT");
+    n->addStatement($1);
+    n->addStatement($3);
+    l->addStatement(n);
+    l->addStatements($5->getStatements());
+    $$ = l;
+};
+alts_tail: pattern T_ARROW_RIGHT expr T_SEMICOLON alts_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("ALTS");
+        auto n = std::make_shared<syntax_tree::ASTNode>("ALT");
+        n->addStatement($1);
+        n->addStatement($3);
+        l->addStatement(n);
+        l->addStatements($5->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
 bindings: bind T_SEMICOLON bindings_tail {
     auto l = std::make_shared<syntax_tree::ListNode>("LIST");
     l->addStatement($1);
@@ -555,7 +582,8 @@ expr: or_expr { $$ = $1; }
     | let_expr { $$ = $1; }
     | list_comprehension { $$ = $1; }
     | lambda_expr { $$ = $1; }
-    | where_expr { $$ = $1; };
+    | where_expr { $$ = $1; }
+    | case_expr { $$ = $1; };
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }

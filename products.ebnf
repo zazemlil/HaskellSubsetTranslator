@@ -111,6 +111,11 @@ LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
 WHERE_EXPR -> EXPR "where" "{" BINDINGS "}"
 LAMBDA_EXPR -> "\\" PATTERNS "->" EXPR
 
+CASE_EXPR -> "case" EXPR "of" "{" ALTS "}"
+ALTS -> PATTERN "->" EXPR ";" ALTS_TAIL
+ALTS_TAIL -> PATTERN "->" EXPR ";" ALTS_TAIL
+        | ε
+
 BINDINGS -> BIND ";" BINDINGS`
 BINDINGS` -> BIND ";" BINDINGS`
         | ε
@@ -167,7 +172,7 @@ EXPR -> LET_EXPR
         | LIST_COMPREHENSION
         | OR_EXPR
         | WHERE_EXPR
-
+        | CASE_EXPR
 
 LITERAL -> literal_int
         | literal_float
