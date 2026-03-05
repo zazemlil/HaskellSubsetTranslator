@@ -10,7 +10,12 @@ int main(int argc, char* argv[])
     ast.print();
 
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
-    staticAnalyzer->analyze(ast.getRoot());
+    try {
+        staticAnalyzer->analyze(ast.getRoot());
+    }
+    catch(const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
 
     return 0;
 }
