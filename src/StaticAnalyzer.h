@@ -22,10 +22,10 @@ private:
     void checkContiguity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
     void checkArity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
-    std::vector<std::shared_ptr<syntax_tree::ASTNode>> StaticAnalyzer::extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl);
-    bool StaticAnalyzer::rowCovers(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r1, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r2);
-    bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std::shared_ptr<syntax_tree::ASTNode> p2);
-    PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode> p);
+    PatternKind getPatternKind(std::shared_ptr<syntax_tree::ASTNode> p);
+    std::vector<std::shared_ptr<syntax_tree::ASTNode>> extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl);
+    bool patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std::shared_ptr<syntax_tree::ASTNode> p2);
+    bool rowCovers(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r1, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r2);
     void checkPatternRedundancy(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
     void analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node);

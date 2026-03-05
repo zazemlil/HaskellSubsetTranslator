@@ -18,7 +18,7 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         for (auto& [name, gdecls] : groups)
         {
             checkArity(gdecls);
-            checkPatternRedundancy(gdecls);
+            //checkPatternRedundancy(gdecls);
         }
     }
 
@@ -31,7 +31,7 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         for (auto& [name, gdecls] : groups)
         {
             checkArity(gdecls);
-            checkPatternRedundancy(gdecls);
+            //checkPatternRedundancy(gdecls);
         }
     }
 
@@ -131,6 +131,27 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
     }
 }
 
+PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode> p) {
+    std::string t = p->getNodeType();
+
+    if (t == "_") 
+        return WILDCARD;
+    
+    if (t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LiteralBoolean")
+        return LITERAL;
+
+    if (t == "LiteralTypeConstructor")
+        return CONSTRUCTOR;
+
+    if (t == "LiteralNil")
+        return LIST_EMPTY;
+
+    if (t == "LIST")
+        return LIST_ENUM;
+
+    return IDENTIFIER;
+}
+
 std::vector<std::shared_ptr<syntax_tree::ASTNode>> 
     StaticAnalyzer::extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl) 
 {
@@ -142,22 +163,6 @@ std::vector<std::shared_ptr<syntax_tree::ASTNode>>
         patterns.push_back(stmts[i]);
 
     return patterns;
-}
-
-bool StaticAnalyzer::rowCovers(
-    const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r1,
-    const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r2)
-{
-    if (r1.size() != r2.size())
-        return false;
-
-    for (size_t i = 0; i < r1.size(); i++) {
-
-        if (!patternCovers(r1[i], r2[i]))
-            return false;
-    }
-
-    return true;
 }
 
 bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std::shared_ptr<syntax_tree::ASTNode> p2) {
@@ -222,32 +227,20 @@ bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std
     return false;
 }
 
-PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode> p) {
-    std::string t = p->getNodeType();
+bool StaticAnalyzer::rowCovers(
+    const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r1,
+    const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r2)
+{
+    if (r1.size() != r2.size())
+        return false;
 
-    if (t == "Identifier") {
-        auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(p);
-        if (id->getValue() == "_")
-            return WILDCARD;
-        return IDENTIFIER;
+    for (size_t i = 0; i < r1.size(); i++) {
+
+        if (!patternCovers(r1[i], r2[i]))
+            return false;
     }
 
-    if (t == "LiteralInt" ||
-        t == "LiteralFloat" ||
-        t == "LiteralString" ||
-        t == "LiteralBoolean")
-        return LITERAL;
-
-    if (t == "LiteralTypeConstructor")
-        return CONSTRUCTOR;
-
-    if (t == "LiteralNil")
-        return LIST_EMPTY;
-
-    if (t == "ListNode")
-        return LIST_ENUM;
-
-    return IDENTIFIER;
+    return true;
 }
 
 void StaticAnalyzer::checkPatternRedundancy(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
