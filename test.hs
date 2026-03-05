@@ -1,13 +1,15 @@
-f :: Int -> Int;
-f x = x*y;
-f 0 = -1;
-g x = let {
-    pi f = (f 3.14);
-    pi 0 = 0;
-} in x*pi;
-g 0 = -1;
+f1 x = 11;
+f2 0 = 22;
+f3 _ = 33;
+f4 (Just x) = 44;
+f5 [] = 55;
+f6 [x, 3] = 66;
+f7 (x:xs) = 77;
 
-pi = 3.14;
-pi = 1;
+f [] x = 0;
+f (y:ys) x = 1;
+f z x = 2;
 
-data Maybe x = Just x | Nothing;
+ff (Car (Wheel (Screw 4))) = 0;
+ff (Car (Wheel (Screw 5))) = 1;
+ff x = 2;

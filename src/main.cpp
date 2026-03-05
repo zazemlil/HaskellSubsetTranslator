@@ -7,6 +7,9 @@ extern std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(int argc, char* ar
 int main(int argc, char* argv[])
 {
     auto [ast, dataDeclarations] = analyze(argc, argv);
+    if (ast.isEmpty()) {
+        return -1;
+    }
     std::cout << "---------------------- AST ----------------------\n";
     ast.print();
     std::cout << "--------------- Data Declarations ---------------\n";
@@ -18,7 +21,7 @@ int main(int argc, char* argv[])
     }
     catch(const std::exception& e) {
         std::cerr << e.what() << '\n';
-        return -1;
+        return -2;
     }
 
     std::cout << "Success.\n";

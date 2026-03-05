@@ -285,7 +285,11 @@ constructor_pattern: type_constructor patterns {
         l->addStatement($2);
         $$ = l;
     }
-    | type_constructor { $$ = $1; };
+    | type_constructor { 
+        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR_PATTERN");
+        l->addStatement($1);
+        $$ = l;
+    };
 
 list_pattern: T_BRACKET_OPEN list_patterns T_BRACKET_CLOSE {
         $$ = $2;

@@ -26,7 +26,7 @@ private:
     std::vector<std::shared_ptr<syntax_tree::ASTNode>> extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl);
     bool patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std::shared_ptr<syntax_tree::ASTNode> p2);
     bool rowCovers(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r1, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& r2);
-    void checkPatternRedundancy(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
+    void checkPatternRedundancy(std::string name, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
     void analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node);
 };

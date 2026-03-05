@@ -18,7 +18,7 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         for (auto& [name, gdecls] : groups)
         {
             checkArity(gdecls);
-            //checkPatternRedundancy(gdecls);
+            checkPatternRedundancy(name, gdecls);
         }
     }
 
@@ -31,7 +31,7 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         for (auto& [name, gdecls] : groups)
         {
             checkArity(gdecls);
-            //checkPatternRedundancy(gdecls);
+            checkPatternRedundancy(name, gdecls);
         }
     }
 
@@ -140,14 +140,17 @@ PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode>
     if (t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LiteralBoolean")
         return LITERAL;
 
-    if (t == "LiteralTypeConstructor")
+    if (t == "CONSTRUCTOR_PATTERN")
         return CONSTRUCTOR;
 
-    if (t == "LiteralNil")
+    if (t == "NIL")
         return LIST_EMPTY;
 
-    if (t == "LIST")
+    if (t == "LIST_PATTERN")
         return LIST_ENUM;
+
+    if (t == "LIST_HEAD_TAIL_PATTERN")
+        return LIST_CONS;
 
     return IDENTIFIER;
 }
@@ -155,14 +158,9 @@ PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode>
 std::vector<std::shared_ptr<syntax_tree::ASTNode>> 
     StaticAnalyzer::extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl) 
 {
-    auto& stmts = decl->getStatements();
+    auto& stmts = decl->getStatement(0)->getStatement(0)->getStatements();
 
-    std::vector<std::shared_ptr<syntax_tree::ASTNode>> patterns;
-
-    for (size_t i = 1; i < stmts.size()-1; i++)
-        patterns.push_back(stmts[i]);
-
-    return patterns;
+    return stmts;
 }
 
 bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std::shared_ptr<syntax_tree::ASTNode> p2) {
@@ -184,14 +182,21 @@ bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std
     if (k1 == CONSTRUCTOR && k2 == CONSTRUCTOR) {
 
         std::ostringstream a,b;
-        p1->printValue(a);
-        p2->printValue(b);
+        p1->getStatement(0)->printValue(a);
+        p2->getStatement(0)->printValue(b);
 
         if (a.str() != b.str())
             return false;
 
-        auto args1 = p1->getStatements();
-        auto args2 = p2->getStatements();
+        if (p1->getStatementCount() != p2->getStatementCount()) {
+            return false;
+        }
+        else if (p1->getStatementCount() < 2) {
+            return true;
+        }
+
+        auto args1 = p1->getStatement(1)->getStatements();
+        auto args2 = p2->getStatement(1)->getStatements();
 
         if (args1.size() != args2.size())
             return false;
@@ -243,7 +248,7 @@ bool StaticAnalyzer::rowCovers(
     return true;
 }
 
-void StaticAnalyzer::checkPatternRedundancy(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
+void StaticAnalyzer::checkPatternRedundancy(std::string name, const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
     std::vector<std::vector<std::shared_ptr<syntax_tree::ASTNode>>> seenRows;
 
     for (auto& d : decls) {
@@ -263,7 +268,7 @@ void StaticAnalyzer::checkPatternRedundancy(const std::vector<std::shared_ptr<sy
         if (redundant) {
 
             throw std::runtime_error(
-                "Redundant pattern in function definition");
+                "Redundant pattern in function definition '" + name + "'");
         }
 
         seenRows.push_back(row);
