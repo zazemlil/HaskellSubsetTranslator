@@ -177,8 +177,6 @@ EXPR -> LET_EXPR
 LITERAL -> literal_int
         | literal_float
         | literal_string
-        | "True"
-        | "False"
 
 id -> [a-z][a-zA-Z|0-9]*
 type_constructor -> [A-Z][a-zA-Z|0-9]*

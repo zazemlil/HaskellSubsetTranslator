@@ -64,7 +64,7 @@
 
 %nonassoc T_END_OF_FILE
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string literal_boolean type_constructor
+%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string type_constructor
 %type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
@@ -591,15 +591,13 @@ expr: or_expr { $$ = $1; }
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }
-    | literal_string { $$ = $1; }
-    | literal_boolean { $$ = $1; };
+    | literal_string { $$ = $1; };
 
 id: T_IDENTIFIER { $$ = std::make_shared<syntax_tree::Identifier>("Identifier", $1); };
 type_constructor: T_TYPE_CONSTRUCTOR { $$ = std::make_shared<syntax_tree::LiteralTypeConstructor>("LiteralTypeConstructor", $1); };
 literal_int: T_LITERAL_INT { $$ = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber($1.c_str(), 10)); };
 literal_float: T_LITERAL_FLOAT { $$ = std::make_shared<syntax_tree::LiteralFloat>("LiteralFloat", $1); };
 literal_string: T_LITERAL_STRING { $$ = std::make_shared<syntax_tree::LiteralString>("LiteralString", $1); };
-literal_boolean: T_LITERAL_BOOLEAN { $$ = std::make_shared<syntax_tree::LiteralBoolean>("LiteralBool", $1); };
 
 // ===============================================================
 %%

@@ -13,3 +13,7 @@ f z x = 2;
 ff (Car (Wheel (Screw 4))) = 0;
 ff (Car (Wheel (Screw 5))) = 1;
 ff x = 2;
+
+fff (True) = 1;
+fff (False) = 2;
+fff x = 3;

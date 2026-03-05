@@ -12,7 +12,6 @@ namespace syntax_tree {
 
 class LiteralInt;
 class LiteralFloat;
-class LiteralBoolean;
 class LiteralString;
 class LiteralTypeConstructor;
 class ListNode;
@@ -157,17 +156,6 @@ public:
     void printValue(std::ostream& os = std::cout) const override { os << value; }
     float getValue() { return value; }
     LiteralFloat(std::string t, float v) : ASTNode(t), value(v) {}
-};
-
-class LiteralBoolean : public ASTNode {
-    bool value;
-public:
-    void printValue(std::ostream& os = std::cout) const override {
-        if (value) { os << "TRUE"; }
-        else { os << "FALSE"; }
-    }
-    bool getValue() { return value; }
-    LiteralBoolean(std::string t, bool v) : ASTNode(t), value(v) {}
 };
 
 class LiteralString : public ASTNode {
