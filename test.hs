@@ -1,1 +1,4 @@
-d = let { z = 3; } in x+y+z where { x = 5; y = 4; };
+f :: Int -> Int;
+f x = x*x;
+g x = x+x;
+f 0 = -1;

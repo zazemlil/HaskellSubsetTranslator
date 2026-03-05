@@ -1,4 +1,5 @@
 #include "StaticAnalyzer.h"
+#include <unordered_map>
 
 void StaticAnalyzer::analyze(std::shared_ptr<syntax_tree::ASTNode> root) {
     if (!root) return;
@@ -9,7 +10,6 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (!node) return;
 
     if (node->getNodeType() == "DEFINITIONS") {
-
         auto& decls = node->getStatements();
 
         checkContiguity(decls);
@@ -18,7 +18,6 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     }
 
     if (node->getNodeType() == "LET") {
-
         auto& decls = node->getStatements();
 
         checkContiguity(decls);
@@ -32,7 +31,26 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
 }
 
 void StaticAnalyzer::checkContiguity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
-    std::cout << "StaticAnalyzer::checkContiguity\n";
+    std::unordered_map<std::string, int> lastPos;
+
+    for (size_t i = 0; i < decls.size(); ++i) {
+        if (decls[i]->getNodeType() == "SIGNATURE") continue;
+
+        auto nameNode = decls[i]->getStatement(0);
+        auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
+
+        if (!id) continue;
+
+        std::string name = id->getValue();
+
+        if (lastPos.count(name) && lastPos[name] != i - 1) {
+            throw std::runtime_error(
+                "Non-contiguous definitions for function " + name
+            );
+        }
+
+        lastPos[name] = i;
+    }
 }
 
 void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
