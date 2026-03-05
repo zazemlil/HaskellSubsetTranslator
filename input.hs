@@ -43,3 +43,5 @@ c = \z -> x+y+z where { x = 5; y = 4; };
 d = let { z = 3; } in x+y+z where { x = 5; y = 4; };
 
 e x = case x of { [] -> "nil"; (x:xs) -> "list"; };
+
+foo x = [(x+y)*c | x <- [1, 2, 3], y <- [3, 2, 1], let c = 3.14, x+y > 2];
