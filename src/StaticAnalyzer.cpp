@@ -121,6 +121,14 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
             );
         }
     }
+
+    if (expectedArity == 0 && decls.size() > 1) {
+        auto nameNode = decls[0]->getStatement(0);
+        auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
+        throw std::runtime_error(
+            "Multiple definitions of '" + id->getValue() + "'"
+        );
+    }
 }
 
 void StaticAnalyzer::checkPatternRedundancy(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {

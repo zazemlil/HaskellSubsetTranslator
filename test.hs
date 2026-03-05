@@ -6,3 +6,6 @@ g x = let {
     pi 0 = 0;
 } in x*pi;
 g 0 = -1;
+
+pi = 3.14;
+pi = 1;
