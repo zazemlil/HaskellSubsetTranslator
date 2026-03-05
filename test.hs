@@ -9,3 +9,5 @@ g 0 = -1;
 
 pi = 3.14;
 pi = 1;
+
+data Maybe x = Just x | Nothing;

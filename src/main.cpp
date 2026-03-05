@@ -2,12 +2,15 @@
 #include "AST.h"
 #include "StaticAnalyzer.h"
 
-extern syntax_tree::AST analize(int argc, char* argv[]);
+extern std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(int argc, char* argv[]);
 
 int main(int argc, char* argv[])
 {
-    syntax_tree::AST ast = analize(argc, argv);
+    auto [ast, dataDeclarations] = analyze(argc, argv);
+    std::cout << "---------------------- AST ----------------------\n";
     ast.print();
+    std::cout << "--------------- Data Declarations ---------------\n";
+    dataDeclarations.print();
 
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
     try {

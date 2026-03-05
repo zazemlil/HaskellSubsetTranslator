@@ -156,10 +156,10 @@ void set_input_file(yyscan_t scanner, const char* filename) {
     }
 }
 
-syntax_tree::AST analize(int argc, char* argv[]) {
+std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <input_file>" << std::endl;
-        return syntax_tree::AST();
+        return std::make_tuple(syntax_tree::AST(), syntax_tree::AST());
     }
     
     yyscan_t scanner;
@@ -167,8 +167,8 @@ syntax_tree::AST analize(int argc, char* argv[]) {
     
     set_input_file(scanner, argv[1]);
     
-    syntax_tree::AST result;
-    haskell_subset::Parser parser{ scanner, result };
+    syntax_tree::AST ast, dataDeclarations = syntax_tree::AST(std::make_shared<syntax_tree::ASTNode>("DATA_DECLARATIONS"));;
+    haskell_subset::Parser parser{ scanner, ast, dataDeclarations };
     if (parser.parse() == 0) {
         std::cout << "Parse success.\n";
     }
@@ -178,5 +178,5 @@ syntax_tree::AST analize(int argc, char* argv[]) {
     
     yylex_destroy(scanner);
 
-    return result;
+    return std::make_tuple(ast, dataDeclarations);
 }

@@ -11,7 +11,7 @@
 %define api.namespace {haskell_subset}
 %define api.value.type variant
 %param {yyscan_t scanner}
-%parse-param {syntax_tree::AST& result}
+%parse-param {syntax_tree::AST& ast} {syntax_tree::AST& dataDeclarations}
 
 %locations
 
@@ -91,7 +91,7 @@
 // ===============================================================
 
 s: definitions T_END_OF_FILE { 
-    result = syntax_tree::AST($1);
+    ast = syntax_tree::AST($1);
     YYACCEPT;
 };
 
@@ -106,7 +106,7 @@ definitions: definition definitions_tail {
 
 definitions_tail: definition definitions_tail {
         auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
-        l->addStatement($1);
+        if ($1 != nullptr) l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
     }
@@ -114,7 +114,7 @@ definitions_tail: definition definitions_tail {
 
 definition: signature T_SEMICOLON { $$ = $1; }
     | supercombinator T_SEMICOLON { $$ = $1; }
-    | data_type_decl T_SEMICOLON { $$ = $1; };
+    | data_type_decl T_SEMICOLON { $$ = nullptr; dataDeclarations.getRoot()->addStatement($1); };
 
 signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
     auto l = std::make_shared<syntax_tree::ASTNode>("SIGNATURE");
