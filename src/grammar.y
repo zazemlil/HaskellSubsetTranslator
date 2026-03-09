@@ -552,7 +552,13 @@ term: literal { $$ = $1; }
     | id { $$ = $1; }
     | T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE { $$ = $2; }
     | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE { $$ = $2; }
-    | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; };
+    | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; }
+    | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
+        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
+        l->addStatement($2);
+        l->addStatement($3);
+        $$ = l;
+    };
 
 list_elements: expr list_elements_tail {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");

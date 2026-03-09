@@ -155,6 +155,7 @@ TERM -> LITERAL
         | "(" EXPR ")"
         | "[" LIST_ELEMENTS "]"
         | "(" FUNCTION_CALL ")"
+        | "(" type_constructor TYPE_ARGUMENTS ")"
 
 LIST_ELEMENTS -> EXPR LIST_ELEMENTS`
         | ε
