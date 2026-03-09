@@ -35,6 +35,19 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         }
     }
 
+    if (node->getNodeType() == "WHERE") {
+        auto& decls = node->getStatement(1)->getStatements();
+
+        auto groups = groupByName(decls);
+
+        checkContiguity(decls);
+        for (auto& [name, gdecls] : groups)
+        {
+            checkArity(gdecls);
+            checkPatternRedundancy(name, gdecls);
+        }
+    }
+
     for (auto& child : node->getStatements()) {
         analyzeNode(child);
     }
