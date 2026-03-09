@@ -10,9 +10,9 @@ v3 :: [a];
 v3 = let { f (x:xs) = xs; } in (f [1, 2, 3]);
 
 f :: Int -> Int;
-f _ = 123;
 f 1 = 11;
 f 2 = 22;
+f _ = 123;
 
 ff :: (Type1 (Type2 a)) -> a;
 

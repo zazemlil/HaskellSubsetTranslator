@@ -97,12 +97,24 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
         }
     }
 
+    int signaturesCount = 0;
     for (const auto& decl : decls)
     {
         size_t arity = 0;
 
         if (decl->getNodeType() == "SIGNATURE") {
-            arity = decl->getStatement(1)->getStatementCount()-1;
+            if (!signaturesCount) {
+                arity = decl->getStatement(1)->getStatementCount()-1;
+                signaturesCount++;
+            }
+            else {
+                auto nameNode = decls[0]->getStatement(0);
+                auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
+                throw std::runtime_error(
+                    "Multiple definitions of '" + id->getValue() + "' signature"
+                );
+            }
+            
         } else if (decl->getNodeType() == "DEF" || decl->getNodeType() == "=") {
             auto id = decl->getStatement(0);
             if (id->getStatementCount() > 0) {
@@ -122,7 +134,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
         }
     }
 
-    if (expectedArity == 0 && decls.size() > 1) {
+    if (expectedArity == 0 && decls.size() > 1+signaturesCount) {
         auto nameNode = decls[0]->getStatement(0);
         auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
         throw std::runtime_error(
