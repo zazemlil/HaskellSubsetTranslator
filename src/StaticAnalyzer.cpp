@@ -159,7 +159,6 @@ std::vector<std::shared_ptr<syntax_tree::ASTNode>>
     StaticAnalyzer::extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl) 
 {
     auto& stmts = decl->getStatement(0)->getStatement(0)->getStatements();
-
     return stmts;
 }
 
@@ -252,11 +251,11 @@ void StaticAnalyzer::checkPatternRedundancy(std::string name, const std::vector<
     std::vector<std::vector<std::shared_ptr<syntax_tree::ASTNode>>> seenRows;
 
     for (auto& d : decls) {
+        if (d->getStatement(0)->getStatementCount() == 0) continue;
 
         auto row = extractPatterns(d);
 
         bool redundant = false;
-
         for (auto& prev : seenRows) {
 
             if (rowCovers(prev, row)) {

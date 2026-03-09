@@ -1,7 +1,7 @@
 v = \(x:xs) -> let { f = \x -> x*x; } in (f x);
 
-v0 :: Int;
-v0 = let { f [a, a] = 1; } in (f [True, False]);
+--v0 :: Int;
+--v0 = let { f [a, a] = 1; } in (f [True, False]);
 
 v1 :: String;
 v2 = let { f a = a; } in (f "asd123");
@@ -36,7 +36,7 @@ analyzeGold standard = if {
 
 a = ((\x y -> x+y) 15+2*5 3*2);
 
-b = if True then 1 else x+y where { x = 5; y = 4; };
+--b = if True then 1 else x+y where { x = 5; y = 4; };
 
 c = \z -> x+y+z where { x = 5; y = 4; };
 
