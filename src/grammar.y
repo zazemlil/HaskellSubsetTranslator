@@ -38,7 +38,6 @@
 
 %nonassoc T_ARITHMETIC_OP_PLUS T_ARITHMETIC_OP_MINUS T_ARITHMETIC_OP_MULTIPLY T_ARITHMETIC_OP_DIVIDE
 %nonassoc T_LOGIC_OP_OR T_LOGIC_OP_AND T_LOGIC_OP_EQUAL T_LOGIC_OP_NOT_EQUAL T_LOGIC_OP_MORE T_LOGIC_OP_LESS T_LOGIC_OP_MORE_OR_EQUAL T_LOGIC_OP_LESS_OR_EQUAL
-
 %nonassoc T_ASSIGNMENT
 
 %nonassoc T_IF T_THEN T_ELSE
@@ -65,7 +64,7 @@
 %nonassoc T_END_OF_FILE
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string type_constructor
-%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr unary_minus
 %type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
@@ -99,7 +98,7 @@ s: definitions T_END_OF_FILE {
 
 definitions: definition definitions_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("DEFINITIONS");
-    l->addStatement($1);
+    if ($1 != nullptr) l->addStatement($1);
     l->addStatements($2->getStatements());
     $$ = l;
 };
@@ -529,16 +528,23 @@ additive_expr:
     | multiplicative_expr { $$ = $1; };
 
 multiplicative_expr:
-    multiplicative_expr T_ARITHMETIC_OP_MULTIPLY term {
+    multiplicative_expr T_ARITHMETIC_OP_MULTIPLY unary_minus {
         auto n = std::make_shared<syntax_tree::ASTNode>("*");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
-    | multiplicative_expr T_ARITHMETIC_OP_DIVIDE term {
+    | multiplicative_expr T_ARITHMETIC_OP_DIVIDE unary_minus {
         auto n = std::make_shared<syntax_tree::ASTNode>("/");
         n->addStatement($1);
         n->addStatement($3);
+        $$ = n;
+    }
+    | unary_minus { $$ = $1; };
+
+unary_minus: T_ARITHMETIC_OP_MINUS term {
+        auto n = std::make_shared<syntax_tree::ASTNode>("-");
+        n->addStatement($2);
         $$ = n;
     }
     | term { $$ = $1; };

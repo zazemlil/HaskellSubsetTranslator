@@ -143,8 +143,11 @@ ADDITIVE_EXPR -> ADDITIVE_EXPR "+" MULTIPLICATIVE_EXPR
         | ADDITIVE_EXPR "-" MULTIPLICATIVE_EXPR
         | MULTIPLICATIVE_EXPR
 
-MULTIPLICATIVE_EXPR -> MULTIPLICATIVE_EXPR "*" TERM
-        | MULTIPLICATIVE_EXPR "/" TERM
+MULTIPLICATIVE_EXPR -> MULTIPLICATIVE_EXPR "*" UNARY_MINUS
+        | MULTIPLICATIVE_EXPR "/" UNARY_MINUS
+        | UNARY_MINUS
+
+UNARY_MINUS -> "-" TERM
         | TERM
 
 TERM -> LITERAL
@@ -180,8 +183,8 @@ LITERAL -> literal_int
 
 id -> [a-z][a-zA-Z|0-9]*
 type_constructor -> [A-Z][a-zA-Z|0-9]*
-literal_int -> [-]?[0-9]+
-literal_float -> [-]?[0-9]+"."[0-9]+
+literal_int -> ?[0-9]+
+literal_float -> ?[0-9]+"."[0-9]+
 literal_string -> \"[^"]*\"
 
 "
