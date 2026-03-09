@@ -61,8 +61,6 @@ static int current_column = 1;
 "Int"  { return Parser::token::T_TYPE_INT; }
 "Float"  { return Parser::token::T_TYPE_FLOAT; }
 "String"  { return Parser::token::T_TYPE_STRING; }
-"Bool"  { return Parser::token::T_TYPE_BOOLEAN; }
-
 
 "if"  { return Parser::token::T_IF; }
 "then"  { return Parser::token::T_THEN; }

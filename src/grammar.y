@@ -34,7 +34,7 @@
 %nonassoc <std::string> T_LITERAL_STRING
 %nonassoc <bool> T_LITERAL_BOOLEAN
 
-%nonassoc T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING T_TYPE_BOOLEAN T_TYPE_LIST
+%nonassoc T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING T_TYPE_LIST
 
 %nonassoc T_ARITHMETIC_OP_PLUS T_ARITHMETIC_OP_MINUS T_ARITHMETIC_OP_MULTIPLY T_ARITHMETIC_OP_DIVIDE
 %nonassoc T_LOGIC_OP_OR T_LOGIC_OP_AND T_LOGIC_OP_EQUAL T_LOGIC_OP_NOT_EQUAL T_LOGIC_OP_MORE T_LOGIC_OP_LESS T_LOGIC_OP_MORE_OR_EQUAL T_LOGIC_OP_LESS_OR_EQUAL
@@ -146,7 +146,6 @@ simple_type: id { $$ = $1; }
     | T_TYPE_INT { $$ = std::make_shared<syntax_tree::ASTNode>("T_INT"); }
     | T_TYPE_FLOAT { $$ = std::make_shared<syntax_tree::ASTNode>("T_FLOAT"); }
     | T_TYPE_STRING { $$ = std::make_shared<syntax_tree::ASTNode>("T_STRING"); }
-    | T_TYPE_BOOLEAN { $$ = std::make_shared<syntax_tree::ASTNode>("T_BOOLEAN"); }
     | list_type { $$ = $1; }
     | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
         auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");

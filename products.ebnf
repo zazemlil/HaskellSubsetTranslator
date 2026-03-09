@@ -25,7 +25,6 @@ SIMPLE_TYPE -> id
         | "Int"
         | "Float"
         | "String"
-        | "Bool"
         | LIST_TYPE
         | "(" type_constructor TYPE_ARGUMENTS ")"
 
