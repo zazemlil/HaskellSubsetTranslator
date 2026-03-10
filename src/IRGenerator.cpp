@@ -8,8 +8,8 @@ void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node, std::unor
     {
         auto signature = extractSignature(decls);
         auto fn = buildFunction(name, decls);
-        if (signature != nullptr) newDecls.push_back(signature);
-        newDecls.push_back(fn);
+        newDecls.insert(newDecls.begin(), fn);
+        if (signature != nullptr) newDecls.insert(newDecls.begin(), signature);
     }
 
     node->setStatements(newDecls);
