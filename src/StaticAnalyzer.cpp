@@ -6,6 +6,14 @@ void StaticAnalyzer::analyze(std::shared_ptr<syntax_tree::ASTNode> root) {
     analyzeNode(root);
 }
 
+StaticAnalyzer::StaticAnalyzer() {
+    generator = new IRGenerator();
+}
+
+StaticAnalyzer::~StaticAnalyzer() {
+    delete generator;
+}
+
 void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (!node) return;
 
@@ -50,6 +58,36 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
 
     for (auto& child : node->getStatements()) {
         analyzeNode(child);
+    }
+
+    // type checker here
+
+    if (node->getNodeType() == "DEFINITIONS") {
+        auto& decls = node->getStatements();
+        auto groups = groupByName(decls);
+        //generator->generate(node, groups);
+        for (auto& [name, decls] : groups)
+        {
+            std::cout << name << " : arity " << generator->getArity(decls) << "\n";
+        }
+    }
+    if (node->getNodeType() == "LET") {
+        auto& decls = node->getStatement(0)->getStatements();
+        auto groups = groupByName(decls);
+        //generator->generate(node, groups);
+        for (auto& [name, decls] : groups)
+        {
+            std::cout << name << " : arity " << generator->getArity(decls) << "\n";
+        }
+    }
+    if (node->getNodeType() == "WHERE") {
+        auto& decls = node->getStatement(1)->getStatements();
+        auto groups = groupByName(decls);
+        //generator->generate(node, groups);
+        for (auto& [name, decls] : groups)
+        {
+            std::cout << name << " : arity " << generator->getArity(decls) << "\n";
+        }
     }
 }
 

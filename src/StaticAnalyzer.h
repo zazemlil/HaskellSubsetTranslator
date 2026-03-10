@@ -1,5 +1,6 @@
 #pragma once
 #include "AST.h"
+#include "IRGenerator.h"
 #include <unordered_map>
 
 enum PatternKind {
@@ -15,8 +16,12 @@ enum PatternKind {
 class StaticAnalyzer {
 public:
     void analyze(std::shared_ptr<syntax_tree::ASTNode> root);
+    StaticAnalyzer();
+    ~StaticAnalyzer();
 
 private:
+    IRGenerator* generator;
+
     std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groupByName(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
     void checkContiguity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
