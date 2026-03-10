@@ -16,8 +16,11 @@ int main(int argc, char* argv[])
     dataDeclarations.print();
 
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
+    syntax_tree::AST ir;
     try {
         staticAnalyzer->analyze(ast.getRoot());
+        // after successfull static analyze: ast == ir
+        ir = ast;
     }
     catch(const std::exception& e) {
         std::cerr << e.what() << '\n';
@@ -25,5 +28,7 @@ int main(int argc, char* argv[])
     }
 
     std::cout << "Success.\n";
+
+    ir.print();
     return 0;
 }
