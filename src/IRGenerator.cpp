@@ -6,7 +6,9 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::generate(std::shared_ptr<synt
 
     for (auto& [name, decls] : groups)
     {
+        auto signature = extractSignature(decls);
         auto fn = buildFunction(name, decls);
+        if (signature != nullptr) newDecls.push_back(signature);
         newDecls.push_back(fn);
     }
 
@@ -65,4 +67,44 @@ std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::generateParams(s
     }
 
     return params;
+}
+
+std::shared_ptr<syntax_tree::ASTNode> IRGenerator::extractSignature(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decl) {
+    int i = 0;
+    for (auto& d : decl) {
+        if (d->getNodeType() == "SIGNATURE") {
+            return d;
+        }
+        i++;
+    }
+    return nullptr;
+}
+
+std::vector<Clause> IRGenerator::buildClauses(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls)
+{
+    std::vector<Clause> clauses;
+
+    for (auto& d : decls)
+    {
+        if (d->getNodeType() != "SIGNATURE") {
+            Clause c;
+
+            if (d->getStatement(0)->getStatementCount() > 0) {
+                c.patterns = d->getStatement(0)->getStatement(0)->getStatements();
+            }
+        
+            c.body = d->getStatement(1);
+
+            std::cout << "-------------------------------\n";
+            if (d->getStatement(0)->getStatementCount() > 0) {
+                d->getStatement(0)->getStatement(0)->print();
+            }
+            else { std::cout << "no pattern\n"; }
+            d->getStatement(1)->print();
+
+            clauses.push_back(c);
+        }
+    }
+
+    return clauses;
 }

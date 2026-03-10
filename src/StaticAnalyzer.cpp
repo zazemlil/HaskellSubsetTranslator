@@ -60,20 +60,16 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         analyzeNode(child);
     }
 
-    // type checker here
-
     if (node->getNodeType() == "DEFINITIONS") {
         auto& decls = node->getStatements();
         auto groups = groupByName(decls);
         //generator->generate(node, groups);
         for (auto& [name, decls] : groups)
         {
-            std::cout << name << " ----- \n";
-            auto params = generator->generateParams(generator->getArity(decls));
-            for (auto& p : params) {
-                p->print();
-            }
-            std::cout << "\n";
+            auto n = generator->extractSignature(decls);
+            if (n)
+                n->print();
+            generator->buildClauses(decls);
         }
     }
     if (node->getNodeType() == "LET") {
@@ -82,12 +78,10 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         //generator->generate(node, groups);
         for (auto& [name, decls] : groups)
         {
-            std::cout << name << " ----- \n";
-            auto params = generator->generateParams(generator->getArity(decls));
-            for (auto& p : params) {
-                p->print();
-            }
-            std::cout << "\n";
+            auto n = generator->extractSignature(decls);
+            if (n)
+                n->print();
+            generator->buildClauses(decls);
         }
     }
     if (node->getNodeType() == "WHERE") {
@@ -96,12 +90,10 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         //generator->generate(node, groups);
         for (auto& [name, decls] : groups)
         {
-            std::cout << name << " ----- \n";
-            auto params = generator->generateParams(generator->getArity(decls));
-            for (auto& p : params) {
-                p->print();
-            }
-            std::cout << "\n";
+            auto n = generator->extractSignature(decls);
+            if (n)
+                n->print();
+            generator->buildClauses(decls);
         }
     }
 }
