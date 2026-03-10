@@ -50,5 +50,19 @@ size_t IRGenerator::getArity(std::vector<std::shared_ptr<syntax_tree::ASTNode>> 
 
 std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::generateParams(size_t arity)
 {
-    return std::vector<std::shared_ptr<syntax_tree::ASTNode>>();
+    std::vector<std::shared_ptr<syntax_tree::ASTNode>> params;
+
+    for (size_t i = 0; i < arity; ++i)
+    {
+        auto name = "v" + std::to_string(i);
+
+        params.push_back(
+            std::make_shared<syntax_tree::Identifier>(
+                "IDENTIFIER",
+                name
+            )
+        );
+    }
+
+    return params;
 }

@@ -68,7 +68,12 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         //generator->generate(node, groups);
         for (auto& [name, decls] : groups)
         {
-            std::cout << name << " : arity " << generator->getArity(decls) << "\n";
+            std::cout << name << " ----- \n";
+            auto params = generator->generateParams(generator->getArity(decls));
+            for (auto& p : params) {
+                p->print();
+            }
+            std::cout << "\n";
         }
     }
     if (node->getNodeType() == "LET") {
@@ -77,7 +82,12 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         //generator->generate(node, groups);
         for (auto& [name, decls] : groups)
         {
-            std::cout << name << " : arity " << generator->getArity(decls) << "\n";
+            std::cout << name << " ----- \n";
+            auto params = generator->generateParams(generator->getArity(decls));
+            for (auto& p : params) {
+                p->print();
+            }
+            std::cout << "\n";
         }
     }
     if (node->getNodeType() == "WHERE") {
@@ -86,7 +96,12 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         //generator->generate(node, groups);
         for (auto& [name, decls] : groups)
         {
-            std::cout << name << " : arity " << generator->getArity(decls) << "\n";
+            std::cout << name << " ----- \n";
+            auto params = generator->generateParams(generator->getArity(decls));
+            for (auto& p : params) {
+                p->print();
+            }
+            std::cout << "\n";
         }
     }
 }
