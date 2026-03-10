@@ -450,7 +450,8 @@ bind: id T_ASSIGNMENT expr {
         n->addStatement($1);
         n->addStatement($4);
         $$ = n;
-    };
+    }
+    | signature { $$ = $1; };
 
 // ============= infix operators+ (9) ==========
 

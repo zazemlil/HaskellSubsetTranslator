@@ -120,6 +120,7 @@ BINDINGS` -> BIND ";" BINDINGS`
         | ε
 BIND -> id "=" EXPR 
         | id PATTERNS "=" EXPR 
+        | SIGNATURE
 #} 2
 
 
