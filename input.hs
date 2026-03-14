@@ -3,7 +3,7 @@ v = \(x:xs) -> let { f = \x -> x*x; } in (f x);
 --v0 :: Int;
 --v0 = let { f [a, a] = 1; } in (f [True, False]);
 
-v1 :: String;
+v2 :: String;
 v2 = let { f a = a; } in (f "asd123");
 
 v3 :: [a];
@@ -14,11 +14,11 @@ f 1 = 11;
 f 2 = 22;
 f _ = 123;
 
-ff :: (Type1 (Type2 a)) -> a;
+--ff :: (Type1 (Type2 a)) -> a;
 
-ff2 :: (T3 (T4));
+--ff2 :: (T3 (T4));
 
-ff3 :: (Tree a);
+--ff3 :: (Tree a);
 
 data Maybe a = Just a | Nothing;
 
