@@ -33,6 +33,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
     );
 
     //fn->addStatement(lambda);
+    fn->addStatement(caseExpr); //
 
     return fn;
 }
@@ -167,7 +168,41 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
     return caseNode;
 }
 
-std::string IRGenerator::getPatternTag(std::shared_ptr<syntax_tree::ASTNode> p)
-{
-    return std::string();
+std::string IRGenerator::getPatternTag(std::shared_ptr<syntax_tree::ASTNode> p) {
+    using namespace syntax_tree;
+
+    if (p->getNodeType() == "IDENTIFIER")
+        return "VAR";
+
+    if (p->getNodeType() == "WILDCARD")
+        return "VAR";
+
+    if (auto lit = std::dynamic_pointer_cast<LiteralInt>(p))
+    {
+        std::ostringstream ss;
+        ss << lit->getValue();
+        return "INT:" + ss.str();
+    }
+
+    if (auto lit = std::dynamic_pointer_cast<LiteralFloat>(p)) 
+        return "FLOAT:" + std::to_string(lit->getValue());
+
+    if (auto lit = std::dynamic_pointer_cast<LiteralString>(p))
+        return "STRING:" + lit->getValue();
+
+    if (p->getNodeType() == "CONSTRUCTOR_PATTERN") {
+        std::ostringstream ss;
+        p->printFlat(0, ss);
+        return "CTOR:" + ss.str();
+    }
+
+    if (p->getNodeType() == "LIST")
+    {
+        if (p->getStatementCount() == 0)
+            return "NIL";
+        else
+            return "CONS";
+    }
+
+    return "UNKNOWN";
 }

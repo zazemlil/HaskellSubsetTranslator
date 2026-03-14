@@ -27,8 +27,10 @@ int main(int argc, char* argv[])
         return -2;
     }
 
-    std::cout << "Success.\n";
-
+    
+    std::cout << "---------------------- IR -----------------------\n";
     ir.print();
+
+    std::cout << "Success.\n";
     return 0;
 }
