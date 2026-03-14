@@ -178,6 +178,14 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
             "Multiple definitions of '" + id->getValue() + "'"
         );
     }
+
+    if (signaturesCount == 1 && decls.size() == 1) {
+        auto nameNode = decls[0]->getStatement(0);
+        auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
+        throw std::runtime_error(
+            "The type signature for '" + id->getValue() + "' lacks an accompanying binding"
+        );
+    }
 }
 
 PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode> p) {
