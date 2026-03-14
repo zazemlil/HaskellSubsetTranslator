@@ -24,16 +24,15 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
 
     auto caseExpr = buildCase(params, decls);
 
-    //auto lambda = buildLambda(params, caseExpr);
+    auto lambda = buildLambda(params, caseExpr);
 
-    auto fn = std::make_shared<syntax_tree::ASTNode>("FUNCTION");
+    auto fn = std::make_shared<syntax_tree::ASTNode>("DEF");
 
     fn->addStatement(
         std::make_shared<syntax_tree::Identifier>("IDENTIFIER", name)
     );
 
-    //fn->addStatement(lambda);
-    fn->addStatement(caseExpr); //
+    fn->addStatement(lambda);
 
     return fn;
 }
@@ -109,6 +108,26 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildCase(std::vector<std::sh
     return compileMatch(params, clauses);
 }
 
+std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildLambda(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &params, 
+                                                                std::shared_ptr<syntax_tree::ASTNode> body)
+{
+    using namespace syntax_tree;
+
+    std::shared_ptr<ASTNode> result = body;
+
+    for (auto it = params.rbegin(); it != params.rend(); ++it)
+    {
+        auto lambda = std::make_shared<ASTNode>("λ");
+
+        lambda->addStatement(*it);   // параметр
+        lambda->addStatement(result); // тело
+
+        result = lambda;
+    }
+
+    return result;
+}
+
 std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std::shared_ptr<syntax_tree::ASTNode>> vars, 
                                                                 std::vector<Clause> clauses)
 {
@@ -122,8 +141,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
     auto var = vars[0];
 
     auto caseNode = std::make_shared<ASTNode>("CASE");
-    caseNode->addStatement(var);
-
+    
     std::unordered_map<std::string, std::vector<Clause>> groups;
 
     for (auto& c : clauses)
@@ -162,8 +180,10 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
         branch->addStatement(pattern);
         branch->addStatement(expr);
 
-        caseNode->addStatement(branch);
+        caseNode->addStatementFront(branch);
     }
+
+    caseNode->addStatementFront(var);
 
     return caseNode;
 }
@@ -196,12 +216,20 @@ std::string IRGenerator::getPatternTag(std::shared_ptr<syntax_tree::ASTNode> p) 
         return "CTOR:" + ss.str();
     }
 
-    if (p->getNodeType() == "LIST")
+    if (p->getNodeType() == "LIST_HEAD_TAIL_PATTERN")
+        return "LIST_HEAD_TAIL_PATTERN";
+
+    if (p->getNodeType() == "NIL")
+        return "NIL";
+
+    if (p->getNodeType() == "LIST_PATTERN")
     {
-        if (p->getStatementCount() == 0)
-            return "NIL";
-        else
-            return "CONS";
+        std::string ss = "LIST_PATTERN:[";
+        for (auto& n : p->getStatements()) {
+            ss += getPatternTag(n);
+        }
+        ss += "]";
+        return ss;
     }
 
     return "UNKNOWN";

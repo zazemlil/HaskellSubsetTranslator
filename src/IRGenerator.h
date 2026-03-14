@@ -23,6 +23,8 @@ private:
     std::vector<std::shared_ptr<syntax_tree::ASTNode>> generateParams(size_t arity);
     std::shared_ptr<syntax_tree::ASTNode> buildCase(std::vector<std::shared_ptr<syntax_tree::ASTNode>> params,
                                                         const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
+    std::shared_ptr<syntax_tree::ASTNode> buildLambda(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& params,
+                                                        std::shared_ptr<syntax_tree::ASTNode> body);
     std::shared_ptr<syntax_tree::ASTNode> compileMatch(std::vector<std::shared_ptr<syntax_tree::ASTNode>> vars, 
                                                                     std::vector<Clause> clauses);
     std::string getPatternTag(std::shared_ptr<syntax_tree::ASTNode> p);
