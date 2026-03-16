@@ -152,7 +152,7 @@ void set_input_file(yyscan_t scanner, const char* filename) {
     }
 }
 
-std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(char* arg) {
+std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(char* arg, bool printError) {
     yyscan_t scanner;
     yylex_init(&scanner);
     
