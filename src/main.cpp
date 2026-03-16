@@ -12,35 +12,23 @@ int main(int argc, char* argv[])
     for (int i = 1; i < new_argc; i++) {
         if (std::string(argv[i]) == "-s") {
             s_flag = true;
-            for (int j = i; j < new_argc - 1; j++) {
-                argv[j] = argv[j + 1];
-            }
-            new_argc--;
-            i--;
+            for (int j = i; j < new_argc - 1; j++) { argv[j] = argv[j + 1]; }
+            new_argc--; i--;
         }
         if (std::string(argv[i]) == "-a") {
             a_flag = true;
-            for (int j = i; j < new_argc - 1; j++) {
-                argv[j] = argv[j + 1];
-            }
-            new_argc--;
-            i--;
+            for (int j = i; j < new_argc - 1; j++) { argv[j] = argv[j + 1]; }
+            new_argc--; i--;
         }
         if (std::string(argv[i]) == "+t") {
             t_flag = true;
-            for (int j = i; j < new_argc - 1; j++) {
-                argv[j] = argv[j + 1];
-            }
-            new_argc--;
-            i--;
+            for (int j = i; j < new_argc - 1; j++) { argv[j] = argv[j + 1]; }
+            new_argc--; i--;
         }
         if (std::string(argv[i]) == "+ir") {
             ir_flag = true;
-            for (int j = i; j < new_argc - 1; j++) {
-                argv[j] = argv[j + 1];
-            }
-            new_argc--;
-            i--;
+            for (int j = i; j < new_argc - 1; j++) { argv[j] = argv[j + 1]; }
+            new_argc--; i--;
         }
     }
     argc = new_argc;
