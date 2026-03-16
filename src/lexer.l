@@ -159,13 +159,8 @@ std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(char* arg, bool printErro
     set_input_file(scanner, arg);
     
     syntax_tree::AST ast, dataDeclarations = syntax_tree::AST(std::make_shared<syntax_tree::ASTNode>("DATA_DECLARATIONS"));;
-    haskell_subset::Parser parser{ scanner, ast, dataDeclarations };
-    if (parser.parse() == 0) {
-        std::cout << "Parse success.\n";
-    }
-    else {
-        std::cerr << "Parse error!\n";
-    }
+    haskell_subset::Parser parser{ scanner, ast, dataDeclarations, printError };
+    parser.parse();
     
     yylex_destroy(scanner);
 

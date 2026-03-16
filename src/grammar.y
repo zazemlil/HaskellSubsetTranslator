@@ -11,7 +11,7 @@
 %define api.namespace {haskell_subset}
 %define api.value.type variant
 %param {yyscan_t scanner}
-%parse-param {syntax_tree::AST& ast} {syntax_tree::AST& dataDeclarations}
+%parse-param {syntax_tree::AST& ast} {syntax_tree::AST& dataDeclarations} {bool printError}
 
 %locations
 
@@ -615,9 +615,11 @@ literal_string: T_LITERAL_STRING { $$ = std::make_shared<syntax_tree::LiteralStr
 %%
 
 void haskell_subset::Parser::error(const location_type& loc, const std::string& msg) {
-    const char* text = yyget_text(scanner);
-    int length = yyget_leng(scanner);
-    
-    std::cerr << msg << " at (Line: " << loc.begin.line << ", Column: " << loc.begin.column
-            << ", Last token: '" << std::string(text, length) << "')\n";
+    if (printError) {
+        const char* text = yyget_text(scanner);
+        int length = yyget_leng(scanner);
+        
+        std::cerr << msg << " at (Line: " << loc.begin.line << ", Column: " << loc.begin.column
+                << ", Last token: '" << std::string(text, length) << "')\n";
+    }
 }
