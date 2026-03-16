@@ -154,7 +154,7 @@ void set_input_file(yyscan_t scanner, const char* filename) {
 
 std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(int argc, char* argv[]) {
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <input_file> [<output_file>]" << std::endl;
         return std::make_tuple(syntax_tree::AST(), syntax_tree::AST());
     }
     
