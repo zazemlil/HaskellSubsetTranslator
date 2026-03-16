@@ -1,6 +1,6 @@
 #include "Translator.h"
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translate(syntax_tree::AST ir)
+syntax_tree::AST Translator::translate(syntax_tree::AST ir)
 {
     return std::shared_ptr<syntax_tree::ASTNode>();
 }

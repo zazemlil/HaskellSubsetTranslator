@@ -8,7 +8,7 @@ public:
     Translator() = default;
 
     // Основная функция трансляции
-    std::shared_ptr<syntax_tree::ASTNode> translate(syntax_tree::AST ir);
+    syntax_tree::AST translate(syntax_tree::AST ir);
 
 private:
 
