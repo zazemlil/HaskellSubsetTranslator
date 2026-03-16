@@ -136,7 +136,7 @@ public:
             else root->printFlat(0, os);
             std::cout << "\n";
         } else {
-            std::cout << "AST is empty.\n\n";
+            os << "AST is empty.\n\n";
         }
     }
 };
