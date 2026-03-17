@@ -1,17 +1,4 @@
-data Maybe x = Just x | Nothing;
+mappairs f [] ys = [];
+mappairs f (x:xs) [] = [];
+mappairs f (x:xs) (y:ys) = (cons (f x y) (mappairs f xs ys));
 
-f :: Int -> Int;
-f 0 = 1;
-f n = n * (f n-1);
-
-ff :: Int;
-ff = let {x :: Int -> Int; x 0 = 1; x 1 = 2;} in x*x;
-
-foo (True 1 (Car)) = 1;
-foo (True 2 (Car)) = 2;
-
-e = y*x where {f 0 = 5; f 1 = 2;};
-
-g [] y = 0;
-g (x:xs) 0 = 1;
-g (x:xs) y = 2;

@@ -55,7 +55,7 @@ std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::generateParams(s
 
     for (size_t i = 0; i < arity; ++i)
     {
-        auto name = "v" + std::to_string(i);
+        auto name = "v" + std::to_string(i+1);
 
         params.push_back(
             std::make_shared<syntax_tree::Identifier>(
@@ -181,6 +181,11 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
         branch->addStatement(expr);
 
         caseNode->addStatementFront(branch);
+    }
+
+    // случай с одним бренчом => возвращаем просто тело
+    if (caseNode->getStatementCount() == 1) {
+        return caseNode->getStatement(0)->getStatement(1);
     }
 
     caseNode->addStatementFront(var);
