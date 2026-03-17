@@ -32,4 +32,5 @@ private:
     std::shared_ptr<syntax_tree::ASTNode> extractSignature(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decl);
     std::vector<Clause> buildClauses(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
+    bool hasBranch(std::shared_ptr<syntax_tree::ASTNode> body);
 };

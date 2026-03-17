@@ -100,6 +100,22 @@ std::vector<Clause> IRGenerator::buildClauses(const std::vector<std::shared_ptr<
     return clauses;
 }
 
+bool IRGenerator::hasBranch(std::shared_ptr<syntax_tree::ASTNode> body) {
+    if (!body)
+        return false;
+
+    if (body->getNodeType() == "BRANCH")
+        return true;
+
+    for (const auto& child : body->getStatements())
+    {
+        if (hasBranch(child))
+            return true;
+    }
+
+    return false;
+}
+
 std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildCase(std::vector<std::shared_ptr<syntax_tree::ASTNode>> params,
                                                                 const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls)
 {
@@ -183,9 +199,14 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
         caseNode->addStatementFront(branch);
     }
 
-    // случай с одним бренчом => возвращаем просто тело
+    // случай с одним бренчом
     if (caseNode->getStatementCount() == 1) {
-        return caseNode->getStatement(0)->getStatement(1);
+        if (hasBranch(caseNode->getStatement(0)->getStatement(1))) {
+            return caseNode->getStatement(0)->getStatement(1);
+        }
+        else {
+            caseNode->addStatement(std::make_shared<ASTNode>("ERROR"));
+        }
     }
 
     caseNode->addStatementFront(var);
