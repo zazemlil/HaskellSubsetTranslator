@@ -75,7 +75,6 @@ static int current_column = 1;
 "case"  { return Parser::token::T_CASE; }
 "of"  { return Parser::token::T_OF; }
 "data"  { return Parser::token::T_DATA; }
-"otherwise"  { return Parser::token::T_OTHERWISE; }
 
 \\ { return Parser::token::T_LAMBDA; }
 "->" { return Parser::token::T_ARROW_RIGHT; }

@@ -47,7 +47,6 @@
 %nonassoc T_DO
 %nonassoc T_DATA
 %nonassoc <std::string> T_TYPE_CONSTRUCTOR
-%nonassoc T_OTHERWISE
 
 %nonassoc T_LAMBDA
 %nonassoc T_ARROW_RIGHT T_ARROW_LEFT
@@ -69,7 +68,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> let_expr where_expr case_expr alts alts_tail bindings bindings_tail bind
-%type <std::shared_ptr<syntax_tree::ASTNode>> if_expr if_guards if_guards_tail lambda_expr
+%type <std::shared_ptr<syntax_tree::ASTNode>> if_expr lambda_expr
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
 
@@ -82,7 +81,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> type_signature type type_signature_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> simple_type list_type type_arguments
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl guard guards guards_tail variable_decl
+%type <std::shared_ptr<syntax_tree::ASTNode>> function_decl variable_decl
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> constructor constructors constructors_tail
 
@@ -179,43 +178,7 @@ function_decl: id patterns T_ASSIGNMENT expr {
         l->addStatement($1);
         l->addStatement($4);
         $$ = l;
-    }
-    | id patterns guards {
-        auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
-        $1->addStatement($2);
-        l->addStatement($1);
-        l->addStatement($3);
-        $$ = l;
-    };
-
-guards: guard T_ASSIGNMENT expr guards_tail {
-    auto l = std::make_shared<syntax_tree::ASTNode>("GUARDS");
-    $1->addStatement($3);
-    l->addStatement($1);
-    l->addStatements($4->getStatements());
-    $$ = l;
 };
-
-guards_tail: guard T_ASSIGNMENT expr guards_tail {
-        auto l = std::make_shared<syntax_tree::ASTNode>("GUARDS");
-        $1->addStatement($3);
-        l->addStatement($1);
-        l->addStatements($4->getStatements());
-        $$ = l;
-    }
-    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
-
-guard: T_DEVIDING_LINE expr {
-        auto l = std::make_shared<syntax_tree::ASTNode>("GUARD");
-        l->addStatement($2);
-        $$ = l;
-    }
-    | T_DEVIDING_LINE T_OTHERWISE {
-        auto l = std::make_shared<syntax_tree::ASTNode>("GUARD");
-        auto otherwise = std::make_shared<syntax_tree::ASTNode>("OTHERWISE");
-        l->addStatement(otherwise);
-        $$ = l;
-    };
 
 variable_decl: id T_ASSIGNMENT expr {
     auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
@@ -356,25 +319,7 @@ if_expr: T_IF expr T_THEN expr T_ELSE expr {
         n->addStatement($4);
         n->addStatement($6);
         $$ = n;
-    }
-    | T_IF T_CURLY_BRACKET_OPEN if_guards T_CURLY_BRACKET_CLOSE { $$ = $3; };
-
-if_guards: guard T_ARROW_RIGHT expr if_guards_tail {
-    auto l = std::make_shared<syntax_tree::ASTNode>("IF-GUARDS");
-    $1->addStatement($3);
-    l->addStatement($1);
-    l->addStatements($4->getStatements());
-    $$ = l;
 };
-
-if_guards_tail: guard T_ARROW_RIGHT expr if_guards_tail {
-        auto l = std::make_shared<syntax_tree::ASTNode>("GUARDS");
-        $1->addStatement($3);
-        l->addStatement($1);
-        l->addStatements($4->getStatements());
-        $$ = l;
-    }
-    | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
     auto n = std::make_shared<syntax_tree::ASTNode>("LET");
