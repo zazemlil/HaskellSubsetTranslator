@@ -44,7 +44,6 @@
 %nonassoc T_LET T_WHERE
 %nonassoc T_IN
 %nonassoc T_CASE T_OF
-%nonassoc T_DO
 %nonassoc T_DATA
 %nonassoc <std::string> T_TYPE_CONSTRUCTOR
 
