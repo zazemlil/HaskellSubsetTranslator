@@ -85,7 +85,6 @@ static int current_column = 1;
 "::" { return Parser::token::T_COLON_DOUBLE; }
 ":" { return Parser::token::T_COLON; }
 ";" { return Parser::token::T_SEMICOLON; }
-"'" { return Parser::token::T_SINGLE_QUOTE; }
 "(" { return Parser::token::T_PARENTHESIS_OPEN; }
 ")" { return Parser::token::T_PARENTHESIS_CLOSE; }
 "[" { return Parser::token::T_BRACKET_OPEN; }
