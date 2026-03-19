@@ -77,7 +77,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> constructor_pattern list_pattern list_patterns list_patterns_tail
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> definitions definition definitions_tail
-%type <std::shared_ptr<syntax_tree::ASTNode>> signature supercombinator data_type_decl
+%type <std::shared_ptr<syntax_tree::ASTNode>> signature def data_type_decl
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> type_signature type type_signature_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> simple_type list_type type_arguments
@@ -112,7 +112,7 @@ definitions_tail: definition definitions_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 definition: signature T_SEMICOLON { $$ = $1; }
-    | supercombinator T_SEMICOLON { $$ = $1; }
+    | def T_SEMICOLON { $$ = $1; }
     | data_type_decl T_SEMICOLON { $$ = nullptr; dataDeclarations.getRoot()->addStatement($1); };
 
 signature: id T_COLON_DOUBLE type_signature { // type_signature at the END
@@ -168,9 +168,9 @@ type_arguments: type type_arguments {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-// ============= Supercombinator+ (7) ==========
+// ============= Def+ (7) ==========
 
-supercombinator: function_decl { $$ = $1; }
+def: function_decl { $$ = $1; }
     | variable_decl { $$ = $1; };
 
 function_decl: id patterns T_ASSIGNMENT expr {
