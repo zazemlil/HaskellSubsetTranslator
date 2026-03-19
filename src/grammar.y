@@ -32,7 +32,6 @@
 %nonassoc <std::string> T_LITERAL_INT
 %nonassoc <float> T_LITERAL_FLOAT 
 %nonassoc <std::string> T_LITERAL_STRING
-%nonassoc <bool> T_LITERAL_BOOLEAN
 
 %nonassoc T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING T_TYPE_LIST
 
