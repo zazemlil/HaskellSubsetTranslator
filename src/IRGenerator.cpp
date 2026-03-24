@@ -100,22 +100,6 @@ std::vector<Clause> IRGenerator::buildClauses(const std::vector<std::shared_ptr<
     return clauses;
 }
 
-bool IRGenerator::hasBranch(std::shared_ptr<syntax_tree::ASTNode> body) {
-    if (!body)
-        return false;
-
-    if (body->getNodeType() == "BRANCH")
-        return true;
-
-    for (const auto& child : body->getStatements())
-    {
-        if (hasBranch(child))
-            return true;
-    }
-
-    return false;
-}
-
 std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildCase(std::vector<std::shared_ptr<syntax_tree::ASTNode>> params,
                                                                 const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls)
 {
@@ -149,114 +133,33 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
 {
     using namespace syntax_tree;
 
-    if (vars.empty())
-    {
+    if (vars.empty()) {
         return clauses[0].body;
     }
 
     auto var = vars[0];
 
     auto caseNode = std::make_shared<ASTNode>("CASE");
-    
-    std::unordered_map<std::string, std::vector<Clause>> groups;
+    auto tuple = std::make_shared<ASTNode>("TUPLE");
+    tuple->setStatements(vars);
 
+    caseNode->addStatement(tuple);
+
+    auto alts = std::make_shared<ASTNode>("ALTS");
     for (auto& c : clauses)
     {
-        auto p = c.patterns[0];
+        auto alt = std::make_shared<ASTNode>("ALT");
 
-        std::string key = getPatternTag(p);
+        auto patterns_tuple = std::make_shared<ASTNode>("TUPLE");
+        patterns_tuple->setStatements(c.patterns);
 
-        groups[key].push_back(c);
+        alt->addStatement(patterns_tuple);
+        alt->addStatement(c.body);
+
+        alts->addStatement(alt);
     }
 
-    for (auto& [tag, gclauses] : groups)
-    {
-        auto branch = std::make_shared<ASTNode>("BRANCH");
-
-        auto pattern = gclauses[0].patterns[0];
-
-        std::vector<Clause> newClauses;
-
-        for (auto& cl : gclauses)
-        {
-            Clause nc;
-
-            nc.body = cl.body;
-
-            for (size_t i = 1; i < cl.patterns.size(); ++i)
-                nc.patterns.push_back(cl.patterns[i]);
-
-            newClauses.push_back(nc);
-        }
-
-        std::vector<std::shared_ptr<ASTNode>> newVars(vars.begin()+1, vars.end());
-
-        auto expr = compileMatch(newVars, newClauses);
-
-        branch->addStatement(pattern);
-        branch->addStatement(expr);
-
-        caseNode->addStatementFront(branch);
-    }
-
-    // случай с одним бренчом
-    if (caseNode->getStatementCount() == 1) {
-        if (hasBranch(caseNode->getStatement(0)->getStatement(1))) {
-            return caseNode->getStatement(0)->getStatement(1);
-        }
-        else {
-            caseNode->addStatement(std::make_shared<ASTNode>("ERROR"));
-        }
-    }
-
-    caseNode->addStatementFront(var);
+    caseNode->addStatement(alts);
 
     return caseNode;
-}
-
-std::string IRGenerator::getPatternTag(std::shared_ptr<syntax_tree::ASTNode> p) {
-    using namespace syntax_tree;
-
-    if (p->getNodeType() == "IDENTIFIER")
-        return "VAR";
-
-    if (p->getNodeType() == "WILDCARD")
-        return "VAR";
-
-    if (auto lit = std::dynamic_pointer_cast<LiteralInt>(p))
-    {
-        std::ostringstream ss;
-        ss << lit->getValue();
-        return "INT:" + ss.str();
-    }
-
-    if (auto lit = std::dynamic_pointer_cast<LiteralFloat>(p)) 
-        return "FLOAT:" + std::to_string(lit->getValue());
-
-    if (auto lit = std::dynamic_pointer_cast<LiteralString>(p))
-        return "STRING:" + lit->getValue();
-
-    if (p->getNodeType() == "CONSTRUCTOR_PATTERN") {
-        std::ostringstream ss;
-        p->printFlat(0, ss);
-        return "CTOR:" + ss.str();
-    }
-
-    if (p->getNodeType() == "LIST_HEAD_TAIL_PATTERN")
-        return "LIST_HEAD_TAIL_PATTERN";
-
-    if (p->getNodeType() == "NIL")
-        return "NIL";
-
-    if (p->getNodeType() == "LIST_PATTERN")
-    {
-        std::string ss = "LIST_PATTERN:[";
-        for (auto& n : p->getStatements()) {
-            ss += getPatternTag(n);
-        }
-        ss += "]";
-        return ss;
-    }
-
-    return "UNKNOWN";
 }
