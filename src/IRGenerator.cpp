@@ -150,7 +150,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
     {
         auto alt = std::make_shared<ASTNode>("ALT");
 
-        auto patterns_tuple = std::make_shared<ASTNode>("TUPLE");
+        auto patterns_tuple = std::make_shared<ASTNode>("TUPLE_PATTERN");
         patterns_tuple->setStatements(c.patterns);
 
         alt->addStatement(patterns_tuple);

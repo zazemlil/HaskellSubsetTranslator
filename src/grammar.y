@@ -339,8 +339,8 @@ where_expr: expr T_WHERE T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE {
     $$ = n;
 };
 
-lambda_expr: T_LAMBDA patterns T_ARROW_RIGHT expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("LAMBDA");
+lambda_expr: T_LAMBDA pattern T_ARROW_RIGHT expr {
+    auto n = std::make_shared<syntax_tree::ASTNode>("λ");
     n->addStatement($2);
     n->addStatement($4);
     $$ = n;

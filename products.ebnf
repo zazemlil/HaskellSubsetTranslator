@@ -96,7 +96,7 @@ QUALIFIER -> id "<-" EXPR
 IF_EXPR -> "if" EXPR "then" EXPR "else" EXPR
 LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
 WHERE_EXPR -> EXPR "where" "{" BINDINGS "}"
-LAMBDA_EXPR -> "\\" PATTERNS "->" EXPR
+LAMBDA_EXPR -> "\\" PATTERN "->" EXPR
 
 CASE_EXPR -> "case" EXPR "of" "{" ALTS "}"
 ALTS -> PATTERN "->" EXPR ";" ALTS_TAIL
