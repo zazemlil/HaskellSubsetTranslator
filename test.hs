@@ -4,3 +4,5 @@ mappairs f (x:xs) (y:ys) = (cons (f x y) (mappairs f xs ys));
 
 f [] [] = 1;
 f xs ys = 2;
+
+g (x, 0) = x;

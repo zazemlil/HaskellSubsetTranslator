@@ -61,7 +61,7 @@
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string type_constructor
 %type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr unary_minus
-%type <std::shared_ptr<syntax_tree::ASTNode>> term list_elements list_elements_tail
+%type <std::shared_ptr<syntax_tree::ASTNode>> term tuple_elements tuple_elements_tail list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> let_expr where_expr case_expr alts alts_tail bindings bindings_tail bind
@@ -70,7 +70,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> list_comprehension qualifier qualifiers qualifiers_tail
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> patterns patterns_tail pattern
-%type <std::shared_ptr<syntax_tree::ASTNode>> constructor_pattern list_pattern list_patterns list_patterns_tail
+%type <std::shared_ptr<syntax_tree::ASTNode>> constructor_pattern tuple_pattern list_pattern list_patterns list_patterns_tail
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> definitions definition definitions_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> signature def data_type_decl
@@ -235,7 +235,8 @@ pattern: id { $$ = $1; }
     | literal { $$ = $1; }
     | T_UNDERSCORE { $$ = std::make_shared<syntax_tree::ASTNode>("_"); }
     | T_PARENTHESIS_OPEN constructor_pattern T_PARENTHESIS_CLOSE { $$ = $2; }
-    | list_pattern { $$ = $1; };
+    | list_pattern { $$ = $1; }
+    | tuple_pattern { $$ = $1; };
 
 constructor_pattern: type_constructor patterns {
         auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR_PATTERN");
@@ -248,6 +249,12 @@ constructor_pattern: type_constructor patterns {
         l->addStatement($1);
         $$ = l;
     };
+
+tuple_pattern: T_PARENTHESIS_OPEN list_patterns T_PARENTHESIS_CLOSE {
+    auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE_PATTERN");
+    l->addStatements($2->getStatements());
+    $$ = l;
+};
 
 list_pattern: T_BRACKET_OPEN list_patterns T_BRACKET_CLOSE {
         $$ = $2;
@@ -495,6 +502,7 @@ term: literal { $$ = $1; }
     | id { $$ = $1; }
     | T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE { $$ = $2; }
     | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE { $$ = $2; }
+    | T_PARENTHESIS_OPEN tuple_elements T_PARENTHESIS_CLOSE { $$ = $2; }
     | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; }
     | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
         auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
@@ -502,6 +510,21 @@ term: literal { $$ = $1; }
         l->addStatement($3);
         $$ = l;
     };
+
+tuple_elements: expr T_COMMA expr tuple_elements_tail {
+    auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE");
+    l->addStatement($1);
+    l->addStatement($3);
+    if ($3 != nullptr) l->addStatements($3->getStatements());
+    $$ = l;
+};
+tuple_elements_tail: T_COMMA expr tuple_elements_tail {
+        auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE");
+        l->addStatement($2);
+        if ($3 != nullptr) l->addStatements($3->getStatements());
+        $$ = l;
+    }
+    | %empty { $$ = nullptr; };
 
 list_elements: expr list_elements_tail {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");

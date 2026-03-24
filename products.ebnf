@@ -65,9 +65,12 @@ PATTERN -> id
         | "_"
         | "(" CONSTRUCTOR_PATTERN ")"
         | LIST_PATTERN
+        | TUPLE_PATTERN
 
 CONSTRUCTOR_PATTERN -> type_constructor PATTERNS
         | type_constructor
+
+TUPLE_PATTERN -> "(" LIST_PATTERNS ")"
 
 LIST_PATTERN -> "[" LIST_PATTERNS "]"
         | "(" id ":" id ")"
@@ -139,9 +142,14 @@ TERM -> LITERAL
         | id
         | LIST_COMPREHENSION
         | "(" EXPR ")"
+        | "(" TUPLE_ELEMENTS ")"
         | "[" LIST_ELEMENTS "]"
         | "(" FUNCTION_CALL ")"
         | "(" type_constructor TYPE_ARGUMENTS ")"
+
+TUPLE_ELEMENTS -> EXPR "," EXPR TUPLE_ELEMENTS`
+TUPLE_ELEMENTS` -> "," EXPR TUPLE_ELEMENTS`
+        | ε
 
 LIST_ELEMENTS -> EXPR LIST_ELEMENTS`
         | ε
