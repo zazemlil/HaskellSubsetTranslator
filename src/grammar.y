@@ -515,7 +515,7 @@ tuple_elements: expr T_COMMA expr tuple_elements_tail {
     auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE");
     l->addStatement($1);
     l->addStatement($3);
-    if ($3 != nullptr) l->addStatements($3->getStatements());
+    if ($4 != nullptr) l->addStatements($4->getStatements());
     $$ = l;
 };
 tuple_elements_tail: T_COMMA expr tuple_elements_tail {
