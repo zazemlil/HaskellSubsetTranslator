@@ -296,7 +296,8 @@ qualifiers: qualifier qualifiers_tail {
     l->addStatement($1);
     l->addStatements($2->getStatements());
     $$ = l;
-};
+}
+| %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 qualifiers_tail: T_COMMA qualifier qualifiers_tail {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");
