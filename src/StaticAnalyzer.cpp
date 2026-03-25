@@ -68,12 +68,12 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (node->getNodeType() == "LET") {
         auto& decls = node->getStatement(0)->getStatements();
         auto groups = groupByName(decls);
-        generator->generate(node, groups);
+        generator->generate(node->getStatement(0), groups);
     }
     if (node->getNodeType() == "WHERE") {
         auto& decls = node->getStatement(1)->getStatements();
         auto groups = groupByName(decls);
-        generator->generate(node, groups);
+        generator->generate(node->getStatement(1), groups);
     }
 }
 
