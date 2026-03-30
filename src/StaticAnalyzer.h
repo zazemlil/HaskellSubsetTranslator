@@ -26,6 +26,7 @@ private:
 
     void checkContiguity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
     void checkArity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
+    size_t getLambdaAbstractionArity(const std::shared_ptr<syntax_tree::ASTNode>& node);
 
     PatternKind getPatternKind(std::shared_ptr<syntax_tree::ASTNode> p);
     std::vector<std::shared_ptr<syntax_tree::ASTNode>> extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl);

@@ -115,6 +115,13 @@ void StaticAnalyzer::checkContiguity(const std::vector<std::shared_ptr<syntax_tr
     }
 }
 
+size_t StaticAnalyzer::getLambdaAbstractionArity(const std::shared_ptr<syntax_tree::ASTNode>& node) {
+    if (node->getStatement(1)->getNodeType() == "λ") {
+        return 1 + getLambdaAbstractionArity(node->getStatement(1));
+    }
+    return 0;
+}
+
 void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
     if (decls.empty())
         return;
@@ -132,6 +139,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
                 expectedArity = id->getStatement(0)->getStatementCount();
             }
         }
+        expectedArity += getLambdaAbstractionArity(first);
     }
 
     int signaturesCount = 0;
@@ -159,6 +167,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
                     arity = id->getStatement(0)->getStatementCount();
                 }
             }
+            arity += getLambdaAbstractionArity(decl);
         }
 
         if (arity != expectedArity)
