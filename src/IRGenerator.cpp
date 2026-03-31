@@ -51,13 +51,15 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
 }
 
 size_t IRGenerator::getArity(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls) {
-    auto& decl = decls[0];
-    if (decl->getNodeType() == "SIGNATURE") {
-        return decl->getStatement(1)->getStatementCount()-1;
-    }
-    else if (decl->getNodeType() == "DEF" || decl->getNodeType() == "=") {
-        if (decl->getStatement(0)->getStatementCount() > 0) 
-            return decl->getStatement(0)->getStatement(0)->getStatementCount();
+    for (auto& n : decls) {
+        if (n->getNodeType() == "DEF" || n->getNodeType() == "=") {
+            if (n->getStatement(0)->getStatementCount() > 0) {
+                return n->getStatement(0)->getStatement(0)->getStatementCount();
+            }
+            else {
+                return 0;
+            }
+        }
     }
     return 0;
 }
