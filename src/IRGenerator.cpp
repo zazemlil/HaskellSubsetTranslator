@@ -19,14 +19,27 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
                                                                     const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls)
 {
     size_t arity = getArity(decls);
+    if (arity == 0) {
+        auto fn = std::make_shared<syntax_tree::Definition>("DEF");
+        fn->addStatement(std::make_shared<syntax_tree::Identifier>("IDENTIFIER", name));
+        fn->addStatement(getBody(decls));
+        return fn;
+    }
 
-    auto params = generateParams(arity);
+    std::shared_ptr<syntax_tree::ASTNode> lambda, body;
+    std::vector<std::shared_ptr<syntax_tree::ASTNode>> params;
+    if (decls.size() == 1 || decls.size() == 2 && (decls[0]->getNodeType() == "SIGNATURE" || decls[1]->getNodeType() == "SIGNATURE")) {
+        params = getParams(decls);
+        body = getBody(decls);
+    }
+    else {
+        params = generateParams(arity);
+        body = buildCase(params, decls);
+    }
 
-    auto caseExpr = buildCase(params, decls);
+    lambda = buildLambda(params, body);
 
-    auto lambda = buildLambda(params, caseExpr);
-
-    auto fn = std::make_shared<syntax_tree::ASTNode>("DEF");
+    auto fn = std::make_shared<syntax_tree::Definition>("DEF");
 
     fn->addStatement(
         std::make_shared<syntax_tree::Identifier>("IDENTIFIER", name)
@@ -47,6 +60,28 @@ size_t IRGenerator::getArity(std::vector<std::shared_ptr<syntax_tree::ASTNode>> 
             return decl->getStatement(0)->getStatement(0)->getStatementCount();
     }
     return 0;
+}
+
+std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::getParams(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls)
+{
+    for (size_t i = 0; i < decls.size(); i++)
+    {
+        if (decls[i]->getNodeType() == "DEF" || decls[i]->getNodeType() == "=") {
+            return decls[i]->getStatement(0)->getStatement(0)->getStatements();
+        }
+    }
+    return std::vector<std::shared_ptr<syntax_tree::ASTNode>>();
+}
+
+std::shared_ptr<syntax_tree::ASTNode> IRGenerator::getBody(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls)
+{
+    for (size_t i = 0; i < decls.size(); i++)
+    {
+        if (decls[i]->getNodeType() == "DEF" || decls[i]->getNodeType() == "=") {
+            return decls[i]->getStatement(1);
+        }
+    }
+    return std::shared_ptr<syntax_tree::ASTNode>();
 }
 
 std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::generateParams(size_t arity)
@@ -117,7 +152,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildLambda(const std::vector
 
     for (auto it = params.rbegin(); it != params.rend(); ++it)
     {
-        auto lambda = std::make_shared<ASTNode>("λ");
+        auto lambda = std::make_shared<Lambda>("λ");
 
         lambda->addStatement(*it);   // параметр
         lambda->addStatement(result); // тело

@@ -19,6 +19,8 @@ private:
     std::shared_ptr<syntax_tree::ASTNode> buildFunction(const std::string& name, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
     size_t getArity(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls);
+    std::vector<std::shared_ptr<syntax_tree::ASTNode>> getParams(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls);
+    std::shared_ptr<syntax_tree::ASTNode> getBody(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls);
     std::vector<std::shared_ptr<syntax_tree::ASTNode>> generateParams(size_t arity);
     std::shared_ptr<syntax_tree::ASTNode> buildCase(std::vector<std::shared_ptr<syntax_tree::ASTNode>> params, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
     std::shared_ptr<syntax_tree::ASTNode> buildLambda(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& params, std::shared_ptr<syntax_tree::ASTNode> body);
