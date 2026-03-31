@@ -1,2 +1,2 @@
-AST is empty.
-
+SIGNATURE f -> T_INT T_INT T_INT
+f = λv1.λv2.CASE TUPLE v1 v2 ALTS ALT TUPLE_PATTERN 0 λx.1 ALT TUPLE_PATTERN x λy.* x y

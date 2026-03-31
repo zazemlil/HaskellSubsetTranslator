@@ -82,12 +82,18 @@ int main(int argc, char* argv[])
         std::cout << "-------------------------------------------------\n";
         std::cout << "------------ Extended lambda calculus -----------\n";
         std::cout << "-------------------------------------------------\n";
-        extendedLambdaCalculus.print();
+        for (auto& n : extendedLambdaCalculus.getRoot()->getStatements()) {
+            n->printFlat();
+            std::cout << "\n";
+        }
     } 
     else {
         auto fileStream = std::make_unique<std::ofstream>(argv[2], std::ios::out | std::ios::trunc);
         if (fileStream->is_open()) {
-            extendedLambdaCalculus.print(true, *fileStream);
+            for (auto& n : extendedLambdaCalculus.getRoot()->getStatements()) {
+                n->printFlat(0, *fileStream);
+                *fileStream << "\n";
+            }
             fileStream->close();
         }
         else {
