@@ -60,48 +60,7 @@ public:
         }
     }
 
-    void printFlatStack(int depth = 0, std::ostream& os = std::cout) const {
-        this->printValue(os);
-        
-        for (const auto& stmt : statements) {
-            os << "\n\t";
-            stmt->printFlat(depth + 1, os);
-        }
-    }
-
-    void printRecFlatStack(int deep, int maxDeep, int depth = 0, std::ostream& os = std::cout) const {
-        this->printValue(os);
-        
-        for (const auto& stmt : statements) {
-            os << "\n\t";
-            stmt->printRecFlat(deep+1, maxDeep, depth + 1, os);
-        }
-    }
-
-    virtual void printRecFlat(int deep, int maxDeep, int depth = 0, std::ostream& os = std::cout) {
-        if (!statements.empty()) {
-            os << "(";
-        }
-        
-        printValue(os);
-        
-        if (!statements.empty()) {
-            if (deep <= maxDeep) {
-                for (const auto& stmt : statements) {
-                    os << " ";
-                    stmt->printRecFlat(deep+1, maxDeep, depth + 1, os);
-                }
-                os << ")";
-            }
-            else { os << " @ "; }
-        }
-    }
-
     virtual void printFlat(int depth = 0, std::ostream& os = std::cout) {
-        if (!statements.empty()) {
-            os << "(";
-        }
-        
         printValue(os);
         
         if (!statements.empty()) {
@@ -109,7 +68,6 @@ public:
                 os << " ";
                 stmt->printFlat(depth + 1, os);
             }
-            os << ")";
         }
     }
 
@@ -178,31 +136,28 @@ class ListNode : public ASTNode {
 public: 
     ListNode(std::string t) : ASTNode(t) {}
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
-        os << "(";
-        if (!getStatements().empty()) {
-            for (const auto& stmt : getStatements()) {
-                os << " ";
+        os << "[";
+        bool firstIter = true;
+        for (const auto& stmt : getStatements()) {
+            if (firstIter) {
                 stmt->printFlat(depth, os);
+                firstIter = false;
+                continue;
             }
+            os << ", ";
+            stmt->printFlat(depth, os);
         }
-        os << ")";
-    }
-    void printRecFlat(int deep, int maxDeep, int depth = 0, std::ostream& os = std::cout) override {
-        os << "(";
-        if (!getStatements().empty()) {
-            if (deep <= maxDeep) {
-                for (const auto& stmt : getStatements()) {
-                    os << " ";
-                    stmt->printRecFlat(deep+1, maxDeep, depth + 1, os);
-                }
-            }
-            else { os << " @ "; }
-        }
-        os << ")";
+        os << "]";
     }
 };
 
-class LiteralNil : public ASTNode { public: LiteralNil(std::string t) : ASTNode(t) {} };
+class LiteralNil : public ASTNode { 
+public: 
+    LiteralNil(std::string t) : ASTNode(t) {} 
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        os << "[]";
+    }
+};
 
 class Identifier : public ASTNode {
     std::string value;
@@ -210,6 +165,30 @@ public:
     void printValue(std::ostream& os = std::cout) const override { os << value; }
     std::string getValue() { return value; }
     Identifier(std::string t, std::string v) : ASTNode(t), value(v) {}
+};
+
+class Definition : public ASTNode { 
+public: 
+    Definition(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        auto& stmts = getStatements();
+        
+        stmts[0]->printFlat(depth, os);
+        os << " = ";
+        stmts[1]->printFlat(depth, os);
+    }
+};
+
+class Lambda : public ASTNode { 
+public: 
+    Lambda(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        auto& stmts = getStatements();
+        this->printValue(os);
+        stmts[0]->printFlat(depth, os);
+        os << ".";
+        stmts[1]->printFlat(depth, os);
+    }
 };
 
 inline std::shared_ptr<ASTNode> ASTNode::car() {

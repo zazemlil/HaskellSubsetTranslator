@@ -1,13 +1,15 @@
 #include "Translator.h"
 
-syntax_tree::AST Translator::translate(syntax_tree::AST ir)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
+syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
+    return syntax_tree::AST(translateNode(ir.getRoot()));
 }
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
+std::shared_ptr<syntax_tree::ASTNode> Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
+    
+    for (auto& n : node->getStatements()) {
+        translateNode(n);
+    }
+    return node;
 }
 
 std::shared_ptr<syntax_tree::ASTNode> Translator::translateLambda(std::shared_ptr<syntax_tree::ASTNode> node)

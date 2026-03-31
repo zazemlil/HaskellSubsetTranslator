@@ -170,7 +170,7 @@ def: function_decl { $$ = $1; }
     | variable_decl { $$ = $1; };
 
 function_decl: id patterns T_ASSIGNMENT expr {
-        auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
+        auto l = std::make_shared<syntax_tree::Definition>("DEF");
         $1->addStatement($2);
         l->addStatement($1);
         l->addStatement($4);
@@ -178,7 +178,7 @@ function_decl: id patterns T_ASSIGNMENT expr {
 };
 
 variable_decl: id T_ASSIGNMENT expr {
-    auto l = std::make_shared<syntax_tree::ASTNode>("DEF");
+    auto l = std::make_shared<syntax_tree::Definition>("DEF");
     l->addStatement($1);
     l->addStatement($3);
     $$ = l;
@@ -341,7 +341,7 @@ where_expr: expr T_WHERE T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE {
 };
 
 lambda_expr: T_LAMBDA pattern T_ARROW_RIGHT expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("λ");
+    auto n = std::make_shared<syntax_tree::Lambda>("λ");
     n->addStatement($2);
     n->addStatement($4);
     $$ = n;

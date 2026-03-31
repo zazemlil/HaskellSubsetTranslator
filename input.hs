@@ -33,3 +33,26 @@ d = let { z = 3; } in x+y+z where { x = 5; y = 4; };
 e x = case x of { [] -> "nil"; (x:xs) -> "list"; };
 
 foo x = [(x+y)*c | x <- [1, 2, 3], y <- [3, 2, 1], let c = 3.14, x+y > 2];
+
+
+mappairs f [] ys = [];
+mappairs f (x:xs) [] = [];
+mappairs f (x:xs) (y:ys) = (cons (f x y) (mappairs f xs ys));
+
+f0 [] [] = 1;
+f0 xs ys = 2;
+
+f1 = \v1 -> \v2 -> case (v1, v2) of {
+    ([], []) -> 1;
+    (xs, ys) -> 2;
+};
+
+foo0 x y = let {
+    f3 [] [] = 1;
+    f3 xs ys = 2;
+} in (f3 x y);
+
+foo1 x y = (f3 x y) where {
+    f3 [] [] = 1;
+    f3 xs ys = 2;
+};
