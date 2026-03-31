@@ -126,30 +126,34 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
     if (decls.empty())
         return;
 
-    auto first = decls[0];
+    int expectedArity = 0, signatureArity = -1;
 
-    size_t expectedArity = 0;
-
-    if (first->getNodeType() == "SIGNATURE") {
-        expectedArity = first->getStatement(1)->getStatementCount()-1;
-    } else if (first->getNodeType() == "DEF" || first->getNodeType() == "=") {
-        auto id = first->getStatement(0);
-        if (id->getStatementCount() > 0) {
-            if (id->getStatement(0)->getNodeType() == "PATTERNS") {
-                expectedArity = id->getStatement(0)->getStatementCount();
-            }
+    for (auto& n : decls) {
+        if (n->getNodeType() == "SIGNATURE") {
+            signatureArity = n->getStatement(1)->getStatementCount()-1;
+            break;
         }
-        expectedArity += getLambdaAbstractionArity(first);
+    }
+    for (auto& n : decls) {
+        if (n->getNodeType() == "DEF" || n->getNodeType() == "=") {
+            auto id = n->getStatement(0);
+            if (id->getStatementCount() > 0) {
+                if (id->getStatement(0)->getNodeType() == "PATTERNS") {
+                    expectedArity = id->getStatement(0)->getStatementCount();
+                }
+            }
+            break;
+        }
     }
 
     int signaturesCount = 0;
     for (const auto& decl : decls)
     {
-        size_t arity = 0;
+        int arity = -1;
 
         if (decl->getNodeType() == "SIGNATURE") {
             if (!signaturesCount) {
-                arity = decl->getStatement(1)->getStatementCount()-1;
+                signatureArity = decl->getStatement(1)->getStatementCount()-1;
                 signaturesCount++;
             }
             else {
@@ -167,15 +171,17 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
                     arity = id->getStatement(0)->getStatementCount();
                 }
             }
-            arity += getLambdaAbstractionArity(decl);
+            else {
+                arity = 0;
+            }
         }
 
-        if (arity != expectedArity)
+        if (arity != -1 && arity != expectedArity)
         {
             auto nameNode = decl->getStatement(0);
             auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
             throw std::runtime_error(
-                "Arity mismatch in function '" + id->getValue() + "'"
+                "Multiple definitions of '" + id->getValue() + "'"
             );
         }
     }
@@ -184,8 +190,22 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
         auto nameNode = decls[0]->getStatement(0);
         auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
         throw std::runtime_error(
-            "Multiple definitions of '" + id->getValue() + "'"
+            "Multiple definitions of '" + id->getValue() + "' constant"
         );
+    }
+
+    if (signatureArity != -1) {
+        for (auto& n : decls) {
+            if (n->getNodeType() == "DEF" || n->getNodeType() == "=") {
+                if (expectedArity+getLambdaAbstractionArity(n) != signatureArity) {
+                    auto nameNode = n->getStatement(0);
+                    auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
+                    throw std::runtime_error(
+                        "Arity mismatch in function '" + id->getValue() + "'"
+                    );
+                }
+            }
+        }
     }
 
     if (signaturesCount == 1 && decls.size() == 1) {
