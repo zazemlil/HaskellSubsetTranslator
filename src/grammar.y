@@ -62,7 +62,7 @@
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string type_constructor
 %type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr unary_minus
 %type <std::shared_ptr<syntax_tree::ASTNode>> term tuple_elements tuple_elements_tail list_elements list_elements_tail
-%type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list
+%type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list func_arg
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> let_expr where_expr case_expr alts alts_tail bindings bindings_tail bind
 %type <std::shared_ptr<syntax_tree::ASTNode>> if_expr lambda_expr
@@ -542,20 +542,27 @@ list_elements_tail: T_COMMA expr list_elements_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-function_call: expr expr arg_list {
+function_call: func_arg func_arg arg_list {
     auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
     n->addStatement($1);
     n->addStatement($2);
     n->addStatements($3->getStatements());
     $$ = n;
 };
-arg_list: expr arg_list {
+arg_list: func_arg arg_list {
         auto l = std::make_shared<syntax_tree::ListNode>("LIST");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
+
+func_arg: T_PARENTHESIS_OPEN expr T_PARENTHESIS_CLOSE { $$ = $2; }
+    | id { $$ = $1; }
+    | literal { $$ = $1; }
+    | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; }
+    | T_BRACKET_OPEN list_elements T_BRACKET_CLOSE { $$ = $2; }
+    | T_PARENTHESIS_OPEN tuple_elements T_PARENTHESIS_CLOSE { $$ = $2; };
 
 // ==================== expr+, literal+, etc.+ (1) ====================
 

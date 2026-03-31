@@ -22,7 +22,7 @@ f _ = 123;
 
 data Maybe a = Just a | Nothing;
 
-a = ((\x -> \y -> x+y) 15+2*5 3*2);
+a = ((\x -> \y -> x+y) (15+2*5) (3*2));
 
 --b = if True then 1 else x+y where { x = 5; y = 4; };
 
