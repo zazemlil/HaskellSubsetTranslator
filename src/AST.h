@@ -191,6 +191,54 @@ public:
     }
 };
 
+class Call : public ASTNode { 
+public: 
+    Call(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        auto& stmts = getStatements();
+        os << "((";
+        stmts[0]->printFlat(depth, os);
+        os << ")";
+        for (int i = 1; i < stmts.size(); i++) {
+            os << " ";
+            std::string t = stmts[i]->getNodeType();
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST") {
+                stmts[i]->printFlat(depth, os);
+            }
+            else {
+                os << "(";
+                stmts[i]->printFlat(depth, os);
+                os << ")";
+            }
+        }
+        os << ")";
+    }
+};
+
+class Operator : public ASTNode { 
+public: 
+    Operator(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        auto& stmts = getStatements();
+        os << "((";
+        this->printValue(os);
+        os << ")";
+        for (int i = 0; i < stmts.size(); i++) {
+            os << " ";
+            std::string t = stmts[i]->getNodeType();
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST") {
+                stmts[i]->printFlat(depth, os);
+            }
+            else {
+                os << "(";
+                stmts[i]->printFlat(depth, os);
+                os << ")";
+            }
+        }
+        os << ")";
+    }
+};
+
 inline std::shared_ptr<ASTNode> ASTNode::car() {
     if (this->getStatementCount() > 0 || this->getNodeType() == "NIL") {
         if (this->getNodeType() == "NIL") return shared_from_this();

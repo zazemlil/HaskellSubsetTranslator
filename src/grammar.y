@@ -407,7 +407,7 @@ bind: id T_ASSIGNMENT expr {
 
 or_expr:
     or_expr T_LOGIC_OP_OR and_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("||");
+        auto n = std::make_shared<syntax_tree::Operator>("||");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
@@ -416,7 +416,7 @@ or_expr:
 
 and_expr:
     and_expr T_LOGIC_OP_AND comp_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("&&");
+        auto n = std::make_shared<syntax_tree::Operator>("&&");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
@@ -425,37 +425,37 @@ and_expr:
 
 comp_expr:
     comp_expr T_LOGIC_OP_EQUAL additive_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("==");
+        auto n = std::make_shared<syntax_tree::Operator>("==");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | comp_expr T_LOGIC_OP_NOT_EQUAL additive_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("/=");
+        auto n = std::make_shared<syntax_tree::Operator>("/=");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | comp_expr T_LOGIC_OP_LESS additive_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("<");
+        auto n = std::make_shared<syntax_tree::Operator>("<");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | comp_expr T_LOGIC_OP_MORE additive_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>(">");
+        auto n = std::make_shared<syntax_tree::Operator>(">");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | comp_expr T_LOGIC_OP_LESS_OR_EQUAL additive_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("<=");
+        auto n = std::make_shared<syntax_tree::Operator>("<=");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | comp_expr T_LOGIC_OP_MORE_OR_EQUAL additive_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>(">=");
+        auto n = std::make_shared<syntax_tree::Operator>(">=");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
@@ -464,13 +464,13 @@ comp_expr:
 
 additive_expr:
     additive_expr T_ARITHMETIC_OP_PLUS multiplicative_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("+");
+        auto n = std::make_shared<syntax_tree::Operator>("+");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | additive_expr T_ARITHMETIC_OP_MINUS multiplicative_expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("-");
+        auto n = std::make_shared<syntax_tree::Operator>("-");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
@@ -479,13 +479,13 @@ additive_expr:
 
 multiplicative_expr:
     multiplicative_expr T_ARITHMETIC_OP_MULTIPLY unary_minus {
-        auto n = std::make_shared<syntax_tree::ASTNode>("*");
+        auto n = std::make_shared<syntax_tree::Operator>("*");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
     | multiplicative_expr T_ARITHMETIC_OP_DIVIDE unary_minus {
-        auto n = std::make_shared<syntax_tree::ASTNode>("/");
+        auto n = std::make_shared<syntax_tree::Operator>("/");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
@@ -493,7 +493,7 @@ multiplicative_expr:
     | unary_minus { $$ = $1; };
 
 unary_minus: T_ARITHMETIC_OP_MINUS term {
-        auto n = std::make_shared<syntax_tree::ASTNode>("-");
+        auto n = std::make_shared<syntax_tree::Operator>("-");
         n->addStatement($2);
         $$ = n;
     }
@@ -543,7 +543,7 @@ list_elements_tail: T_COMMA expr list_elements_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 function_call: func_arg func_arg arg_list {
-    auto n = std::make_shared<syntax_tree::ASTNode>("CALL");
+    auto n = std::make_shared<syntax_tree::Call>("CALL");
     n->addStatement($1);
     n->addStatement($2);
     n->addStatements($3->getStatements());
