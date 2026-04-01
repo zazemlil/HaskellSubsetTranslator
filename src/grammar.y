@@ -536,14 +536,14 @@ tuple_elements_tail: T_COMMA expr tuple_elements_tail {
     | %empty { $$ = nullptr; };
 
 list_elements: expr list_elements_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST_NODE");
+        auto l = std::make_shared<syntax_tree::Operator>("LIST_NODE");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 list_elements_tail: T_COMMA expr list_elements_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST_NODE");
+        auto l = std::make_shared<syntax_tree::Operator>("LIST_NODE");
         l->addStatement($2);
         l->addStatements($3->getStatements());
         $$ = l;

@@ -9,7 +9,10 @@ tree = Tree 5 (Leaf 1) (Empty);
 
 e = ((\a -> if a < 5 then 1 else 2) 6);
 
--- if -> case (maybe in IRGenerator)
+e2 = [1, 3, 5, 7];
+e3 = 1 : 2 : 3 : [];
+
+--+ if -> case
 -- List -> :
 -- List pattern -> :
 -- +Nil

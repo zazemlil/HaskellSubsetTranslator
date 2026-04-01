@@ -5,10 +5,12 @@ syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
 }
 
 std::shared_ptr<syntax_tree::ASTNode> Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
+    if (node->getNodeType() == "LIST_NODE") {
+        translateList(node);
+    }
     if (node->getNodeType() == "IF") {
         translateIf(node);
     }
-
 
     for (auto& n : node->getStatements()) {
         translateNode(n);
@@ -77,7 +79,24 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateIf(std::shared_ptr<sy
 
 std::shared_ptr<syntax_tree::ASTNode> Translator::translateList(std::shared_ptr<syntax_tree::ASTNode> node)
 {
-    return std::shared_ptr<syntax_tree::ASTNode>();
+    auto stmts = node->getStatements();
+
+    auto tmp = std::make_shared<syntax_tree::Operator>(":");
+    tmp->addStatement(stmts[stmts.size()-1]);
+    tmp->addStatement(std::make_shared<syntax_tree::LiteralNil>("NIL"));
+
+    for (int i = stmts.size()-2; i >= 0; i--) {
+        auto cons = std::make_shared<syntax_tree::Operator>(":");
+        cons->addStatement(stmts[i]);
+        cons->addStatement(tmp);
+        tmp = cons;
+    }
+
+    node->clearStatements();
+    node->setNodeType(":");
+    node->addStatements(tmp->getStatements());
+
+    return node;
 }
 
 std::shared_ptr<syntax_tree::ASTNode> Translator::translateListPattern(std::shared_ptr<syntax_tree::ASTNode> node)

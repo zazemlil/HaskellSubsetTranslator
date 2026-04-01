@@ -14,7 +14,6 @@ class LiteralInt;
 class LiteralFloat;
 class LiteralString;
 class LiteralTypeConstructor;
-class ListNode;
 class LiteralNil;
 
 class ASTNode : public std::enable_shared_from_this<ASTNode> {
@@ -72,10 +71,6 @@ public:
             }
         }
     }
-
-    std::shared_ptr<ASTNode> car();
-    std::shared_ptr<ASTNode> cdr();
-    std::shared_ptr<ListNode> cons(std::shared_ptr<ASTNode> node);
 };
 
 
@@ -132,25 +127,6 @@ public:
     void printValue(std::ostream& os = std::cout) const override { os << value; }
     std::string getValue() { return value; }
     LiteralTypeConstructor(std::string t, std::string v) : ASTNode(t), value(v) {}
-};
-
-class ListNode : public ASTNode { 
-public: 
-    ListNode(std::string t) : ASTNode(t) {}
-    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
-        os << "[";
-        bool firstIter = true;
-        for (const auto& stmt : getStatements()) {
-            if (firstIter) {
-                stmt->printFlat(depth, os);
-                firstIter = false;
-                continue;
-            }
-            os << ", ";
-            stmt->printFlat(depth, os);
-        }
-        os << "]";
-    }
 };
 
 class Tuple : public ASTNode { 
@@ -284,41 +260,5 @@ public:
         }
     }
 };
-
-inline std::shared_ptr<ASTNode> ASTNode::car() {
-    if (this->getStatementCount() > 0 || this->getNodeType() == "NIL") {
-        if (this->getNodeType() == "NIL") return shared_from_this();
-        return this->getStatement(0);
-    }
-    throw std::runtime_error("Car error: arg must be Nil or List");
-}
-
-inline std::shared_ptr<ASTNode> ASTNode::cdr() {
-    if (this->getStatementCount() > 0 || this->getNodeType() == "NIL") {
-        if (this->getStatementCount() <= 1) {
-            return std::make_shared<LiteralNil>("NIL");
-        }
-        std::shared_ptr<ASTNode> l = std::make_shared<ListNode>("LIST");
-        for (size_t i = 1; i < this->getStatementCount(); i++) {
-            l->addStatement(this->getStatement(i));
-        }
-        return l;
-    }
-
-    throw std::runtime_error("Cdr error: second param must be List or Nil");
-}
-
-inline std::shared_ptr<ListNode> ASTNode::cons(std::shared_ptr<ASTNode> node) {
-    if (node->getStatementCount() > 0 || node->getNodeType() == "NIL") {
-        std::shared_ptr<ListNode> l = std::make_shared<ListNode>("LIST");
-    
-        l->addStatement(shared_from_this());
-        
-        l->addStatements(node->getStatements());
-        return l;
-    }
-    
-    throw std::runtime_error("Cons error: second param must be List or Nil");
-}
 
 };
