@@ -182,7 +182,14 @@ public:
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
         auto& stmts = getStatements();
         this->printValue(os);
-        stmts[0]->printFlat(depth, os);
+        if (stmts[0]->getNodeType() == ":") {
+            os << "(";
+            stmts[0]->printFlat(depth, os);
+            os << ")";
+        }
+        else {
+            stmts[0]->printFlat(depth, os);
+        }
         os << ".";
         stmts[1]->printFlat(depth, os);
     }

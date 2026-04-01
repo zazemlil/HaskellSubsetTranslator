@@ -12,10 +12,11 @@ e = ((\a -> if a < 5 then 1 else 2) 6);
 e2 = [1, 3, 5, 7];
 e3 = 1 : 2 : 3 : [];
 
+e4 (x:xs) = x + 5;
+
 --+ if -> case
--- List -> :
--- List pattern -> :
--- +Nil
+--+ List -> :
+--+ List pattern -> :
 -- case -> FATBAR
 -- let and where -> application with fix (+check def depend.)
 -- list comprehension

@@ -8,6 +8,9 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateNode(std::shared_ptr<
     if (node->getNodeType() == "LIST_NODE") {
         translateList(node);
     }
+    if (node->getNodeType() == "LIST_HEAD_TAIL_PATTERN") {
+        translateListHeadTailPattern(node);
+    }
     if (node->getNodeType() == "IF") {
         translateIf(node);
     }
@@ -104,9 +107,9 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateListPattern(std::shar
     return std::shared_ptr<syntax_tree::ASTNode>();
 }
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateListHeadTailPattern(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
+std::shared_ptr<syntax_tree::ASTNode> Translator::translateListHeadTailPattern(std::shared_ptr<syntax_tree::ASTNode> node) {
+    node->setNodeType(":");
+    return node;
 }
 
 std::shared_ptr<syntax_tree::ASTNode> Translator::translateLiteral(std::shared_ptr<syntax_tree::ASTNode> node)

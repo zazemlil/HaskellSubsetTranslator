@@ -260,7 +260,7 @@ list_pattern: T_BRACKET_OPEN list_patterns T_BRACKET_CLOSE {
         $$ = $2;
     }
     | T_PARENTHESIS_OPEN id T_COLON id T_PARENTHESIS_CLOSE {
-        auto l = std::make_shared<syntax_tree::ASTNode>("LIST_HEAD_TAIL_PATTERN");
+        auto l = std::make_shared<syntax_tree::Operator>("LIST_HEAD_TAIL_PATTERN");
         l->addStatement($2);
         l->addStatement($4);
         $$ = l;
