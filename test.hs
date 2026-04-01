@@ -3,6 +3,6 @@ f z = \x -> \y -> x*y*z;
 
 g = (f (\x -> [1, 2]));
 
-c = 3.14;
+c = (1, 2, 3);
 
-tree = Tree a b;
+tree = Tree 5 (Leaf 1) (Empty);

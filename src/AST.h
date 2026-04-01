@@ -151,6 +151,25 @@ public:
     }
 };
 
+class Tuple : public ASTNode { 
+public: 
+    Tuple(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        os << "(";
+        bool firstIter = true;
+        for (const auto& stmt : getStatements()) {
+            if (firstIter) {
+                stmt->printFlat(depth, os);
+                firstIter = false;
+                continue;
+            }
+            os << ",";
+            stmt->printFlat(depth, os);
+        }
+        os << ")";
+    }
+};
+
 class LiteralNil : public ASTNode { 
 public: 
     LiteralNil(std::string t) : ASTNode(t) {} 
@@ -188,6 +207,33 @@ public:
         stmts[0]->printFlat(depth, os);
         os << ".";
         stmts[1]->printFlat(depth, os);
+    }
+};
+
+class Constructor : public ASTNode { 
+public: 
+    Constructor(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        auto& stmts = getStatements();
+        if (getStatementCount() == 1) {
+            stmts[0]->printFlat(depth, os);
+            return;
+        }
+        os << "(";
+        stmts[0]->printFlat(depth, os);
+        os << ")";
+        for (int i = 1; i < stmts.size(); i++) {
+            os << " ";
+            std::string t = stmts[i]->getNodeType();
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || stmts[i]->getStatementCount() == 1) {
+                stmts[i]->printFlat(depth, os);
+            }
+            else {
+                os << "(";
+                stmts[i]->printFlat(depth, os);
+                os << ")";
+            }
+        }
     }
 };
 

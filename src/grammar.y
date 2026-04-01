@@ -506,21 +506,21 @@ term: literal { $$ = $1; }
     | T_PARENTHESIS_OPEN tuple_elements T_PARENTHESIS_CLOSE { $$ = $2; }
     | T_PARENTHESIS_OPEN function_call T_PARENTHESIS_CLOSE { $$ = $2; }
     | type_constructor arg_list {
-        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
+        auto l = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
     };
 
 tuple_elements: expr T_COMMA expr tuple_elements_tail {
-    auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE");
+    auto l = std::make_shared<syntax_tree::Tuple>("TUPLE");
     l->addStatement($1);
     l->addStatement($3);
     if ($4 != nullptr) l->addStatements($4->getStatements());
     $$ = l;
 };
 tuple_elements_tail: T_COMMA expr tuple_elements_tail {
-        auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE");
+        auto l = std::make_shared<syntax_tree::Tuple>("TUPLE");
         l->addStatement($2);
         if ($3 != nullptr) l->addStatements($3->getStatements());
         $$ = l;
