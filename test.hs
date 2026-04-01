@@ -7,6 +7,8 @@ c = (1, 2, 3);
 
 tree = Tree 5 (Leaf 1) (Empty);
 
+e = ((\a -> if a < 5 then 1 else 2) 6);
+
 -- if -> case (maybe in IRGenerator)
 -- List -> :
 -- List pattern -> :

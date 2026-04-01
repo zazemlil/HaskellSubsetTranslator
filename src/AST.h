@@ -28,7 +28,9 @@ public:
     virtual ~ASTNode() = default;
 
     std::string getNodeType() const { return node_type; }
+    void setNodeType(std::string t) { this->node_type = t; }
     size_t getStatementCount() const { return statements.size(); }
+    void clearStatements() { statements = std::vector<std::shared_ptr<ASTNode>>(); }
 
     std::shared_ptr<ASTNode>& getStatement(size_t index) { return statements.at(index); }
     void addStatement(std::shared_ptr<ASTNode> stmt) { statements.push_back(stmt); }

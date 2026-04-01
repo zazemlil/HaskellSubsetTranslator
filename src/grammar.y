@@ -319,11 +319,11 @@ qualifier: id T_ARROW_LEFT expr { // pattern вместо id = конфликт
 // ============= Let+, if+, lambda+ (2) ==========
 
 if_expr: T_IF expr T_THEN expr T_ELSE expr {
-        auto n = std::make_shared<syntax_tree::ASTNode>("COND");
-        n->addStatement($2);
-        n->addStatement($4);
-        n->addStatement($6);
-        $$ = n;
+    auto n = std::make_shared<syntax_tree::ASTNode>("IF");
+    n->addStatement($2);
+    n->addStatement($4);
+    n->addStatement($6);
+    $$ = n;
 };
 
 let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
