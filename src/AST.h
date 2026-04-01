@@ -227,7 +227,7 @@ public:
         for (int i = 1; i < stmts.size(); i++) {
             os << " ";
             std::string t = stmts[i]->getNodeType();
-            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || stmts[i]->getStatementCount() == 1) {
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL" || stmts[i]->getStatementCount() == 1) {
                 stmts[i]->printFlat(depth, os);
             }
             else {
@@ -250,7 +250,7 @@ public:
         for (int i = 1; i < stmts.size(); i++) {
             os << " ";
             std::string t = stmts[i]->getNodeType();
-            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST") {
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL") {
                 stmts[i]->printFlat(depth, os);
             }
             else {
@@ -273,7 +273,7 @@ public:
         for (int i = 0; i < stmts.size(); i++) {
             os << " ";
             std::string t = stmts[i]->getNodeType();
-            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST") {
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL") {
                 stmts[i]->printFlat(depth, os);
             }
             else {
