@@ -196,7 +196,7 @@ public:
     Call(std::string t) : ASTNode(t) {}
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
         auto& stmts = getStatements();
-        os << "((";
+        os << "(";
         stmts[0]->printFlat(depth, os);
         os << ")";
         for (int i = 1; i < stmts.size(); i++) {
@@ -211,7 +211,6 @@ public:
                 os << ")";
             }
         }
-        os << ")";
     }
 };
 
@@ -220,7 +219,7 @@ public:
     Operator(std::string t) : ASTNode(t) {}
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
         auto& stmts = getStatements();
-        os << "((";
+        os << "(";
         this->printValue(os);
         os << ")";
         for (int i = 0; i < stmts.size(); i++) {
@@ -235,7 +234,6 @@ public:
                 os << ")";
             }
         }
-        os << ")";
     }
 };
 

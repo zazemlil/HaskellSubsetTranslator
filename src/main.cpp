@@ -101,6 +101,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << "Success.\n";
+    std::cout << "\nSuccess.\n";
     return 0;
 }
