@@ -60,7 +60,7 @@
 %nonassoc T_END_OF_FILE
 
 %type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string type_constructor
-%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr additive_expr multiplicative_expr unary_minus
+%type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr cons_expr additive_expr multiplicative_expr unary_minus
 %type <std::shared_ptr<syntax_tree::ASTNode>> term tuple_elements tuple_elements_tail list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list arg_expr
 
@@ -224,7 +224,7 @@ patterns: pattern patterns_tail {
     $$ = l;
 };
 patterns_tail: pattern patterns_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
@@ -292,7 +292,7 @@ list_comprehension: T_BRACKET_OPEN expr T_DEVIDING_LINE qualifiers T_BRACKET_CLO
 };
 
 qualifiers: qualifier qualifiers_tail {
-    auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+    auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
     l->addStatement($1);
     l->addStatements($2->getStatements());
     $$ = l;
@@ -300,7 +300,7 @@ qualifiers: qualifier qualifiers_tail {
 | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 qualifiers_tail: T_COMMA qualifier qualifiers_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
         l->addStatement($2);
         l->addStatements($3->getStatements());
         $$ = l;
@@ -374,14 +374,14 @@ alts_tail: pattern T_ARROW_RIGHT expr T_SEMICOLON alts_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 bindings: bind T_SEMICOLON bindings_tail {
-    auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+    auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
     l->addStatement($1);
     l->addStatements($3->getStatements());
     $$ = l;
 };
 
 bindings_tail: bind T_SEMICOLON bindings_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
         l->addStatement($1);
         l->addStatements($3->getStatements());
         $$ = l;
@@ -424,38 +424,46 @@ and_expr:
     | comp_expr { $$ = $1; };
 
 comp_expr:
-    comp_expr T_LOGIC_OP_EQUAL additive_expr {
+    comp_expr T_LOGIC_OP_EQUAL cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>("==");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
-    | comp_expr T_LOGIC_OP_NOT_EQUAL additive_expr {
+    | comp_expr T_LOGIC_OP_NOT_EQUAL cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>("/=");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
-    | comp_expr T_LOGIC_OP_LESS additive_expr {
+    | comp_expr T_LOGIC_OP_LESS cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>("<");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
-    | comp_expr T_LOGIC_OP_MORE additive_expr {
+    | comp_expr T_LOGIC_OP_MORE cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>(">");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
-    | comp_expr T_LOGIC_OP_LESS_OR_EQUAL additive_expr {
+    | comp_expr T_LOGIC_OP_LESS_OR_EQUAL cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>("<=");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
     }
-    | comp_expr T_LOGIC_OP_MORE_OR_EQUAL additive_expr {
+    | comp_expr T_LOGIC_OP_MORE_OR_EQUAL cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>(">=");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | cons_expr { $$ = $1; };
+
+cons_expr: additive_expr T_COLON cons_expr {
+        auto n = std::make_shared<syntax_tree::Operator>(":");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
@@ -528,14 +536,14 @@ tuple_elements_tail: T_COMMA expr tuple_elements_tail {
     | %empty { $$ = nullptr; };
 
 list_elements: expr list_elements_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST_NODE");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 list_elements_tail: T_COMMA expr list_elements_tail {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        auto l = std::make_shared<syntax_tree::ListNode>("LIST_NODE");
         l->addStatement($2);
         l->addStatements($3->getStatements());
         $$ = l;
@@ -550,7 +558,7 @@ function_call: arg_expr arg_expr arg_list {
     $$ = n;
 };
 arg_list: arg_expr arg_list {
-        auto l = std::make_shared<syntax_tree::ListNode>("LIST");
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
