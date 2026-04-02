@@ -133,18 +133,19 @@ class Tuple : public ASTNode {
 public: 
     Tuple(std::string t) : ASTNode(t) {}
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
-        os << "(";
-        bool firstIter = true;
+        os << "(Tuple)";
         for (const auto& stmt : getStatements()) {
-            if (firstIter) {
+            os << " ";
+            std::string t = stmt->getNodeType();
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL" || stmt->getStatementCount() == 1) {
                 stmt->printFlat(depth, os);
-                firstIter = false;
-                continue;
             }
-            os << ",";
-            stmt->printFlat(depth, os);
+            else {
+                os << "(";
+                stmt->printFlat(depth, os);
+                os << ")";
+            }
         }
-        os << ")";
     }
 };
 
@@ -182,7 +183,7 @@ public:
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
         auto& stmts = getStatements();
         this->printValue(os);
-        if (stmts[0]->getNodeType() == ":") {
+        if (stmts[0]->getNodeType() == ":" || stmts[0]->getNodeType() == "TUPLE" || stmts[0]->getNodeType() == "TUPLE_PATTERN") {
             os << "(";
             stmts[0]->printFlat(depth, os);
             os << ")";
@@ -233,7 +234,7 @@ public:
         for (int i = 1; i < stmts.size(); i++) {
             os << " ";
             std::string t = stmts[i]->getNodeType();
-            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL" || t == "TUPLE") {
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL" || stmts[i]->getStatementCount() == 1) {
                 stmts[i]->printFlat(depth, os);
             }
             else {

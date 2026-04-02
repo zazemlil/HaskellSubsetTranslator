@@ -16,6 +16,10 @@ f xs ys = 2;
 fact 0 = 1;
 fact n = n * (fact (n-1));
 
+mappairs f [] ys = [];
+mappairs f xs [] = [];
+mappairs f (x:xs) (y:ys) = ((f x y) : (mappairs f xs ys));
+
 --+ if -> case
 --+ List -> :
 --+ List pattern -> :
