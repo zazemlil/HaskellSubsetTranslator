@@ -177,7 +177,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
     auto var = vars[0];
 
     auto caseNode = std::make_shared<ASTNode>("CASE");
-    auto tuple = std::make_shared<ASTNode>("TUPLE");
+    auto tuple = std::make_shared<Tuple>("TUPLE");
     tuple->setStatements(vars);
 
     caseNode->addStatement(tuple);
@@ -187,7 +187,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
     {
         auto alt = std::make_shared<ASTNode>("ALT");
 
-        auto patterns_tuple = std::make_shared<ASTNode>("TUPLE_PATTERN");
+        auto patterns_tuple = std::make_shared<Tuple>("TUPLE_PATTERN");
         patterns_tuple->setStatements(c.patterns);
 
         alt->addStatement(patterns_tuple);

@@ -239,19 +239,19 @@ pattern: id { $$ = $1; }
     | tuple_pattern { $$ = $1; };
 
 constructor_pattern: type_constructor patterns {
-        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR_PATTERN");
+        auto l = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR_PATTERN");
         l->addStatement($1);
         l->addStatement($2);
         $$ = l;
     }
     | type_constructor { 
-        auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR_PATTERN");
+        auto l = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR_PATTERN");
         l->addStatement($1);
         $$ = l;
     };
 
 tuple_pattern: T_PARENTHESIS_OPEN list_patterns T_PARENTHESIS_CLOSE {
-    auto l = std::make_shared<syntax_tree::ASTNode>("TUPLE_PATTERN");
+    auto l = std::make_shared<syntax_tree::Tuple>("TUPLE_PATTERN");
     l->addStatements($2->getStatements());
     $$ = l;
 };
@@ -267,7 +267,7 @@ list_pattern: T_BRACKET_OPEN list_patterns T_BRACKET_CLOSE {
     };
 
 list_patterns: pattern list_patterns_tail {
-        auto l = std::make_shared<syntax_tree::ASTNode>("LIST_PATTERN");
+        auto l = std::make_shared<syntax_tree::Operator>("LIST_PATTERN");
         l->addStatement($1);
         l->addStatements($2->getStatements());
         $$ = l;
@@ -275,7 +275,7 @@ list_patterns: pattern list_patterns_tail {
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
 list_patterns_tail: T_COMMA pattern list_patterns_tail {
-        auto l = std::make_shared<syntax_tree::ASTNode>("LIST_PATTERN");
+        auto l = std::make_shared<syntax_tree::Operator>("LIST_PATTERN");
         l->addStatement($2);
         l->addStatements($3->getStatements());
         $$ = l;
