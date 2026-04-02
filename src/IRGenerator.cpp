@@ -21,7 +21,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
     size_t arity = getArity(decls);
     if (arity == 0) {
         auto fn = std::make_shared<syntax_tree::Definition>("DEF");
-        fn->addStatement(std::make_shared<syntax_tree::Identifier>("IDENTIFIER", name));
+        fn->addStatement(std::make_shared<syntax_tree::Identifier>("Identifier", name));
         fn->addStatement(getBody(decls));
         return fn;
     }
@@ -42,7 +42,7 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
     auto fn = std::make_shared<syntax_tree::Definition>("DEF");
 
     fn->addStatement(
-        std::make_shared<syntax_tree::Identifier>("IDENTIFIER", name)
+        std::make_shared<syntax_tree::Identifier>("Identifier", name)
     );
 
     fn->addStatement(lambda);
@@ -96,7 +96,7 @@ std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::generateParams(s
 
         params.push_back(
             std::make_shared<syntax_tree::Identifier>(
-                "IDENTIFIER",
+                "Identifier",
                 name
             )
         );
@@ -176,21 +176,31 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::compileMatch(std::vector<std:
 
     auto var = vars[0];
 
-    auto caseNode = std::make_shared<ASTNode>("CASE");
-    auto tuple = std::make_shared<Tuple>("TUPLE");
-    tuple->setStatements(vars);
+    auto caseNode = std::make_shared<Fatbar>("CASE");
+    if (vars.size() == 1) {
+        caseNode->addStatement(vars[0]);
+    }
+    else {
+        auto tuple = std::make_shared<Tuple>("TUPLE");
+        tuple->setStatements(vars);
 
-    caseNode->addStatement(tuple);
+        caseNode->addStatement(tuple);
+    }
 
     auto alts = std::make_shared<ASTNode>("ALTS");
     for (auto& c : clauses)
     {
         auto alt = std::make_shared<ASTNode>("ALT");
 
-        auto patterns_tuple = std::make_shared<Tuple>("TUPLE_PATTERN");
-        patterns_tuple->setStatements(c.patterns);
-
-        alt->addStatement(patterns_tuple);
+        if (c.patterns.size()==1) {
+            alt->addStatement(c.patterns[0]);
+        }
+        else {
+            auto patterns_tuple = std::make_shared<Tuple>("TUPLE_PATTERN");
+            patterns_tuple->setStatements(c.patterns);
+            alt->addStatement(patterns_tuple);
+        }
+        
         alt->addStatement(c.body);
 
         alts->addStatement(alt);

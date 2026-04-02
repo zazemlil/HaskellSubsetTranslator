@@ -319,7 +319,7 @@ qualifier: id T_ARROW_LEFT expr { // pattern вместо id = конфликт
 // ============= Let+, if+, lambda+ (2) ==========
 
 if_expr: T_IF expr T_THEN expr T_ELSE expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("IF");
+    auto n = std::make_shared<syntax_tree::Fatbar>("IF");
     n->addStatement($2);
     n->addStatement($4);
     n->addStatement($6);
@@ -348,7 +348,7 @@ lambda_expr: T_LAMBDA pattern T_ARROW_RIGHT expr {
 };
 
 case_expr: T_CASE expr T_OF T_CURLY_BRACKET_OPEN alts T_CURLY_BRACKET_CLOSE {
-    auto l = std::make_shared<syntax_tree::ASTNode>("CASE");
+    auto l = std::make_shared<syntax_tree::Fatbar>("CASE");
     l->addStatement($2);
     l->addStatement($5);
     $$ = l;

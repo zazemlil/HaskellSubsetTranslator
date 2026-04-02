@@ -152,7 +152,7 @@ class LiteralNil : public ASTNode {
 public: 
     LiteralNil(std::string t) : ASTNode(t) {} 
     void printFlat(int depth = 0, std::ostream& os = std::cout) override {
-        os << "[]";
+        os << "Nil";
     }
 };
 
@@ -233,7 +233,7 @@ public:
         for (int i = 1; i < stmts.size(); i++) {
             os << " ";
             std::string t = stmts[i]->getNodeType();
-            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL") {
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL" || t == "TUPLE") {
                 stmts[i]->printFlat(depth, os);
             }
             else {
@@ -265,6 +265,32 @@ public:
                 os << ")";
             }
         }
+    }
+};
+
+class Fatbar : public ASTNode { 
+public: 
+    Fatbar(std::string t) : ASTNode(t) {}
+    void printFlat(int depth = 0, std::ostream& os = std::cout) override {
+        auto& stmts = getStatements();
+        os << "( ";
+        for (int i = 0; i < stmts.size(); i++) {
+            std::string t = stmts[i]->getNodeType();
+            if (t == "ERROR") {
+                stmts[i]->printFlat(depth, os);
+            }
+            else if (t == "[]") {
+                os << " ";
+                stmts[i]->printFlat(depth, os);
+                os << " ";
+            }
+            else {
+                os << "(";
+                stmts[i]->printFlat(depth, os);
+                os << ")";
+            }
+        }
+        os << ") ";
     }
 };
 

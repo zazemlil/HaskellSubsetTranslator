@@ -6,15 +6,17 @@ syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
 }
 
 void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
-    std::string t = node->getNodeType();
-    if (t == "LIST_NODE" || t == "LIST_PATTERN") {
+    if (node->getNodeType() == "LIST_NODE" || node->getNodeType() == "LIST_PATTERN") {
         translateList(node);
     }
-    if (t == "LIST_HEAD_TAIL_PATTERN") {
+    if (node->getNodeType() == "LIST_HEAD_TAIL_PATTERN") {
         translateListHeadTailPattern(node);
     }
-    if (t == "IF") {
+    if (node->getNodeType() == "IF") {
         translateIf(node);
+    }
+    if (node->getNodeType() == "CASE") {
+        translateCase(node);
     }
 
     for (auto& n : node->getStatements()) {
@@ -24,7 +26,29 @@ void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
 
 void Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode> node) {}
 
-void Translator::translateCase(std::shared_ptr<syntax_tree::ASTNode> node) {}
+void Translator::translateCase(std::shared_ptr<syntax_tree::ASTNode> node) {
+    auto expr = node->getStatement(0);
+    auto alts = node->getStatement(1)->getStatements();
+
+    auto fatbar = std::make_shared<syntax_tree::Fatbar>("FATBAR");
+    for (int i = 0; i < alts.size(); i++) {
+        auto lambda = std::make_shared<syntax_tree::Lambda>("λ");
+        lambda->setStatements(alts[i]->getStatements());
+
+        auto call = std::make_shared<syntax_tree::Call>("CALL");
+        call->addStatement(lambda);
+        call->addStatement(expr);
+        
+        fatbar->addStatement(call);
+        fatbar->addStatement(std::make_shared<syntax_tree::ASTNode>("[]"));
+    }
+    auto err = std::make_shared<syntax_tree::ASTNode>("ERROR");
+    fatbar->addStatement(err);
+
+    node->clearStatements();
+    node->setNodeType("FATBAR");
+    node->setStatements(fatbar->getStatements());
+}
 
 void Translator::translateLet(std::shared_ptr<syntax_tree::ASTNode> node) {}
 

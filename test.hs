@@ -1,8 +1,3 @@
-f :: Int -> Int -> Int -> Int;
-f z = \x -> \y -> x*y*z;
-
-g = (f (\x -> [1, 2]));
-
 c = (1, 2, 3);
 
 tree = Tree 5 (Leaf 1) (Empty);
@@ -15,10 +10,16 @@ e3 = 1 : 2 : 3 : [];
 e4 (x:xs) = x + 5;
 e5 [x, 1, _] = x;
 
+f [] [] = 1;
+f xs ys = 2;
+
+fact 0 = 1;
+fact n = n * (fact (n-1));
+
 --+ if -> case
 --+ List -> :
 --+ List pattern -> :
--- case -> FATBAR
+--+ case -> FATBAR
 -- let and where -> application with fix (+check def depend.)
 -- list comprehension
 -- output spaces for FATBAR
