@@ -256,7 +256,7 @@ public:
         for (int i = 0; i < stmts.size(); i++) {
             os << " ";
             std::string t = stmts[i]->getNodeType();
-            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL") {
+            if (t == "Identifier" || t == "LiteralInt" || t == "LiteralFloat" || t == "LiteralString" || t == "LIST" || t == "NIL" || t == "_") {
                 stmts[i]->printFlat(depth, os);
             }
             else {
