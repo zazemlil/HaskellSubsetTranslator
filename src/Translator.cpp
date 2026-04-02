@@ -1,57 +1,36 @@
 #include "Translator.h"
 
 syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
-    return syntax_tree::AST(translateNode(ir.getRoot()));
+    translateNode(ir.getRoot());
+    return ir;
 }
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
-    if (node->getNodeType() == "LIST_NODE") {
+void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
+    std::string t = node->getNodeType();
+    if (t == "LIST_NODE" || t == "LIST_PATTERN") {
         translateList(node);
     }
-    if (node->getNodeType() == "LIST_HEAD_TAIL_PATTERN") {
+    if (t == "LIST_HEAD_TAIL_PATTERN") {
         translateListHeadTailPattern(node);
     }
-    if (node->getNodeType() == "IF") {
+    if (t == "IF") {
         translateIf(node);
     }
 
     for (auto& n : node->getStatements()) {
         translateNode(n);
     }
-    return node;
 }
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateLambda(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
+void Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode> node) {}
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
+void Translator::translateCase(std::shared_ptr<syntax_tree::ASTNode> node) {}
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateApplication(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
+void Translator::translateLet(std::shared_ptr<syntax_tree::ASTNode> node) {}
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateCase(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
+void Translator::translateWhere(std::shared_ptr<syntax_tree::ASTNode> node) {}
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateLet(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
-
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateWhere(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
-
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateIf(std::shared_ptr<syntax_tree::ASTNode> node) {
+void Translator::translateIf(std::shared_ptr<syntax_tree::ASTNode> node) {
     auto alts = std::make_shared<syntax_tree::ASTNode>("ALTS");
     auto alt1 = std::make_shared<syntax_tree::ASTNode>("ALT");
     auto alt2 = std::make_shared<syntax_tree::ASTNode>("ALT");
@@ -76,12 +55,9 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateIf(std::shared_ptr<sy
     node->clearStatements();
     node->addStatement(expr);
     node->addStatement(alts);
-    
-    return node;
 }
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateList(std::shared_ptr<syntax_tree::ASTNode> node)
-{
+void Translator::translateList(std::shared_ptr<syntax_tree::ASTNode> node) {
     auto stmts = node->getStatements();
 
     auto tmp = std::make_shared<syntax_tree::Operator>(":");
@@ -98,31 +74,8 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateList(std::shared_ptr<
     node->clearStatements();
     node->setNodeType(":");
     node->addStatements(tmp->getStatements());
-
-    return node;
 }
 
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateListPattern(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
-
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateListHeadTailPattern(std::shared_ptr<syntax_tree::ASTNode> node) {
+void Translator::translateListHeadTailPattern(std::shared_ptr<syntax_tree::ASTNode> node) {
     node->setNodeType(":");
-    return node;
-}
-
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateLiteral(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
-
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateIdentifier(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
-}
-
-std::shared_ptr<syntax_tree::ASTNode> Translator::translateConstructor(std::shared_ptr<syntax_tree::ASTNode> node)
-{
-    return std::shared_ptr<syntax_tree::ASTNode>();
 }
