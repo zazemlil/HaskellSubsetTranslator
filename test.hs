@@ -20,15 +20,18 @@ mappairs f [] ys = [];
 mappairs f xs [] = [];
 mappairs f (x:xs) (y:ys) = ((f x y) : (mappairs f xs ys));
 
-e6 = let {x = 5; y = 3;} in x+y;
+e6 = let {x :: Int; y :: Int; x = 5; y = 3;} in x+y;
 e7 = z/pi where {z = 1; pi = 3.14;};
-e8 = let {pi = 3.14;} in pi*5;
+e8 = let {pi x = 3.14*x;} in (pi 2);
 
 --+ if -> case
 --+ List -> :
 --+ List pattern -> :
 --+ case -> FATBAR
 --+ let and where -> application with fix
--- string -> list of char or constructor
+-- string -> constructor with list of char arg
 -- char -> constructor with ascii code
 -- list comprehension
+
+-- проблема сигнатур в локальных определениях (нужно либо делать аннотации, либо держать сигнатуры отдельно и переименовывать локальные определения)
+-- fix нужен не только для let и where, но и в глобальных определениях + нужно использовать fix только по необходимости
