@@ -3,13 +3,13 @@ v = \(x:xs) -> let { f = \x -> x*x; } in (f x);
 --v0 :: Int;
 --v0 = let { f [a, a] = 1; } in (f [True, False]);
 
-v2 :: String;
+v2 :: (String);
 v2 = let { f a = a; } in (f "asd123");
 
 v3 :: [a];
 v3 = let { f (x:xs) = xs; } in (f [1, 2, 3]);
 
-f :: Int -> Int;
+f :: (Int) -> (Int);
 f 1 = 11;
 f 2 = 22;
 f _ = 123;
