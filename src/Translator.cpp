@@ -1,16 +1,22 @@
 #include "Translator.h"
 
 syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
-    translateNode(ir.getRoot());
+    translateNode(ir.getRoot(), -1, nullptr);
     return ir;
 }
 
-void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
+void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
     if (node->getNodeType() == "LIST_NODE" || node->getNodeType() == "LIST_PATTERN") {
         translateList(node);
     }
     if (node->getNodeType() == "LIST_HEAD_TAIL_PATTERN") {
         translateListHeadTailPattern(node);
+    }
+    if (node->getNodeType() == "LiteralString") {
+        translateString(node, index, parent);
+    }
+    if (node->getNodeType() == "LiteralChar") {
+        translateChar(node, index, parent);
     }
     if (node->getNodeType() == "IF") {
         translateIf(node);
@@ -35,8 +41,10 @@ void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         node->setStatements(n->getStatements());
     }
 
+    int i = 0;
     for (auto& n : node->getStatements()) {
-        translateNode(n);
+        translateNode(n, i, node);
+        i++;
     }
 }
 
@@ -160,4 +168,44 @@ void Translator::translateList(std::shared_ptr<syntax_tree::ASTNode> node) {
 
 void Translator::translateListHeadTailPattern(std::shared_ptr<syntax_tree::ASTNode> node) {
     node->setNodeType(":");
+}
+
+void Translator::translateString(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
+    if (auto n = std::dynamic_pointer_cast<syntax_tree::LiteralString>(node)) {
+        std::string value = n->getValue();
+        
+        std::shared_ptr<syntax_tree::ASTNode> arg;
+        if (value == "") {
+            arg = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR");
+            arg->addStatement(std::make_shared<syntax_tree::ASTNode>("EMPTY"));
+        }
+        else {
+            arg = std::make_shared<syntax_tree::Operator>(":");
+            for (int i = 0; i < value.size(); i++) {
+                auto c = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR");
+                c->addStatement(std::make_shared<syntax_tree::ASTNode>("Char"));
+                auto ascii = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber(std::to_string(value[i]).c_str(), 10));
+                c->addStatement(ascii);
+                arg->addStatement(c);
+            }
+            translateList(arg);
+        }
+        
+        auto s = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR");
+        s->addStatement(std::make_shared<syntax_tree::ASTNode>("String"));
+        s->addStatement(arg);
+        parent->getStatement(index) = s;
+    }
+}
+
+void Translator::translateChar(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
+    if (auto n = std::dynamic_pointer_cast<syntax_tree::LiteralChar>(node)) {
+        char value = n->getValue();
+        auto c = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR");
+        c->addStatement(std::make_shared<syntax_tree::ASTNode>("Char"));
+        auto ascii = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber(std::to_string(value).c_str(), 10));
+        c->addStatement(ascii);
+
+        parent->getStatement(index) = c;
+    }
 }

@@ -58,10 +58,6 @@ static int current_column = 1;
 
 "=" { return Parser::token::T_ASSIGNMENT; }
 
-"Int"  { return Parser::token::T_TYPE_INT; }
-"Float"  { return Parser::token::T_TYPE_FLOAT; }
-"String"  { return Parser::token::T_TYPE_STRING; }
-
 "if"  { return Parser::token::T_IF; }
 "then"  { return Parser::token::T_THEN; }
 "else"  { return Parser::token::T_ELSE; }
@@ -97,6 +93,7 @@ static int current_column = 1;
 [0-9]+          { yylval->emplace<std::string>(std::string(yytext, yyleng)); return Parser::token::T_LITERAL_INT; }
 [0-9]+"."[0-9]+ { yylval->emplace<float>(atof(yytext)); return Parser::token::T_LITERAL_FLOAT; }
 \"[^"]*\"           { yylval->emplace<std::string>(std::string(yytext + 1, yyleng - 2)); return Parser::token::T_LITERAL_STRING; }
+\'[^']\'           { yylval->emplace<char>(std::string(yytext + 1, yyleng - 2)[0]); return Parser::token::T_LITERAL_CHAR; }
 
 \n[ \t]*     { 
     current_line++; current_column = yyleng; 

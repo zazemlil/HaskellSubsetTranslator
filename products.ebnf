@@ -22,9 +22,6 @@ TYPE -> SIMPLE_TYPE
         | "(" TYPE_SIGNATURE ")"
 
 SIMPLE_TYPE -> id
-        | "Int"
-        | "Float"
-        | "String"
         | LIST_TYPE
         | "(" type_constructor TYPE_ARGUMENTS ")"
 

@@ -121,6 +121,14 @@ public:
     LiteralString(std::string t, std::string v) : ASTNode(t), value(v) {}
 };
 
+class LiteralChar : public ASTNode {
+    char value;
+public:
+    void printValue(std::ostream& os = std::cout) const override { os << "\'" << value << "\'"; }
+    char getValue() { return value; }
+    LiteralChar(std::string t, char v) : ASTNode(t), value(v) {}
+};
+
 class LiteralTypeConstructor : public ASTNode {
     std::string value;
 public:

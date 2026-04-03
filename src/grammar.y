@@ -32,8 +32,7 @@
 %nonassoc <std::string> T_LITERAL_INT
 %nonassoc <float> T_LITERAL_FLOAT 
 %nonassoc <std::string> T_LITERAL_STRING
-
-%nonassoc T_TYPE_INT T_TYPE_FLOAT T_TYPE_STRING
+%nonassoc <char> T_LITERAL_CHAR
 
 %nonassoc T_ARITHMETIC_OP_PLUS T_ARITHMETIC_OP_MINUS T_ARITHMETIC_OP_MULTIPLY T_ARITHMETIC_OP_DIVIDE
 %nonassoc T_LOGIC_OP_OR T_LOGIC_OP_AND T_LOGIC_OP_EQUAL T_LOGIC_OP_NOT_EQUAL T_LOGIC_OP_MORE T_LOGIC_OP_LESS T_LOGIC_OP_MORE_OR_EQUAL T_LOGIC_OP_LESS_OR_EQUAL
@@ -59,7 +58,7 @@
 
 %nonassoc T_END_OF_FILE
 
-%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string type_constructor
+%type <std::shared_ptr<syntax_tree::ASTNode>> s expr literal id literal_int literal_float literal_string literal_char type_constructor
 %type <std::shared_ptr<syntax_tree::ASTNode>> or_expr and_expr comp_expr cons_expr additive_expr multiplicative_expr unary_minus
 %type <std::shared_ptr<syntax_tree::ASTNode>> term tuple_elements tuple_elements_tail list_elements list_elements_tail
 %type <std::shared_ptr<syntax_tree::ASTNode>> function_call arg_list arg_expr
@@ -138,10 +137,7 @@ type_signature_tail: T_ARROW_RIGHT type type_signature_tail {
 type: simple_type { $$ = $1; }
     | T_PARENTHESIS_OPEN type_signature T_PARENTHESIS_CLOSE { $$ = $2; };
 
-simple_type: id { $$ = $1; } 
-    | T_TYPE_INT { $$ = std::make_shared<syntax_tree::ASTNode>("T_INT"); }
-    | T_TYPE_FLOAT { $$ = std::make_shared<syntax_tree::ASTNode>("T_FLOAT"); }
-    | T_TYPE_STRING { $$ = std::make_shared<syntax_tree::ASTNode>("T_STRING"); }
+simple_type: id { $$ = $1; }
     | list_type { $$ = $1; }
     | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
         auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
@@ -584,13 +580,15 @@ expr: or_expr { $$ = $1; }
 
 literal: literal_int { $$ = $1; }
     | literal_float { $$ = $1; }
-    | literal_string { $$ = $1; };
+    | literal_string { $$ = $1; }
+    | literal_char { $$ = $1; };
 
 id: T_IDENTIFIER { $$ = std::make_shared<syntax_tree::Identifier>("Identifier", $1); };
 type_constructor: T_TYPE_CONSTRUCTOR { $$ = std::make_shared<syntax_tree::LiteralTypeConstructor>("LiteralTypeConstructor", $1); };
 literal_int: T_LITERAL_INT { $$ = std::make_shared<syntax_tree::LiteralInt>("LiteralInt", cBigNumber($1.c_str(), 10)); };
 literal_float: T_LITERAL_FLOAT { $$ = std::make_shared<syntax_tree::LiteralFloat>("LiteralFloat", $1); };
 literal_string: T_LITERAL_STRING { $$ = std::make_shared<syntax_tree::LiteralString>("LiteralString", $1); };
+literal_char: T_LITERAL_CHAR { $$ = std::make_shared<syntax_tree::LiteralChar>("LiteralChar", $1); };
 
 // ===============================================================
 %%

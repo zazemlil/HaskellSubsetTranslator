@@ -9,7 +9,8 @@ public:
     syntax_tree::AST translate(syntax_tree::AST ir);
 
 private:
-    void translateNode                (std::shared_ptr<syntax_tree::ASTNode> node);
+    void translateNode                (std::shared_ptr<syntax_tree::ASTNode> node, int index,
+                                       std::shared_ptr<syntax_tree::ASTNode> parent);
 
     void translateListComprehension   (std::shared_ptr<syntax_tree::ASTNode> node);
     void translateCase                (std::shared_ptr<syntax_tree::ASTNode> node);
@@ -18,4 +19,8 @@ private:
     void translateIf                  (std::shared_ptr<syntax_tree::ASTNode> node);
     void translateList                (std::shared_ptr<syntax_tree::ASTNode> node);
     void translateListHeadTailPattern (std::shared_ptr<syntax_tree::ASTNode> node);
+    void translateString              (std::shared_ptr<syntax_tree::ASTNode> node, int index, 
+                                       std::shared_ptr<syntax_tree::ASTNode> parent);
+    void translateChar                (std::shared_ptr<syntax_tree::ASTNode> node, int index, 
+                                       std::shared_ptr<syntax_tree::ASTNode> parent);
 };
