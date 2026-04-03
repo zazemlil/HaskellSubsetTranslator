@@ -20,10 +20,15 @@ mappairs f [] ys = [];
 mappairs f xs [] = [];
 mappairs f (x:xs) (y:ys) = ((f x y) : (mappairs f xs ys));
 
+e6 = let {x = 5; y = 3;} in x+y;
+e7 = z/pi where {z = 1; pi = 3.14;};
+e8 = let {pi = 3.14;} in pi*5;
+
 --+ if -> case
 --+ List -> :
 --+ List pattern -> :
 --+ case -> FATBAR
--- let and where -> application with fix (+check def depend.)
+--+ let and where -> application with fix
+-- string -> list of char or constructor
+-- char -> constructor with ascii code
 -- list comprehension
--- output spaces for FATBAR

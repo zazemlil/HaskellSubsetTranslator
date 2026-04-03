@@ -18,6 +18,22 @@ void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (node->getNodeType() == "CASE") {
         translateCase(node);
     }
+    if (node->getNodeType() == "LET") {
+        auto defs = node->getStatement(0)->getStatements();
+        auto e = node->getStatement(1);
+        auto n = translateLetWhere(e, defs);
+        node->clearStatements();
+        node->setNodeType("CALL");
+        node->setStatements(n->getStatements());
+    }
+    if (node->getNodeType() == "WHERE") {
+        auto defs = node->getStatement(1)->getStatements();
+        auto e = node->getStatement(0);
+        auto n = translateLetWhere(e, defs);
+        node->clearStatements();
+        node->setNodeType("CALL");
+        node->setStatements(n->getStatements());
+    }
 
     for (auto& n : node->getStatements()) {
         translateNode(n);
@@ -50,9 +66,51 @@ void Translator::translateCase(std::shared_ptr<syntax_tree::ASTNode> node) {
     node->setStatements(fatbar->getStatements());
 }
 
-void Translator::translateLet(std::shared_ptr<syntax_tree::ASTNode> node) {}
+std::shared_ptr<syntax_tree::ASTNode> Translator::translateLetWhere(std::shared_ptr<syntax_tree::ASTNode> e, std::vector<std::shared_ptr<syntax_tree::ASTNode>> defs) {
+    auto lam1 = std::make_shared<syntax_tree::Lambda>("λ");
+    auto lam2 = std::make_shared<syntax_tree::Lambda>("λ");
+    
+    if (defs.size() > 1) {
+        auto tuplep1 = std::make_shared<syntax_tree::Tuple>("TUPLE_PATTERN");
+        auto tuplep2 = std::make_shared<syntax_tree::Tuple>("TUPLE_PATTERN");
+        auto tuple = std::make_shared<syntax_tree::Tuple>("TUPLE");
+        for (auto n : defs) {
+            auto id = n->getStatement(0);
+            auto body = n->getStatement(1);
 
-void Translator::translateWhere(std::shared_ptr<syntax_tree::ASTNode> node) {}
+            tuplep1->addStatement(id);
+            tuplep2->addStatement(id);
+            tuple->addStatement(body);
+        }
+
+        lam1->addStatement(tuplep1);
+        lam1->addStatement(e);
+
+        lam2->addStatement(tuplep2);
+        lam2->addStatement(tuple);
+    }
+    else {
+        auto id = defs[0]->getStatement(0);
+        auto body = defs[0]->getStatement(1);
+
+        lam1->addStatement(id);
+        lam1->addStatement(e);
+
+        lam2->addStatement(id);
+        lam2->addStatement(body);
+    }
+    
+    auto call1 = std::make_shared<syntax_tree::Call>("CALL");
+    auto fix = std::make_shared<syntax_tree::Identifier>("Identifier", "fix");
+    call1->addStatement(fix);
+    call1->addStatement(lam2);
+
+    auto call2 = std::make_shared<syntax_tree::Call>("CALL");
+    call2->addStatement(lam1);
+    call2->addStatement(call1);
+
+    return call2;
+}
 
 void Translator::translateIf(std::shared_ptr<syntax_tree::ASTNode> node) {
     auto alts = std::make_shared<syntax_tree::ASTNode>("ALTS");

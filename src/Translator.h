@@ -13,8 +13,8 @@ private:
 
     void translateListComprehension   (std::shared_ptr<syntax_tree::ASTNode> node);
     void translateCase                (std::shared_ptr<syntax_tree::ASTNode> node);
-    void translateLet                 (std::shared_ptr<syntax_tree::ASTNode> node);
-    void translateWhere               (std::shared_ptr<syntax_tree::ASTNode> node);
+    std::shared_ptr<syntax_tree::ASTNode> translateLetWhere (std::shared_ptr<syntax_tree::ASTNode> e, 
+                                                             std::vector<std::shared_ptr<syntax_tree::ASTNode>> defs);
     void translateIf                  (std::shared_ptr<syntax_tree::ASTNode> node);
     void translateList                (std::shared_ptr<syntax_tree::ASTNode> node);
     void translateListHeadTailPattern (std::shared_ptr<syntax_tree::ASTNode> node);

@@ -1,2 +1,13 @@
-SIGNATURE f -> T_INT T_INT T_INT
-f = λv1.λv2.CASE TUPLE v1 v2 ALTS ALT TUPLE_PATTERN 0 λx.1 ALT TUPLE_PATTERN x λy.* x y
+c = (Tuple) 1 2 3
+tree = (Tree) 5 ((Leaf) 1) Empty
+e = (λa.( ((λTrue.1) ((<) a 5)) [] ((λFalse.2) ((<) a 5)) [] ERROR) ) 6
+e2 = (:) 1 ((:) 3 ((:) 5 ((:) 7 Nil)))
+e3 = (:) 1 ((:) 2 ((:) 3 Nil))
+fact = λv1.( ((λ0.1) v1) [] ((λn.(*) n ((fact) ((-) n 1))) v1) [] ERROR) 
+e4 = λ((:) x xs).(+) x 5
+e5 = λ((:) x ((:) 1 ((:) _ Nil))).x
+f = λv1.λv2.( ((λ((Tuple) Nil Nil).1) ((Tuple) v1 v2)) [] ((λ((Tuple) xs ys).2) ((Tuple) v1 v2)) [] ERROR) 
+e7 = (λ((Tuple) z pi).(/) z pi) ((fix) (λ((Tuple) z pi).(Tuple) 1 3.14))
+mappairs = λv1.λv2.λv3.( ((λ((Tuple) f Nil ys).Nil) ((Tuple) v1 v2 v3)) [] ((λ((Tuple) f xs Nil).Nil) ((Tuple) v1 v2 v3)) [] ((λ((Tuple) f ((:) x xs) ((:) y ys)).(:) ((f) x y) ((mappairs) f xs ys)) ((Tuple) v1 v2 v3)) [] ERROR) 
+e6 = (λ((Tuple) x y).(+) x y) ((fix) (λ((Tuple) x y).(Tuple) 5 3))
+e8 = (λpi.(*) pi 5) ((fix) (λpi.3.14))

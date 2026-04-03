@@ -327,14 +327,14 @@ if_expr: T_IF expr T_THEN expr T_ELSE expr {
 };
 
 let_expr: T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE T_IN expr {
-    auto n = std::make_shared<syntax_tree::ASTNode>("LET");
+    auto n = std::make_shared<syntax_tree::Call>("LET");
     n->addStatement($3);
     n->addStatement($6);
     $$ = n;
 };
 
 where_expr: expr T_WHERE T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE {
-    auto n = std::make_shared<syntax_tree::ASTNode>("WHERE");
+    auto n = std::make_shared<syntax_tree::Call>("WHERE");
     n->addStatement($1);
     n->addStatement($4);
     $$ = n;
