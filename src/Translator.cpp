@@ -6,6 +6,10 @@ syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
 }
 
 void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
+    if (node->getNodeType() == "LIST_COMPREHENSION") {
+        translateListComprehension(node, index, parent);
+        node = parent->getStatement(index);
+    }
     if (node->getNodeType() == "LIST_NODE" || node->getNodeType() == "LIST_PATTERN") {
         translateList(node);
     }
@@ -48,7 +52,67 @@ void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node, int i
     }
 }
 
-void Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode> node) {}
+void Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
+    if (auto n = revomeFirstQualifier(node->getStatement(1), "=")) {
+        auto def = std::make_shared<syntax_tree::Definition>("DEF");
+        def->setStatements(n->getStatements());
+        
+        auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
+        l->addStatement(def);
+        
+        while (auto next = revomeFirstQualifier(node->getStatement(1), "=")) {
+            auto nextDef = std::make_shared<syntax_tree::Definition>("DEF");
+            nextDef->setStatements(next->getStatements());
+            l->addStatement(nextDef);
+        }
+
+        auto let = std::make_shared<syntax_tree::Call>("LET");
+        let->addStatement(l);
+        let->addStatement(node);
+
+        parent->getStatement(index) = let;
+    }
+    else if (auto n = revomeFirstQualifier(node->getStatement(1), "<-")) {
+        auto lambda = std::make_shared<syntax_tree::Lambda>("λ");
+        lambda->addStatement(n->getStatement(0));
+        lambda->addStatement(node);
+        
+        auto call = std::make_shared<syntax_tree::Call>("CALL");
+        call->addStatement(std::make_shared<syntax_tree::Identifier>("Identifier", "concatMap"));
+        call->addStatement(lambda);
+        call->addStatement(n->getStatement(1));
+
+        parent->getStatement(index) = call;
+    }
+    else if (auto n = revomeFirstQualifier(node->getStatement(1))) {
+        auto ifExpr = std::make_shared<syntax_tree::Fatbar>("IF");
+        ifExpr->addStatement(n);
+        ifExpr->addStatement(node);
+        ifExpr->addStatement(std::make_shared<syntax_tree::LiteralNil>("NIL"));
+        
+        parent->getStatement(index) = ifExpr;
+    }
+    else {
+        auto list = std::make_shared<syntax_tree::Operator>("LIST_NODE");
+        list->addStatement(node->getStatement(0));
+
+        parent->getStatement(index) = list;
+    }
+}
+
+std::shared_ptr<syntax_tree::ASTNode> Translator::revomeFirstQualifier(std::shared_ptr<syntax_tree::ASTNode> node, std::string t) {
+    auto& stmts = node->getStatements();
+
+    for (size_t i = 0; i < stmts.size(); ++i) {
+        if (stmts[i]->getNodeType() == t || t == "") {
+            auto result = stmts[i];               
+            stmts.erase(stmts.begin() + i);         
+            return result;                          
+        }
+    }
+
+    return nullptr;
+}
 
 void Translator::translateCase(std::shared_ptr<syntax_tree::ASTNode> node) {
     auto expr = node->getStatement(0);
