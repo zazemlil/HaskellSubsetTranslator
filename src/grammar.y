@@ -51,7 +51,7 @@
 %nonassoc T_DEVIDING_LINE
 %nonassoc T_COMMA
 %nonassoc T_COLON_DOUBLE
-%nonassoc T_COLON T_SEMICOLON
+%nonassoc T_COLON T_SEMICOLON T_CONCAT
 %nonassoc T_PARENTHESIS_OPEN T_PARENTHESIS_CLOSE
 %nonassoc T_BRACKET_OPEN T_BRACKET_CLOSE
 %nonassoc T_CURLY_BRACKET_OPEN T_CURLY_BRACKET_CLOSE
@@ -460,6 +460,12 @@ comp_expr:
 
 cons_expr: additive_expr T_COLON cons_expr {
         auto n = std::make_shared<syntax_tree::Operator>(":");
+        n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | additive_expr T_CONCAT cons_expr {
+        auto n = std::make_shared<syntax_tree::Operator>("++");
         n->addStatement($1);
         n->addStatement($3);
         $$ = n;
