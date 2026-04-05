@@ -56,10 +56,12 @@ int main(int argc, char* argv[])
 
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
     syntax_tree::AST ir;
+    std::shared_ptr<syntax_tree::ASTNode> signatures;
     try {
         staticAnalyzer->analyze(ast.getRoot());
         // after successfull static analyze: ast == ir
         ir = ast;
+        signatures = staticAnalyzer->getIRGenerator()->getSignatures();
     }
     catch(const std::exception& e) {
         if (!a_flag) {
@@ -72,16 +74,29 @@ int main(int argc, char* argv[])
         std::cout << "-------------------------------------------------\n";
         std::cout << "---------------------- IR -----------------------\n";
         std::cout << "-------------------------------------------------\n";
+        signatures->print();
         ir.print();
     }
 
     Translator* translator = new Translator();
+    syntax_tree::AST dataDeclsELC = translator->translate(dataDeclarations);
+    syntax_tree::AST signaturesELC = translator->translate(signatures);
     syntax_tree::AST extendedLambdaCalculus = translator->translate(ir);
 
     if (argc < 3) {
         std::cout << "-------------------------------------------------\n";
         std::cout << "------------ Extended lambda calculus -----------\n";
         std::cout << "-------------------------------------------------\n";
+        for (auto& n : dataDeclsELC.getRoot()->getStatements()) {
+            n->printFlat();
+            std::cout << "\n";
+        }
+        std::cout << "\n";
+        for (auto& n : signaturesELC.getRoot()->getStatements()) {
+            n->printFlat();
+            std::cout << "\n";
+        }
+        std::cout << "\n";
         for (auto& n : extendedLambdaCalculus.getRoot()->getStatements()) {
             n->printFlat();
             std::cout << "\n";
@@ -90,6 +105,16 @@ int main(int argc, char* argv[])
     else {
         auto fileStream = std::make_unique<std::ofstream>(argv[2], std::ios::out | std::ios::trunc);
         if (fileStream->is_open()) {
+            for (auto& n : dataDeclsELC.getRoot()->getStatements()) {
+                n->printFlat(0, *fileStream);
+                *fileStream << "\n";
+            }
+            *fileStream << "\n";
+            for (auto& n : signaturesELC.getRoot()->getStatements()) {
+                n->printFlat(0, *fileStream);
+                *fileStream << "\n";
+            }
+            *fileStream << "\n";
             for (auto& n : extendedLambdaCalculus.getRoot()->getStatements()) {
                 n->printFlat(0, *fileStream);
                 *fileStream << "\n";

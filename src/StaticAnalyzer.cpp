@@ -6,6 +6,10 @@ void StaticAnalyzer::analyze(std::shared_ptr<syntax_tree::ASTNode> root) {
     analyzeNode(root);
 }
 
+IRGenerator *StaticAnalyzer::getIRGenerator() {
+    return generator;
+}
+
 StaticAnalyzer::StaticAnalyzer() {
     generator = new IRGenerator();
 }

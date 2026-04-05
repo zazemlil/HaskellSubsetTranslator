@@ -16,6 +16,7 @@ enum PatternKind {
 class StaticAnalyzer {
 public:
     void analyze(std::shared_ptr<syntax_tree::ASTNode> root);
+    IRGenerator* getIRGenerator();
     StaticAnalyzer();
     ~StaticAnalyzer();
 

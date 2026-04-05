@@ -12,10 +12,14 @@ struct Clause
 
 class IRGenerator {
 public:
+    IRGenerator();
     void generate(std::shared_ptr<syntax_tree::ASTNode> node, 
                     std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groups);
+    std::shared_ptr<syntax_tree::ASTNode>& getSignatures();
 
 private:
+    std::shared_ptr<syntax_tree::ASTNode> signatures;
+
     std::shared_ptr<syntax_tree::ASTNode> buildFunction(const std::string& name, const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
 
     size_t getArity(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls);

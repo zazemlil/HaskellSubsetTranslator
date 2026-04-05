@@ -1,13 +1,20 @@
-c = (Tuple) 1 2 3
-tree = (Tree) 5 ((Leaf) 1) Empty
-e = (λa.( ((λTrue.1) ((<) a 5)) [] ((λFalse.2) ((<) a 5)) [] ERROR) ) 6
-e2 = (:) 1 ((:) 3 ((:) 5 ((:) 7 Nil)))
-e3 = (:) 1 ((:) 2 ((:) 3 Nil))
-fact = λv1.( ((λ0.1) v1) [] ((λn.(*) n ((fact) ((-) n 1))) v1) [] ERROR) 
-e4 = λ((:) x xs).(+) x 5
-e5 = λ((:) x ((:) 1 ((:) _ Nil))).x
-f = λv1.λv2.( ((λ((Tuple) Nil Nil).1) ((Tuple) v1 v2)) [] ((λ((Tuple) xs ys).2) ((Tuple) v1 v2)) [] ERROR) 
-e7 = (λ((Tuple) z pi).(/) z pi) ((fix) (λ((Tuple) z pi).(Tuple) 1 3.14))
-mappairs = λv1.λv2.λv3.( ((λ((Tuple) f Nil ys).Nil) ((Tuple) v1 v2 v3)) [] ((λ((Tuple) f xs Nil).Nil) ((Tuple) v1 v2 v3)) [] ((λ((Tuple) f ((:) x xs) ((:) y ys)).(:) ((f) x y) ((mappairs) f xs ys)) ((Tuple) v1 v2 v3)) [] ERROR) 
-e6 = (λ((Tuple) x y).(+) x y) ((fix) (λ((Tuple) x y).(Tuple) 5 3))
-e8 = (λpi.(*) pi 5) ((fix) (λpi.3.14))
+DATA CONSTRUCTOR Maybe TYPE_ARGS a | CONSTRUCTOR Just TYPE_ARGS a CONSTRUCTOR Nothing Nil
+
+SIGNATURE v2 -> CONSTRUCTOR String Nil
+SIGNATURE v3 -> LIST_CONSTRUCTOR a
+SIGNATURE f -> CONSTRUCTOR Int Nil CONSTRUCTOR Int Nil
+
+foo0 = λx.λy.(λf3.(f3) x y) ((fix) (λf3.λv1.λv2.( ((λ((Tuple) Nil Nil).1) ((Tuple) v1 v2)) [] ((λ((Tuple) xs ys).2) ((Tuple) v1 v2)) [] ERROR) ))
+f0 = λv1.λv2.( ((λ((Tuple) Nil Nil).1) ((Tuple) v1 v2)) [] ((λ((Tuple) xs ys).2) ((Tuple) v1 v2)) [] ERROR) 
+c = (λ((Tuple) x y).λz.(+) ((+) x y) z) ((fix) (λ((Tuple) x y).(Tuple) 5 4))
+e = λx.( ((λNil.(String) ((:) ((Char) 110) ((:) ((Char) 105) ((:) ((Char) 108) Nil)))) x) [] ((λ((:) x xs).(String) ((:) ((Char) 108) ((:) ((Char) 105) ((:) ((Char) 115) ((:) ((Char) 116) Nil))))) x) [] ERROR) 
+f1 = λv1.λv2.( ((λ((Tuple) Nil Nil).1) ((Tuple) v1 v2)) [] ((λ((Tuple) xs ys).2) ((Tuple) v1 v2)) [] ERROR) 
+foo = λx.(λc.(concatMap) (λx.(concatMap) (λy.( ((λTrue.(:) ((*) ((+) x y) c) Nil) ((>) ((+) x y) 2)) [] ((λFalse.Nil) ((>) ((+) x y) 2)) [] ERROR) ) ((:) 3 ((:) 2 ((:) 1 Nil)))) ((:) 1 ((:) 2 ((:) 3 Nil)))) ((fix) (λc.3.14))
+d = (λ((Tuple) x y).(λz.(+) ((+) x y) z) ((fix) (λz.3))) ((fix) (λ((Tuple) x y).(Tuple) 5 4))
+a = (λx.λy.(+) x y) ((+) 15 ((*) 2 5)) ((*) 3 2)
+f = λv1.( ((λ1.11) v1) [] ((λ2.22) v1) [] ((λ_.123) v1) [] ERROR) 
+v3 = (λf.(f) ((:) 1 ((:) 2 ((:) 3 Nil)))) ((fix) (λf.λ((:) x xs).xs))
+v2 = (λf.(f) ((String) ((:) ((Char) 97) ((:) ((Char) 115) ((:) ((Char) 100) ((:) ((Char) 49) ((:) ((Char) 50) ((:) ((Char) 51) Nil)))))))) ((fix) (λf.λa.a))
+mappairs = λv1.λv2.λv3.( ((λ((Tuple) f Nil ys).Nil) ((Tuple) v1 v2 v3)) [] ((λ((Tuple) f ((:) x xs) Nil).Nil) ((Tuple) v1 v2 v3)) [] ((λ((Tuple) f ((:) x xs) ((:) y ys)).(cons) ((f) x y) ((mappairs) f xs ys)) ((Tuple) v1 v2 v3)) [] ERROR) 
+foo1 = λx.λy.(λf3.(f3) x y) ((fix) (λf3.λv1.λv2.( ((λ((Tuple) Nil Nil).1) ((Tuple) v1 v2)) [] ((λ((Tuple) xs ys).2) ((Tuple) v1 v2)) [] ERROR) ))
+v = λ((:) x xs).(λf.(f) x) ((fix) (λf.λx.(*) x x))

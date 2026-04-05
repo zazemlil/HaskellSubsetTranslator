@@ -1,5 +1,9 @@
 #include "IRGenerator.h"
 
+IRGenerator::IRGenerator() {
+    signatures = std::make_shared<syntax_tree::ASTNode>("SIGNATURES");
+}
+
 void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node, std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groups)
 {
     std::vector<std::shared_ptr<syntax_tree::ASTNode>> newDecls;
@@ -9,10 +13,14 @@ void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node, std::unor
         auto signature = extractSignature(decls);
         auto fn = buildFunction(name, decls);
         newDecls.insert(newDecls.begin(), fn);
-        if (signature != nullptr) newDecls.insert(newDecls.begin(), signature);
+        if (signature != nullptr) signatures->addStatement(signature);
     }
 
     node->setStatements(newDecls);
+}
+
+std::shared_ptr<syntax_tree::ASTNode>& IRGenerator::getSignatures() {
+    return signatures;
 }
 
 std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::string &name, 
