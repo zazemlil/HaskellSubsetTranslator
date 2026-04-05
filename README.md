@@ -7,6 +7,9 @@ C++ implementation of a translator for a subset of the Haskell language into ext
 - Lexical analysis (flex)
 - Syntactic analysis (bison)
 - Abstract Syntax Tree generation
+- Static analysis
+- Intermediate representation generation
+- Extended λ-calculus generation
 - Basic Haskell syntax support
 - Cross-platform (Linux/Windows)
 
