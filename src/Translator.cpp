@@ -6,6 +6,11 @@ syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
 }
 
 void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
+    if (node->getNodeType() == "DEF") {
+        if (parent->getNodeType() == "DEFINITIONS") {
+            translateGlobalDef(node, index, parent);
+        }
+    }
     if (node->getNodeType() == "LIST_COMPREHENSION") {
         translateListComprehension(node, index, parent);
         node = parent->getStatement(index);
@@ -100,6 +105,22 @@ void Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode
     }
 }
 
+void Translator::translateGlobalDef(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
+    if (auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(node->getStatement(0))) {
+        if (isRecursive(id->getValue(), node->getStatement(1))) {
+            auto lambda = std::make_shared<syntax_tree::Lambda>("λ");
+            lambda->addStatement(node->getStatement(0));
+            lambda->addStatement(node->getStatement(1));
+
+            auto call = std::make_shared<syntax_tree::Call>("CALL");
+            call->addStatement(std::make_shared<syntax_tree::Identifier>("Identifier", "fix"));
+            call->addStatement(lambda);
+
+            node->getStatement(1) = call;
+        }
+    }
+}
+
 std::shared_ptr<syntax_tree::ASTNode> Translator::revomeFirstQualifier(std::shared_ptr<syntax_tree::ASTNode> node, std::string t) {
     auto& stmts = node->getStatements();
 
@@ -142,6 +163,7 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateLetWhere(std::shared_
     auto lam1 = std::make_shared<syntax_tree::Lambda>("λ");
     auto lam2 = std::make_shared<syntax_tree::Lambda>("λ");
     
+    bool isRec = false;
     if (defs.size() > 1) {
         auto tuplep1 = std::make_shared<syntax_tree::Tuple>("TUPLE_PATTERN");
         auto tuplep2 = std::make_shared<syntax_tree::Tuple>("TUPLE_PATTERN");
@@ -149,6 +171,9 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateLetWhere(std::shared_
         for (auto n : defs) {
             auto id = n->getStatement(0);
             auto body = n->getStatement(1);
+
+            auto idName = std::dynamic_pointer_cast<syntax_tree::Identifier>(id)->getValue();
+            if (isRecursive(idName, body)) isRec = true;
 
             tuplep1->addStatement(id);
             tuplep2->addStatement(id);
@@ -173,15 +198,77 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateLetWhere(std::shared_
     }
     
     auto call1 = std::make_shared<syntax_tree::Call>("CALL");
-    auto fix = std::make_shared<syntax_tree::Identifier>("Identifier", "fix");
-    call1->addStatement(fix);
-    call1->addStatement(lam2);
+    call1->addStatement(lam1);
 
-    auto call2 = std::make_shared<syntax_tree::Call>("CALL");
-    call2->addStatement(lam1);
-    call2->addStatement(call1);
+    if (isRec) {
+        auto call2 = std::make_shared<syntax_tree::Call>("CALL");
+        auto fix = std::make_shared<syntax_tree::Identifier>("Identifier", "fix");
+        call2->addStatement(fix);
+        call2->addStatement(lam2);
 
-    return call2;
+        call1->addStatement(call2);
+    }
+    else {
+        call1->addStatement(lam2->getStatement(1));
+    }
+    
+    return call1;
+}
+
+bool Translator::isRecursive(const std::string& name, std::shared_ptr<syntax_tree::ASTNode> node) {
+    if (!node) return false;
+
+    // 1. Проверка идентификатора
+    if (node->getNodeType() == "Identifier") {
+        auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(node);
+        if (id && id->getValue() == name) {
+            return true;
+        }
+    }
+
+    // 2. Если это let — проверяем shadowing
+    if (node->getNodeType() == "LET") {
+        auto bindings = node->getStatement(0);
+
+        for (auto& bind : bindings->getStatements()) {
+            auto id = bind->getStatement(0);
+            auto idName = std::dynamic_pointer_cast<syntax_tree::Identifier>(id)->getValue();
+
+            if (idName == name) {
+                return false; // имя затенено
+            }
+        }
+    }
+
+    if (node->getNodeType() == "WHERE") {
+        auto bindings = node->getStatement(1);
+
+        for (auto& bind : bindings->getStatements()) {
+            auto id = bind->getStatement(0);
+            auto idName = std::dynamic_pointer_cast<syntax_tree::Identifier>(id)->getValue();
+
+            if (idName == name) {
+                return false; // имя затенено
+            }
+        }
+    }
+
+    // 3. Аналогично для lambda
+    if (node->getNodeType() == "λ") {
+        auto pattern = node->getStatement(0);
+        if (isRecursive(name, pattern)) {
+            return false;
+        }
+    }
+
+    // 4. Рекурсивный обход
+    for (auto& child : node->getStatements()) {
+        if (isRecursive(name, child)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Translator::translateIf(std::shared_ptr<syntax_tree::ASTNode> node) {

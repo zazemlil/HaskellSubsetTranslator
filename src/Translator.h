@@ -14,6 +14,8 @@ private:
 
     void translateListComprehension   (std::shared_ptr<syntax_tree::ASTNode> node, int index, 
                                        std::shared_ptr<syntax_tree::ASTNode> parent);
+    void translateGlobalDef           (std::shared_ptr<syntax_tree::ASTNode> node, int index, 
+                                       std::shared_ptr<syntax_tree::ASTNode> parent);
     void translateCase                (std::shared_ptr<syntax_tree::ASTNode> node);
     std::shared_ptr<syntax_tree::ASTNode> translateLetWhere (std::shared_ptr<syntax_tree::ASTNode> e, 
                                                              std::vector<std::shared_ptr<syntax_tree::ASTNode>> defs);
@@ -26,4 +28,5 @@ private:
                                        std::shared_ptr<syntax_tree::ASTNode> parent);
 
     std::shared_ptr<syntax_tree::ASTNode> revomeFirstQualifier(std::shared_ptr<syntax_tree::ASTNode> node, std::string t = "");
+    bool isRecursive(const std::string& name, std::shared_ptr<syntax_tree::ASTNode> node);
 };
