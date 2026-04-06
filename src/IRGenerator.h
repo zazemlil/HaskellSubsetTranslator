@@ -1,7 +1,6 @@
 #pragma once
 #include "AST.h"
-
-#include <unordered_map>
+#include "GroupingService.h"
 
 struct Clause
 {
@@ -13,8 +12,7 @@ struct Clause
 class IRGenerator {
 public:
     IRGenerator();
-    void generate(std::shared_ptr<syntax_tree::ASTNode> node, 
-                    std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groups);
+    void generate(std::shared_ptr<syntax_tree::ASTNode> node);
     std::shared_ptr<syntax_tree::ASTNode>& getSignatures();
 
 private:

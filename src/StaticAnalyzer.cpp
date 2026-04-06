@@ -23,12 +23,14 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
 
     if (node->getNodeType() == "DEFINITIONS") {
         auto& decls = node->getStatements();
-
-        auto groups = groupByName(decls);
-
         checkContiguity(decls);
-        for (auto& [name, gdecls] : groups)
+
+        auto grouped = GroupingService::getInstance().groupByName(decls);
+
+        for (const auto& name : grouped.order)
         {
+            auto& gdecls = grouped.groups[name];
+
             checkArity(gdecls);
             checkPatternRedundancy(name, gdecls);
         }
@@ -37,11 +39,14 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (node->getNodeType() == "LET") {
         auto& decls = node->getStatement(0)->getStatements();
 
-        auto groups = groupByName(decls);
-
         checkContiguity(decls);
-        for (auto& [name, gdecls] : groups)
+
+        auto grouped = GroupingService::getInstance().groupByName(decls);
+
+        for (const auto& name : grouped.order)
         {
+            auto& gdecls = grouped.groups[name];
+
             checkArity(gdecls);
             checkPatternRedundancy(name, gdecls);
         }
@@ -50,11 +55,14 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (node->getNodeType() == "WHERE") {
         auto& decls = node->getStatement(1)->getStatements();
 
-        auto groups = groupByName(decls);
-
         checkContiguity(decls);
-        for (auto& [name, gdecls] : groups)
+
+        auto grouped = GroupingService::getInstance().groupByName(decls);
+
+        for (const auto& name : grouped.order)
         {
+            auto& gdecls = grouped.groups[name];
+
             checkArity(gdecls);
             checkPatternRedundancy(name, gdecls);
         }
@@ -64,20 +72,8 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         analyzeNode(child);
     }
 
-    if (node->getNodeType() == "DEFINITIONS") {
-        auto& decls = node->getStatements();
-        auto groups = groupByName(decls);
-        generator->generate(node, groups);
-    }
-    if (node->getNodeType() == "LET") {
-        auto& decls = node->getStatement(0)->getStatements();
-        auto groups = groupByName(decls);
-        generator->generate(node->getStatement(0), groups);
-    }
-    if (node->getNodeType() == "WHERE") {
-        auto& decls = node->getStatement(1)->getStatements();
-        auto groups = groupByName(decls);
-        generator->generate(node->getStatement(1), groups);
+    if (node->getNodeType() == "DEFINITIONS" || node->getNodeType() == "LET" || node->getNodeType() == "WHERE") {
+        generator->generate(node);
     }
 }
 

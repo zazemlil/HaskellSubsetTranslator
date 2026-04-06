@@ -4,19 +4,40 @@ IRGenerator::IRGenerator() {
     signatures = std::make_shared<syntax_tree::ASTNode>("SIGNATURES");
 }
 
-void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node, std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groups)
-{
-    std::vector<std::shared_ptr<syntax_tree::ASTNode>> newDecls;
+void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node) {
+    std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls;
 
-    for (auto& [name, decls] : groups)
-    {
+    if (node->getNodeType() == "DEFINITIONS") {
+        decls = node->getStatements();
+    }
+    else if (node->getNodeType() == "LET") {
+        decls = node->getStatement(0)->getStatements();
+    }
+    else if (node->getNodeType() == "WHERE") {
+        decls = node->getStatement(1)->getStatements();
+    }
+
+    auto grouped = GroupingService::getInstance().groupByName(decls);
+    std::vector<std::shared_ptr<syntax_tree::ASTNode>> newDecls;
+    for (const auto& name : grouped.order) {
+        auto& decls = grouped.groups[name];
+
         auto signature = extractSignature(decls);
         auto fn = buildFunction(name, decls);
-        newDecls.insert(newDecls.begin(), fn);
+
+        newDecls.push_back(fn);
         if (signature != nullptr) signatures->addStatement(signature);
     }
 
-    node->setStatements(newDecls);
+    if (node->getNodeType() == "DEFINITIONS") {
+        node->setStatements(newDecls);
+    }
+    else if (node->getNodeType() == "LET") {
+        node->getStatement(0)->setStatements(newDecls);
+    }
+    else if (node->getNodeType() == "WHERE") {
+        node->getStatement(1)->setStatements(newDecls);
+    }
 }
 
 std::shared_ptr<syntax_tree::ASTNode>& IRGenerator::getSignatures() {
