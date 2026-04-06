@@ -1,17 +1,8 @@
-f0 = [5 |];
-f1 :: (Int);
-f1 = [5 | (True)];
-f2 = [x | let x = 123];
-f3 = [x | x <- [1, 2]];
-f4 = [x*x | x <- [4, 5], x*x <= 16];
-f5 :: (Int);
-f5 = [(x, y) | y <- [10, 11, 12], x <- [1, 2, 3]];
-
 concatMap f [] = [];
 concatMap f (x:xs) = (f x) ++ (concatMap f xs);  
 
 ff = x where {x = 2;}; 
-f = let {pi = 3.14;x=x+1;} in pi*2;
+f = let {x=x+1;} in pi*2;
 
 --+ if -> case
 --+ List -> :

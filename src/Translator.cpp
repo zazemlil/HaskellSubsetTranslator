@@ -190,6 +190,9 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateLetWhere(std::shared_
         auto id = defs[0]->getStatement(0);
         auto body = defs[0]->getStatement(1);
 
+        auto idName = std::dynamic_pointer_cast<syntax_tree::Identifier>(id)->getValue();
+        if (isRecursive(idName, body)) isRec = true;
+
         lam1->addStatement(id);
         lam1->addStatement(e);
 
