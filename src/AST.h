@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <unordered_map>
+
 #include "cBigNumber/Cbignum.h"
 #include "cBigNumber/Cbignums.h"
 
@@ -170,6 +172,7 @@ class Identifier : public ASTNode {
 public:
     void printValue(std::ostream& os = std::cout) const override { os << value; }
     std::string getValue() { return value; }
+    void setValue(std::string v) {value = v; }
     Identifier(std::string t, std::string v) : ASTNode(t), value(v) {}
 };
 

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "AST.h"
 #include "StaticAnalyzer.h"
 #include "Translator.h"
