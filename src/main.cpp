@@ -1,4 +1,5 @@
 #include "AST.h"
+#include "Renamer.h"
 #include "StaticAnalyzer.h"
 #include "Translator.h"
 
@@ -53,6 +54,10 @@ int main(int argc, char* argv[])
         dataDeclarations.print();
     }
 
+    Renamer* renamer = new Renamer();
+    renamer->rename(ast.getRoot());
+    delete renamer;
+
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
     syntax_tree::AST ir;
     std::shared_ptr<syntax_tree::ASTNode> signatures;
@@ -61,6 +66,7 @@ int main(int argc, char* argv[])
         // after successfull static analyze: ast == ir
         ir = ast;
         signatures = staticAnalyzer->getIRGenerator()->getSignatures();
+        delete staticAnalyzer;
     }
     catch(const std::exception& e) {
         if (!a_flag) {
@@ -79,8 +85,8 @@ int main(int argc, char* argv[])
 
     Translator* translator = new Translator();
     syntax_tree::AST dataDeclsELC = translator->translate(dataDeclarations);
-    syntax_tree::AST signaturesELC = translator->translate(signatures);
     syntax_tree::AST extendedLambdaCalculus = translator->translate(ir);
+    delete translator;
 
     if (argc < 3) {
         std::cout << "-------------------------------------------------\n";
@@ -91,7 +97,7 @@ int main(int argc, char* argv[])
             std::cout << "\n";
         }
         std::cout << "\n";
-        for (auto& n : signaturesELC.getRoot()->getStatements()) {
+        for (auto& n : signatures->getStatements()) {
             n->printFlat();
             std::cout << "\n";
         }
@@ -109,7 +115,7 @@ int main(int argc, char* argv[])
                 *fileStream << "\n";
             }
             *fileStream << "\n";
-            for (auto& n : signaturesELC.getRoot()->getStatements()) {
+            for (auto& n : signatures->getStatements()) {
                 n->printFlat(0, *fileStream);
                 *fileStream << "\n";
             }
