@@ -77,21 +77,6 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     }
 }
 
-std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> 
-    StaticAnalyzer::groupByName(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) 
-{
-    std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groups;
-
-    for (const auto& decl : decls)
-    {
-        auto nameNode = decl->getStatement(0);
-        auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
-        groups[id->getValue()].push_back(decl);
-    }
-
-    return groups;
-}
-
 void StaticAnalyzer::checkContiguity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
     std::unordered_map<std::string, int> lastPos;
 
@@ -137,11 +122,12 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
     for (auto& n : decls) {
         if (n->getNodeType() == "DEF" || n->getNodeType() == "=") {
             auto id = n->getStatement(0);
-            if (id->getStatementCount() > 0) {
-                if (id->getStatement(0)->getNodeType() == "PATTERNS") {
-                    expectedArity = id->getStatement(0)->getStatementCount();
-                }
-            }
+            // if (id->getStatementCount() > 0) {
+            //     if (id->getStatement(0)->getNodeType() == "PATTERNS") {
+            //         expectedArity = id->getStatement(0)->getStatementCount();
+            //     }
+            // }
+            expectedArity = id->getStatementCount(); //
             break;
         }
     }
@@ -166,14 +152,15 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
             
         } else if (decl->getNodeType() == "DEF" || decl->getNodeType() == "=") {
             auto id = decl->getStatement(0);
-            if (id->getStatementCount() > 0) {
-                if (id->getStatement(0)->getNodeType() == "PATTERNS") {
-                    arity = id->getStatement(0)->getStatementCount();
-                }
-            }
-            else {
-                arity = 0;
-            }
+            // if (id->getStatementCount() > 0) {
+            //     if (id->getStatement(0)->getNodeType() == "PATTERNS") {
+            //         arity = id->getStatement(0)->getStatementCount();
+            //     }
+            // }
+            // else {
+            //     arity = 0;
+            // }
+            arity = id->getStatementCount();
         }
 
         if (arity != -1 && arity != expectedArity)
@@ -244,7 +231,8 @@ PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode>
 std::vector<std::shared_ptr<syntax_tree::ASTNode>> 
     StaticAnalyzer::extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl) 
 {
-    auto& stmts = decl->getStatement(0)->getStatement(0)->getStatements();
+    //auto& stmts = decl->getStatement(0)->getStatement(0)->getStatements();
+    auto& stmts = decl->getStatement(0)->getStatements();
     return stmts;
 }
 
@@ -280,14 +268,18 @@ bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std
             return true;
         }
 
-        auto args1 = p1->getStatement(1)->getStatements();
-        auto args2 = p2->getStatement(1)->getStatements();
+        // auto args1 = p1->getStatement(1)->getStatements();
+        // auto args2 = p2->getStatement(1)->getStatements();
 
-        if (args1.size() != args2.size())
-            return false;
+        // if (args1.size() != args2.size())
+        //     return false;
 
-        for (size_t i=0;i<args1.size();i++)
-            if (!patternCovers(args1[i], args2[i]))
+        // for (size_t i=0;i<args1.size();i++)
+        //     if (!patternCovers(args1[i], args2[i]))
+        //         return false;
+
+        for (size_t i=1;i<p1->getStatementCount();i++)
+            if (!patternCovers(p1->getStatement(i), p2->getStatement(i)))
                 return false;
 
         return true;

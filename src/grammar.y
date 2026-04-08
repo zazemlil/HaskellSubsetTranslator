@@ -142,7 +142,7 @@ simple_type: id { $$ = $1; }
     | T_PARENTHESIS_OPEN type_constructor type_arguments T_PARENTHESIS_CLOSE {
         auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
         l->addStatement($2);
-        l->addStatement($3);
+        l->addStatements($3->getStatements());
         $$ = l;
     };
 
@@ -167,7 +167,7 @@ def: function_decl { $$ = $1; }
 
 function_decl: id patterns T_ASSIGNMENT expr {
         auto l = std::make_shared<syntax_tree::Definition>("DEF");
-        $1->addStatement($2);
+        $1->setStatements($2->getStatements());
         l->addStatement($1);
         l->addStatement($4);
         $$ = l;
@@ -207,7 +207,7 @@ constructors_tail: T_DEVIDING_LINE constructor constructors_tail {
 constructor: type_constructor type_arguments {
     auto l = std::make_shared<syntax_tree::ASTNode>("CONSTRUCTOR");
     l->addStatement($1);
-    l->addStatement($2);
+    l->addStatements($2->getStatements());
     $$ = l;
 };
 
@@ -237,7 +237,7 @@ pattern: id { $$ = $1; }
 constructor_pattern: type_constructor patterns {
         auto l = std::make_shared<syntax_tree::Constructor>("CONSTRUCTOR_PATTERN");
         l->addStatement($1);
-        l->addStatement($2);
+        l->addStatements($2->getStatements());
         $$ = l;
     }
     | type_constructor { 
@@ -392,7 +392,7 @@ bind: id T_ASSIGNMENT expr {
     }
     | id patterns T_ASSIGNMENT expr {
         auto n = std::make_shared<syntax_tree::ASTNode>("=");
-        $1->addStatement($2);
+        $1->setStatements($2->getStatements());
         n->addStatement($1);
         n->addStatement($4);
         $$ = n;

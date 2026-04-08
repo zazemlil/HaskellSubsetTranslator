@@ -23,8 +23,6 @@ public:
 private:
     IRGenerator* generator;
 
-    std::unordered_map<std::string, std::vector<std::shared_ptr<syntax_tree::ASTNode>>> groupByName(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
-
     void checkContiguity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
     void checkArity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>>& decls);
     size_t getLambdaAbstractionArity(const std::shared_ptr<syntax_tree::ASTNode>& node);

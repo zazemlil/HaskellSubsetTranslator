@@ -82,12 +82,13 @@ std::shared_ptr<syntax_tree::ASTNode> IRGenerator::buildFunction(const std::stri
 size_t IRGenerator::getArity(std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls) {
     for (auto& n : decls) {
         if (n->getNodeType() == "DEF" || n->getNodeType() == "=") {
-            if (n->getStatement(0)->getStatementCount() > 0) {
-                return n->getStatement(0)->getStatement(0)->getStatementCount();
-            }
-            else {
-                return 0;
-            }
+            // if (n->getStatement(0)->getStatementCount() > 0) {
+            //     return n->getStatement(0)->getStatement(0)->getStatementCount();
+            // }
+            // else {
+            //     return 0;
+            // }
+            return n->getStatement(0)->getStatementCount();
         }
     }
     return 0;
@@ -98,7 +99,8 @@ std::vector<std::shared_ptr<syntax_tree::ASTNode>> IRGenerator::getParams(std::v
     for (size_t i = 0; i < decls.size(); i++)
     {
         if (decls[i]->getNodeType() == "DEF" || decls[i]->getNodeType() == "=") {
-            return decls[i]->getStatement(0)->getStatement(0)->getStatements();
+            //return decls[i]->getStatement(0)->getStatement(0)->getStatements();
+            return decls[i]->getStatement(0)->getStatements();
         }
     }
     return std::vector<std::shared_ptr<syntax_tree::ASTNode>>();
@@ -154,7 +156,8 @@ std::vector<Clause> IRGenerator::buildClauses(const std::vector<std::shared_ptr<
             Clause c;
 
             if (d->getStatement(0)->getStatementCount() > 0) {
-                c.patterns = d->getStatement(0)->getStatement(0)->getStatements();
+                //c.patterns = d->getStatement(0)->getStatement(0)->getStatements();
+                c.patterns = d->getStatement(0)->getStatements();
             }
         
             c.body = d->getStatement(1);
