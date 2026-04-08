@@ -1,58 +1,37 @@
-v = \(x:xs) -> let { f = \x -> x*x; } in (f x);
-
---v0 :: Int;
---v0 = let { f [a, a] = 1; } in (f [True, False]);
-
-v2 :: (String);
-v2 = let { f a = a; } in (f "asd123");
-
-v3 :: [a];
-v3 = let { f (x:xs) = xs; } in (f [1, 2, 3]);
-
-f :: (Int) -> (Int);
-f 1 = 11;
-f 2 = 22;
-f _ = 123;
-
---ff :: (Type1 (Type2 a)) -> a;
-
---ff2 :: (T3 (T4));
-
---ff3 :: (Tree a);
-
-data Maybe a = Just a | Nothing;
-
-a = ((\x -> \y -> x+y) (15+2*5) (3*2));
-
---b = if True then 1 else x+y where { x = 5; y = 4; };
-
-c = \z -> x+y+z where { x = 5; y = 4; };
-
-d = let { z = 3; } in x+y+z where { x = 5; y = 4; };
-
-e x = case x of { [] -> "nil"; (x:xs) -> "list"; };
-
-foo x = [(x+y)*c | x <- [1, 2, 3], y <- [3, 2, 1], let c = 3.14, x+y > 2];
-
-
 mappairs f [] ys = [];
 mappairs f (x:xs) [] = [];
 mappairs f (x:xs) (y:ys) = (cons (f x y) (mappairs f xs ys));
 
-f0 [] [] = 1;
-f0 xs ys = 2;
+f1 [] [] = 1;
+f1 xs ys = 2;
 
-f1 = \v1 -> \v2 -> case (v1, v2) of {
+f11 = \v1 -> \v2 -> case (v1, v2) of {
     ([], []) -> 1;
     (xs, ys) -> 2;
 };
 
-foo0 x y = let {
+foo1 x y = let {
     f3 [] [] = 1;
     f3 xs ys = 2;
 } in (f3 x y);
 
-foo1 x y = (f3 x y) where {
+foo11 x y = (f3 x y) where {
     f3 [] [] = 1;
     f3 xs ys = 2;
 };
+
+concatMap :: (a -> [b]) -> [a] -> [b];
+concatMap f [] = [];
+concatMap f (x:xs) = (f x) ++ (concatMap f xs);  
+
+f2 = let {x=2; y = 5 + x;} in x+y; -- не корректная трансляция (нужен граф зависимостей) 
+f3 = let {
+    even 0 = (True);
+    even n = (odd (n-1));
+
+    odd 0 = (False);
+    odd n = (even (n-1));
+} in (odd 3); -- транслируется корректно, но нужно что то делать с кортежем (он не ленивый в Haskell; можно перед кортежем ставить ленивый паттерн ~)
+
+fact 0 = 1;
+fact n = n * (fact (n-1)); -- все ОК

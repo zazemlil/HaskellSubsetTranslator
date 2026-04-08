@@ -25,6 +25,7 @@ g++ -w -std=c++17 -I$SRC_DIR \
     $SRC_DIR/cBigNumber/Ctty.cpp \
     $SRC_DIR/cBigNumber/Exarray.cpp \
     $SRC_DIR/cBigNumber/Prime.cpp \
+    $SRC_DIR/Renamer.cpp \
     $SRC_DIR/StaticAnalyzer.cpp \
     $SRC_DIR/IRGenerator.cpp \
     $SRC_DIR/Translator.cpp \
@@ -40,6 +41,7 @@ x86_64-w64-mingw32-g++ -w -static -I$SRC_DIR \
     $SRC_DIR/cBigNumber/Ctty.cpp \
     $SRC_DIR/cBigNumber/Exarray.cpp \
     $SRC_DIR/cBigNumber/Prime.cpp \
+    $SRC_DIR/Renamer.cpp \
     $SRC_DIR/StaticAnalyzer.cpp \
     $SRC_DIR/IRGenerator.cpp \
     $SRC_DIR/Translator.cpp \
