@@ -1,123 +1,123 @@
 #{ 5 
-S -> DEFINITIONS
+S ::= DEFINITIONS
 
-DEFINITIONS -> DEFINITION DEFINITIONS`
-DEFINITIONS` -> DEFINITION DEFINITIONS`
+DEFINITIONS ::= DEFINITION DEFINITIONS_TAIL
+DEFINITIONS_TAIL ::= DEFINITION DEFINITIONS_TAIL
         | ε
 
-DEFINITION -> SIGNATURE ";"
+DEFINITION ::= SIGNATURE ";"
         | DEF ";"
         | DATA_TYPE_DECL ";"
 
-SIGNATURE -> id "::" TYPE_SIGNATURE
+SIGNATURE ::= id "::" TYPE_SIGNATURE
 #} 5
 
 
 #{ 6
-TYPE_SIGNATURE -> TYPE TYPE_SIGNATURE`
-TYPE_SIGNATURE` -> "->" TYPE TYPE_SIGNATURE`
+TYPE_SIGNATURE ::= TYPE TYPE_SIGNATURE_TAIL
+TYPE_SIGNATURE_TAIL ::= "->" TYPE TYPE_SIGNATURE_TAIL
         | ε
 
-TYPE -> SIMPLE_TYPE
+TYPE ::= SIMPLE_TYPE
         | "(" TYPE_SIGNATURE ")"
 
-SIMPLE_TYPE -> id
+SIMPLE_TYPE ::= id
         | LIST_TYPE
         | "(" type_constructor TYPE_ARGUMENTS ")"
 
-LIST_TYPE -> "[" TYPE "]"
+LIST_TYPE ::= "[" TYPE "]"
 
-TYPE_ARGUMENTS -> TYPE TYPE_ARGUMENTS
+TYPE_ARGUMENTS ::= TYPE TYPE_ARGUMENTS
         | ε
 #} 6
 
 
 #{ 7
-DEF -> FUNCTION_DECL
+DEF ::= FUNCTION_DECL
         |  VARIABLE_DECL
 
-FUNCTION_DECL -> id PATTERNS "=" EXPR
-VARIABLE_DECL -> id "=" EXPR
+FUNCTION_DECL ::= id PATTERNS "=" EXPR
+VARIABLE_DECL ::= id "=" EXPR
 #} 7
 
 
 #{ 8
-DATA_TYPE_DECL -> "data" CONSTRUCTOR "=" CONSTRUCTORS
+DATA_TYPE_DECL ::= "data" CONSTRUCTOR "=" CONSTRUCTORS
 
-CONSTRUCTORS -> CONSTRUCTOR CONSTRUCTORS`
-CONSTRUCTORS` -> "|" CONSTRUCTOR CONSTRUCTORS`
+CONSTRUCTORS ::= CONSTRUCTOR CONSTRUCTORS_TAIL
+CONSTRUCTORS_TAIL ::= "|" CONSTRUCTOR CONSTRUCTORS_TAIL
         | ε
 
-CONSTRUCTOR -> type_constructor TYPE_ARGUMENTS
+CONSTRUCTOR ::= type_constructor TYPE_ARGUMENTS
 #} 8
 
 
 #{ 4
-PATTERNS -> PATTERN PATTERNS`
-PATTERNS` -> PATTERN PATTERNS`
+PATTERNS ::= PATTERN PATTERNS_TAIL
+PATTERNS_TAIL ::= PATTERN PATTERNS_TAIL
         | ε
 
-PATTERN -> id
+PATTERN ::= id
         | LITERAL
         | "_"
         | "(" CONSTRUCTOR_PATTERN ")"
         | LIST_PATTERN
         | TUPLE_PATTERN
 
-CONSTRUCTOR_PATTERN -> type_constructor PATTERNS
+CONSTRUCTOR_PATTERN ::= type_constructor PATTERNS
         | type_constructor
 
-TUPLE_PATTERN -> "(" LIST_PATTERNS ")"
+TUPLE_PATTERN ::= "(" LIST_PATTERNS ")"
 
-LIST_PATTERN -> "[" LIST_PATTERNS "]"
+LIST_PATTERN ::= "[" LIST_PATTERNS "]"
         | "(" id ":" id ")"
-LIST_PATTERNS -> PATTERN LIST_PATTERNS`
+LIST_PATTERNS ::= PATTERN LIST_PATTERNS_TAIL
         | ε
-LIST_PATTERNS` -> "," PATTERN LIST_PATTERNS`
+LIST_PATTERNS_TAIL ::= "," PATTERN LIST_PATTERNS_TAIL
         | ε
 #} 4
 
 
 #{ 3
-LIST_COMPREHENSION -> "[" EXPR "|" QUALIFIERS "]"
-QUALIFIERS -> QUALIFIER QUALIFIERS`
+LIST_COMPREHENSION ::= "[" EXPR "|" QUALIFIERS "]"
+QUALIFIERS ::= QUALIFIER QUALIFIERS_TAIL
         | ε
-QUALIFIERS` -> "," QUALIFIER QUALIFIERS`
+QUALIFIERS_TAIL ::= "," QUALIFIER QUALIFIERS_TAIL
         | ε
-QUALIFIER -> id "<-" EXPR
+QUALIFIER ::= id "<-" EXPR
         | "let" BIND
         | EXPR
 #} 3
 
 
 #{ 2
-IF_EXPR -> "if" EXPR "then" EXPR "else" EXPR
-LET_EXPR -> "let" "{" BINDINGS "}" "in" EXPR
-WHERE_EXPR -> EXPR "where" "{" BINDINGS "}"
-LAMBDA_EXPR -> "\\" PATTERN "->" EXPR
+IF_EXPR ::= "if" EXPR "then" EXPR "else" EXPR
+LET_EXPR ::= "let" "{" BINDINGS "}" "in" EXPR
+WHERE_EXPR ::= EXPR "where" "{" BINDINGS "}"
+LAMBDA_EXPR ::= "\\" PATTERN "->" EXPR
 
-CASE_EXPR -> "case" EXPR "of" "{" ALTS "}"
-ALTS -> PATTERN "->" EXPR ";" ALTS_TAIL
-ALTS_TAIL -> PATTERN "->" EXPR ";" ALTS_TAIL
+CASE_EXPR ::= "case" EXPR "of" "{" ALTS "}"
+ALTS ::= PATTERN "->" EXPR ";" ALTS_TAIL
+ALTS_TAIL ::= PATTERN "->" EXPR ";" ALTS_TAIL
         | ε
 
-BINDINGS -> BIND ";" BINDINGS`
-BINDINGS` -> BIND ";" BINDINGS`
+BINDINGS ::= BIND ";" BINDINGS_TAIL
+BINDINGS_TAIL ::= BIND ";" BINDINGS_TAIL
         | ε
-BIND -> id "=" EXPR 
+BIND ::= id "=" EXPR 
         | id PATTERNS "=" EXPR 
         | SIGNATURE
 #} 2
 
 
 #{ 9
-OR_EXPR -> OR_EXPR "||" AND_EXPR
+OR_EXPR ::= OR_EXPR "||" AND_EXPR
         | AND_EXPR
 
-AND_EXPR -> AND_EXPR "&&" COMP_EXPR
+AND_EXPR ::= AND_EXPR "&&" COMP_EXPR
         | COMP_EXPR
 
-COMP_EXPR -> COMP_EXPR "==" CONS_EXPR 
+COMP_EXPR ::= COMP_EXPR "==" CONS_EXPR 
         | COMP_EXPR "/=" CONS_EXPR
         | COMP_EXPR "<" CONS_EXPR
         | COMP_EXPR ">" CONS_EXPR
@@ -125,42 +125,42 @@ COMP_EXPR -> COMP_EXPR "==" CONS_EXPR
         | COMP_EXPR ">=" CONS_EXPR
         | CONS_EXPR
 
-CONS_EXPR -> ADDITIVE_EXPR ":" CONS_EXPR
+CONS_EXPR ::= ADDITIVE_EXPR ":" CONS_EXPR
+        | ADDITIVE_EXPR "++" CONS_EXPR
         | ADDITIVE_EXPR
 
-ADDITIVE_EXPR -> ADDITIVE_EXPR "+" MULTIPLICATIVE_EXPR
+ADDITIVE_EXPR ::= ADDITIVE_EXPR "+" MULTIPLICATIVE_EXPR
         | ADDITIVE_EXPR "-" MULTIPLICATIVE_EXPR
         | MULTIPLICATIVE_EXPR
 
-MULTIPLICATIVE_EXPR -> MULTIPLICATIVE_EXPR "*" UNARY_MINUS
+MULTIPLICATIVE_EXPR ::= MULTIPLICATIVE_EXPR "*" UNARY_MINUS
         | MULTIPLICATIVE_EXPR "/" UNARY_MINUS
         | UNARY_MINUS
 
-UNARY_MINUS -> "-" TERM
+UNARY_MINUS ::= "-" TERM
         | TERM
 
-TERM -> LITERAL
+TERM ::= LITERAL
         | id
-        | LIST_COMPREHENSION
         | "(" EXPR ")"
-        | "(" TUPLE_ELEMENTS ")"
         | "[" LIST_ELEMENTS "]"
+        | "(" TUPLE_ELEMENTS ")"
         | "(" FUNCTION_CALL ")"
-        | "(" type_constructor TYPE_ARGUMENTS ")"
+        | type_constructor ARG_LIST
 
-TUPLE_ELEMENTS -> EXPR "," EXPR TUPLE_ELEMENTS`
-TUPLE_ELEMENTS` -> "," EXPR TUPLE_ELEMENTS`
-        | ε
-
-LIST_ELEMENTS -> EXPR LIST_ELEMENTS`
-        | ε
-LIST_ELEMENTS` -> "," EXPR LIST_ELEMENTS`
+TUPLE_ELEMENTS ::= EXPR "," EXPR TUPLE_ELEMENTS_TAIL
+TUPLE_ELEMENTS_TAIL ::= "," EXPR TUPLE_ELEMENTS_TAIL
         | ε
 
-FUNCTION_CALL -> FUNC_ARG FUNC_ARG ARG_LIST
-ARG_LIST -> FUNC_ARG ARG_LIST
+LIST_ELEMENTS ::= EXPR LIST_ELEMENTS_TAIL
         | ε
-FUNC_ARG -> "(" EXPR ")"
+LIST_ELEMENTS_TAIL ::= "," EXPR LIST_ELEMENTS_TAIL
+        | ε
+
+FUNCTION_CALL ::= ARG_EXPR ARG_EXPR ARG_LIST
+ARG_LIST ::= ARG_EXPR ARG_LIST
+        | ε
+ARG_EXPR ::= "(" EXPR ")"
         | id
         | LITERAL
         | "(" FUNCTION_CALL ")"
@@ -170,23 +170,24 @@ FUNC_ARG -> "(" EXPR ")"
 
 
 #{ 1
-EXPR -> LET_EXPR
+EXPR ::= OR_EXPR
         | IF_EXPR
-        | LAMBDA_EXPR
+        | LET_EXPR
         | LIST_COMPREHENSION
-        | OR_EXPR
+        | LAMBDA_EXPR
         | WHERE_EXPR
         | CASE_EXPR
 
-LITERAL -> literal_int
+LITERAL ::= literal_int
         | literal_float
         | literal_string
+        | literal_char
 
-id -> [a-z][a-zA-Z|0-9]*
-type_constructor -> [A-Z][a-zA-Z|0-9]*
-literal_int -> ?[0-9]+
-literal_float -> ?[0-9]+"."[0-9]+
-literal_string -> \"[^"]*\"
+id ::= [a-z][a-zA-Z0-9]* 
+type_constructor ::= [A-Z][a-zA-Z0-9]*
+literal_int ::= [0-9]+
+literal_float ::= [0-9]+"."[0-9]+
+literal_string ::= \"[^"]*\" 
+literal_char ::= \'[^']\' 
 
-"
 #} 1
