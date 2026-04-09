@@ -8,7 +8,10 @@ void Renamer::rename(std::shared_ptr<ASTNode> root) {
 }
 
 std::string Renamer::freshName(const std::string& base) {
-    return base + "_" + std::to_string(counter++);
+    int& cnt = counters[base]; // если нет - создастся 0
+    std::string name = base + "_" + std::to_string(cnt);
+    cnt++;
+    return name;
 }
 
 void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::string, std::string>& env) {
@@ -23,21 +26,13 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
         if (it != env.end()) {
             id->setValue(it->second);
         }
-        
         return;
     }
 
     if (type == "λ") {
         auto newEnv = env;
 
-        auto param = node->getStatement(0);
-        auto id = std::dynamic_pointer_cast<Identifier>(param); // не обязательно только id
-
-        std::string newName = freshName(id->getValue());
-
-        newEnv[id->getValue()] = newName;
-        id->setValue(newName);
-
+        renamePattern(node->getStatement(0), newEnv);
         renameNode(node->getStatement(1), newEnv);
         return;
     }
@@ -47,29 +42,28 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
 
         auto defs = node->getStatement(0);
 
-        // 1. сначала объявляем имена
+        // идентификаторы объявлений
+        std::unordered_map<std::string, std::string> tmpEnv;
         for (auto& d : defs->getStatements()) {
             if (d->getNodeType() == "SIGNATURE") continue;
 
             auto nameNode = d->getStatement(0);
             auto id = std::dynamic_pointer_cast<Identifier>(nameNode);
 
-            // std::string newName = freshName(id->getValue());
-
-            // newEnv[id->getValue()] = newName;
-            // id->setValue(newName);
-            if (newEnv.find(id->getValue()) == newEnv.end()) {
+            if (tmpEnv.find(id->getValue()) == tmpEnv.end()) {
                 std::string newName = freshName(id->getValue());
                 newEnv[id->getValue()] = newName;
+                tmpEnv[id->getValue()] = newName;
             }
 
             id->setValue(newEnv[id->getValue()]);
         }
 
-        // 2. сигнатуры
+        // сигнатуры 
         for (auto& d : defs->getStatements()) {
             if (d->getNodeType() == "SIGNATURE") {
                 auto nameNode = d->getStatement(0);
+
                 auto id = std::dynamic_pointer_cast<Identifier>(nameNode);
 
                 if (newEnv.count(id->getValue())) {
@@ -78,12 +72,12 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
             }
         }
 
-        // 3. обрабатываем тела
+        // объявления
         for (auto& d : defs->getStatements()) {
             renameNode(d, newEnv);
         }
 
-        // 4. тело let
+        // тело let
         renameNode(node->getStatement(1), newEnv);
         return;
     }
@@ -93,20 +87,18 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
 
         auto defs = node->getStatement(1);
 
-        // объявление
+        // идентификаторы объявлений
+        std::unordered_map<std::string, std::string> tmpEnv;
         for (auto& d : defs->getStatements()) {
             if (d->getNodeType() == "SIGNATURE") continue;
 
             auto nameNode = d->getStatement(0);
             auto id = std::dynamic_pointer_cast<Identifier>(nameNode);
 
-            // std::string newName = freshName(id->getValue());
-
-            // newEnv[id->getValue()] = newName;
-            // id->setValue(newName);
-            if (newEnv.find(id->getValue()) == newEnv.end()) {
+            if (tmpEnv.find(id->getValue()) == tmpEnv.end()) {
                 std::string newName = freshName(id->getValue());
                 newEnv[id->getValue()] = newName;
+                tmpEnv[id->getValue()] = newName;
             }
 
             id->setValue(newEnv[id->getValue()]);
@@ -124,33 +116,26 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
             }
         }
 
-        // тело выражения
+        // тело where
         renameNode(node->getStatement(0), newEnv);
 
-        // определения
+        // объявления
         for (auto& d : defs->getStatements()) {
             renameNode(d, newEnv);
         }
-
         return;
     }
 
     if (type == "CASE") {
-        // выражение
         renameNode(node->getStatement(0), env);
 
         auto alts = node->getStatement(1);
-
         for (auto& alt : alts->getStatements()) {
             auto newEnv = env;
 
-            auto pattern = alt->getStatement(0);
-
-            renamePattern(pattern, newEnv);
-
+            renamePattern(alt->getStatement(0), newEnv);
             renameNode(alt->getStatement(1), newEnv);
         }
-
         return;
     }
 
@@ -160,15 +145,57 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
         auto nameNode = node->getStatement(0);
 
         // параметры (PATTERNS)
-        if (nameNode->getStatementCount() > 0) {
-            auto patterns = nameNode->getStatement(0);
+        auto patterns = nameNode->getStatements();
 
-            for (auto& p : patterns->getStatements()) {
-                renamePattern(p, newEnv);
-            }
+        for (auto& p : patterns) {
+            renamePattern(p, newEnv);
         }
 
         renameNode(node->getStatement(1), newEnv);
+        return;
+    }
+
+    if (type == "LIST_COMPREHENSION") {
+        auto newEnv = env;
+
+        auto expr = node->getStatement(0);
+        auto qualifiers = node->getStatement(1);
+
+        for (auto& q : qualifiers->getStatements()) {
+            auto qType = q->getNodeType();
+
+            if (qType == "=") {
+                auto id = std::dynamic_pointer_cast<Identifier>(q->getStatement(0));
+
+                std::string newName = freshName(id->getValue());
+                newEnv[id->getValue()] = newName;
+                id->setValue(newName);
+                
+                renameNode(q->getStatement(0), newEnv);
+                renameNode(q, newEnv);
+            }
+            else if (qType == "<-") {
+                renameNode(q->getStatement(1), newEnv);
+            }
+        }
+
+        for (auto& q : qualifiers->getStatements()) {
+            auto qType = q->getNodeType();
+
+            if (qType != "<-" && qType != "=") { // FILTER (expr)
+                renameNode(q, newEnv);
+            }
+        }
+
+        for (auto& q : qualifiers->getStatements()) {
+            auto qType = q->getNodeType();
+
+            if (qType == "<-") {
+                renamePattern(q->getStatement(0), newEnv);
+            }
+        }
+
+        renameNode(expr, newEnv);
         return;
     }
 
@@ -206,7 +233,7 @@ void Renamer::renamePattern(std::shared_ptr<ASTNode> pattern, std::unordered_map
     }
 
     // список [x,y]
-    if (type == "LIST") {
+    if (type == "LIST" || type == "LIST_PATTERN") {
         for (auto& p : pattern->getStatements()) {
             renamePattern(p, env);
         }

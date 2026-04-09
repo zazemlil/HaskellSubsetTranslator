@@ -7,7 +7,7 @@ public:
     void rename(std::shared_ptr<syntax_tree::ASTNode> root);
 
 private:
-    int counter = 0;
+    std::unordered_map<std::string, int> counters;
 
     std::string freshName(const std::string& base);
 

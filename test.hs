@@ -1,9 +1,27 @@
-x = \x -> \x -> x;
+--x = \x -> \y -> x+y;
+x x y = x+y;
 
-y = \x -> x;
+--y = \(A (B x) (C y)) -> x+y;
+y (A (B x) (C y)) = x+y;
 
-z0 = x where {c = 1; c = 2;};
-z1 = let {x = 5; x = 1;} in x;
+--z = \[x, y, z] -> x+y+z;
+z [x, y, z] = x+y+z;
+
+--e = \(x, y, z) -> x+y+z;
+e (x, y, z) = x+y+z;
+
+f :: (Int) -> (Int);
+f x = let {f :: (Int) -> (Int); f 0 = 1+x; f x = 2+x;} in (f 0);
+f2 x = (x 0) where {x :: (Int) -> (Int); x x = x;};
+
+f3 x = case x of {
+    0 -> 1;
+    n -> n+x;
+};
+
+i = f3 + (let {f3 = 123; c = if x then f3 else 0; } in c); 
+
+lc = [(x*f, y*f) | x <- [1*f, 2], y <- [1, 2], let f x = x*x, f < e];
 
 --+ if -> case
 --+ List -> :
@@ -20,11 +38,16 @@ z1 = let {x = 5; x = 1;} in x;
 --+ нужно переименовывать имена всех локальных определений и их вызовы (... -> Parser -> Renamer -> StaticAnalyze -> ...)
     --+ let 
     --+ where
-    -- patterns
-    -- lambda with pattern
-    -- case 
-    -- global and local def
+    --+ patterns
+    --+ lambda with pattern
+    --+ case 
+    --+ global and local def
+    -- list comprehension
+-- let с аргументами в list comprehension (исправить трансляцию)
+-- let в list comprehension с одинаковым id (добавить случай в статический анализ)
+-- отрефакторить грамматику (simple type и т.д. убрать)
 -- исправить грамматику (добавить поддержку паттернов) для list comprehension
+-- добавить ScopeChecker
 -- *граф зависимостей в области локальных определений (это модуль оптимизаций, после IRGen + в IRGen нужно все where транслировать в let + Translator будет различать только let и letrec)
 -- *в грамматику добавить возможность писать просто выражения (=> если есть взаимная рекурсия глобальных определений, то объединять их в let в выражении где они используются)
 
