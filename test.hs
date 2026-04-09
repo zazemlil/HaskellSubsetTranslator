@@ -23,6 +23,8 @@ i = f3 + (let {f3 = 123; c = if x then f3 else 0; } in c);
 
 lc = [(x*f, y*f) | x <- [1*f, 2], y <- [1, 2], let f x = x*x, f < e];
 lc1 = [x | let pi = 3.14, let pi = 10, x <- [1*pi, 2, 3], let x = 3];
+
+lc2 = [x | let {x = 1; y = 2;}];
 -- + if -> case
 -- + List -> :
 -- + List pattern -> :
@@ -36,6 +38,7 @@ lc1 = [x | let pi = 3.14, let pi = 10, x <- [1*pi, 2, 3], let x = 3];
 -- + fix по необходимости не только для let и where, но и в глобальных определениях
 -- + исправить порядок определений (он неправильный из за unordered_map) 
 -- + нужно переименовывать имена всех локальных определений и их вызовы (... -> Parser -> Renamer -> StaticAnalyze -> ...)
+-- исправить под новую структуру LC_LET
 -- исправить грамматику let в list comprehension (с binds)
 -- let с аргументами в list comprehension (исправить трансляцию)
 -- let в list comprehension с одинаковым id (добавить случай в статический анализ)

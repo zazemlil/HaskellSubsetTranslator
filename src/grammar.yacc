@@ -309,7 +309,16 @@ qualifier: id T_ARROW_LEFT expr { // pattern вместо id = конфликт
         n->addStatement($3);
         $$ = n;
     }
-    | T_LET bind { $$ = $2; }
+    | T_LET bind { 
+        auto n = std::make_shared<syntax_tree::ASTNode>("LC_LET");
+        n->addStatement($2);
+        $$ = n; 
+    }
+    | T_LET T_CURLY_BRACKET_OPEN bindings T_CURLY_BRACKET_CLOSE {
+        auto n = std::make_shared<syntax_tree::ASTNode>("LC_LET");
+        n->addStatements($3->getStatements());
+        $$ = n;
+    }
     | expr { $$ = $1; };
 
 // ============= Let+, if+, lambda+ (2) ==========
