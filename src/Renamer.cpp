@@ -176,22 +176,10 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
             }
             else if (qType == "<-") {
                 renameNode(q->getStatement(1), newEnv);
-            }
-        }
-
-        for (auto& q : qualifiers->getStatements()) {
-            auto qType = q->getNodeType();
-
-            if (qType != "<-" && qType != "=") { // FILTER (expr)
-                renameNode(q, newEnv);
-            }
-        }
-
-        for (auto& q : qualifiers->getStatements()) {
-            auto qType = q->getNodeType();
-
-            if (qType == "<-") {
                 renamePattern(q->getStatement(0), newEnv);
+            }
+            else { // FILTER (expr)
+                renameNode(q, newEnv);
             }
         }
 

@@ -22,7 +22,7 @@ f3 x = case x of {
 i = f3 + (let {f3 = 123; c = if x then f3 else 0; } in c); 
 
 lc = [(x*f, y*f) | x <- [1*f, 2], y <- [1, 2], let f x = x*x, f < e];
-
+lc1 = [x | let pi = 3.14, let pi = 10, x <- [1*pi, 2, 3], let x = 3];
 --+ if -> case
 --+ List -> :
 --+ List pattern -> :
