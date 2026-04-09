@@ -8,9 +8,9 @@ mkdir -p "$BUILD_DIR"/{linux,windows}
 
 echo "📝 Generating parser..."
 cd $BUILD_DIR
-bison -d -Wcounterexamples ../$SRC_DIR/grammar.y
+bison -d -Wcounterexamples ../$SRC_DIR/grammar.yacc
 echo "🔤 Generating lexer..."
-flex ../$SRC_DIR/lexer.l
+flex ../$SRC_DIR/lexer.flex
 cd ..
 
 
