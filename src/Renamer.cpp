@@ -37,10 +37,16 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
         return;
     }
 
-    if (type == "LET") {
+    if (type == "LET" || type == "LC_LET") {
         auto newEnv = env;
 
-        auto defs = node->getStatement(0);
+        std::shared_ptr<ASTNode> defs;
+        if (type == "LET") {
+            defs = node->getStatement(0);
+        }
+        else if (type == "LC_LET") {
+            defs = node;
+        }
 
         // идентификаторы объявлений
         std::unordered_map<std::string, std::string> tmpEnv;
@@ -77,8 +83,10 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
             renameNode(d, newEnv);
         }
 
-        // тело let
-        renameNode(node->getStatement(1), newEnv);
+        if (type == "LET") {
+            // тело let
+            renameNode(node->getStatement(1), newEnv);
+        }
         return;
     }
 
@@ -164,14 +172,14 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
         for (auto& q : qualifiers->getStatements()) {
             auto qType = q->getNodeType();
 
-            if (qType == "=") {
-                auto id = std::dynamic_pointer_cast<Identifier>(q->getStatement(0));
+            if (qType == "LC_LET") { // need to fix
+                // auto id = std::dynamic_pointer_cast<Identifier>(q->getStatement(0)->getStatement(0));
 
-                std::string newName = freshName(id->getValue());
-                newEnv[id->getValue()] = newName;
-                id->setValue(newName);
+                // std::string newName = freshName(id->getValue());
+                // newEnv[id->getValue()] = newName;
+                // id->setValue(newName);
                 
-                renameNode(q->getStatement(0), newEnv);
+                // renameNode(q->getStatement(0)->getStatement(0), newEnv);
                 renameNode(q, newEnv);
             }
             else if (qType == "<-") {

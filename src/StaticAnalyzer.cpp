@@ -52,6 +52,22 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         }
     }
 
+    if (node->getNodeType() == "LC_LET") {
+        auto& decls = node->getStatements();
+
+        checkContiguity(decls);
+
+        auto grouped = GroupingService::getInstance().groupByName(decls);
+
+        for (const auto& name : grouped.order)
+        {
+            auto& gdecls = grouped.groups[name];
+
+            checkArity(gdecls);
+            checkPatternRedundancy(name, gdecls);
+        }
+    }
+
     if (node->getNodeType() == "WHERE") {
         auto& decls = node->getStatement(1)->getStatements();
 
@@ -72,7 +88,7 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         analyzeNode(child);
     }
 
-    if (node->getNodeType() == "DEFINITIONS" || node->getNodeType() == "LET" || node->getNodeType() == "WHERE") {
+    if (node->getNodeType() == "DEFINITIONS" || node->getNodeType() == "LET" || node->getNodeType() == "WHERE" || node->getNodeType() == "LC_LET") {
         generator->generate(node);
     }
 }

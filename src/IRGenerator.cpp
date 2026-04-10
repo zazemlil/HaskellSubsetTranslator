@@ -13,6 +13,9 @@ void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node) {
     else if (node->getNodeType() == "LET") {
         decls = node->getStatement(0)->getStatements();
     }
+    else if (node->getNodeType() == "LC_LET") {
+        decls = node->getStatements();
+    }
     else if (node->getNodeType() == "WHERE") {
         decls = node->getStatement(1)->getStatements();
     }
@@ -34,6 +37,9 @@ void IRGenerator::generate(std::shared_ptr<syntax_tree::ASTNode> node) {
     }
     else if (node->getNodeType() == "LET") {
         node->getStatement(0)->setStatements(newDecls);
+    }
+    else if (node->getNodeType() == "LC_LET") {
+        node->setStatements(newDecls);
     }
     else if (node->getNodeType() == "WHERE") {
         node->getStatement(1)->setStatements(newDecls);

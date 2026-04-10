@@ -58,17 +58,17 @@ void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node, int i
 }
 
 void Translator::translateListComprehension(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
-    if (auto n = revomeFirstQualifier(node->getStatement(1), "=")) {
-        auto def = std::make_shared<syntax_tree::Definition>("DEF");
-        def->setStatements(n->getStatements());
-        
+    if (auto n = revomeFirstQualifier(node->getStatement(1), "LC_LET")) {
         auto l = std::make_shared<syntax_tree::ASTNode>("LIST");
-        l->addStatement(def);
+
+        for (auto& d : n->getStatements()) {
+            l->addStatement(d);
+        }
         
-        while (auto next = revomeFirstQualifier(node->getStatement(1), "=")) {
-            auto nextDef = std::make_shared<syntax_tree::Definition>("DEF");
-            nextDef->setStatements(next->getStatements());
-            l->addStatement(nextDef);
+        while (auto next = revomeFirstQualifier(node->getStatement(1), "LC_LET")) {
+            for (auto& d : next->getStatements()) {
+                l->addStatement(d);
+            }
         }
 
         auto let = std::make_shared<syntax_tree::Call>("LET");
