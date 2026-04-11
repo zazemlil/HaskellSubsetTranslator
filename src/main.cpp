@@ -5,8 +5,7 @@
 
 extern std::tuple<syntax_tree::AST, syntax_tree::AST> analyze(char* arg, bool printError);
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     bool s_flag = false, a_flag = false, t_flag = false, ir_flag = false;
     int new_argc = argc;
     for (int i = 1; i < new_argc; i++) {
@@ -72,6 +71,7 @@ int main(int argc, char* argv[])
         if (!a_flag) {
             std::cerr << e.what() << '\n';
         } 
+        delete staticAnalyzer;
         return -2;
     }
 
