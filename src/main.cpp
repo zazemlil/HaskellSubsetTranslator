@@ -33,12 +33,13 @@ int main(int argc, char* argv[]) {
     argc = new_argc;
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <input_file> [<output_file>]" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " [params] <input_file> [<output_file>]" << std::endl;
         return -1;
     }
 
     auto [ast, dataDeclarations] = analyze(argv[1], !s_flag);
     if (ast.isEmpty()) {
+        std::cerr << "Error: Input file is empty.\n";
         return -1;
     }
 
@@ -69,7 +70,7 @@ int main(int argc, char* argv[]) {
     }
     catch(const std::exception& e) {
         if (!a_flag) {
-            std::cerr << e.what() << '\n';
+            std::cerr << "Error: " << e.what() << '\n';
         } 
         delete staticAnalyzer;
         return -2;
@@ -127,7 +128,7 @@ int main(int argc, char* argv[]) {
             fileStream->close();
         }
         else {
-            std::cerr << "The file is not open.\n";
+            std::cerr << "Error: Output file is not open.\n";
         }
     }
 
