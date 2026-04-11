@@ -303,9 +303,15 @@ qualifiers_tail: T_COMMA qualifier qualifiers_tail {
     }
     | %empty { $$ = std::make_shared<syntax_tree::LiteralNil>("NIL"); };
 
-qualifier: id T_ARROW_LEFT expr { // pattern вместо id = конфликт
+qualifier: expr T_ARROW_LEFT expr {
         auto n = std::make_shared<syntax_tree::ASTNode>("<-");
         n->addStatement($1);
+        n->addStatement($3);
+        $$ = n;
+    }
+    | T_UNDERSCORE T_ARROW_LEFT expr {
+        auto n = std::make_shared<syntax_tree::ASTNode>("<-");
+        n->addStatement(std::make_shared<syntax_tree::ASTNode>("_"));
         n->addStatement($3);
         $$ = n;
     }

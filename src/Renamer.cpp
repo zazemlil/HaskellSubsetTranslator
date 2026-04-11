@@ -172,14 +172,7 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
         for (auto& q : qualifiers->getStatements()) {
             auto qType = q->getNodeType();
 
-            if (qType == "LC_LET") { // need to fix
-                // auto id = std::dynamic_pointer_cast<Identifier>(q->getStatement(0)->getStatement(0));
-
-                // std::string newName = freshName(id->getValue());
-                // newEnv[id->getValue()] = newName;
-                // id->setValue(newName);
-                
-                // renameNode(q->getStatement(0)->getStatement(0), newEnv);
+            if (qType == "LC_LET") {
                 renameNode(q, newEnv);
             }
             else if (qType == "<-") {
@@ -221,7 +214,7 @@ void Renamer::renamePattern(std::shared_ptr<ASTNode> pattern, std::unordered_map
         return;
 
     // (Just x) or (x, y)
-    if (type == "CONSTRUCTOR_PATTERN" || type == "TUPLE_PATTERN") {
+    if (type == "CONSTRUCTOR_PATTERN" || type == "TUPLE_PATTERN" || type == "TUPLE") {
         for (auto& p : pattern->getStatements()) {
             renamePattern(p, env);
         }
@@ -229,7 +222,7 @@ void Renamer::renamePattern(std::shared_ptr<ASTNode> pattern, std::unordered_map
     }
 
     // список [x,y]
-    if (type == "LIST" || type == "LIST_PATTERN") {
+    if (type == "LIST_NODE" || type == "LIST_PATTERN") {
         for (auto& p : pattern->getStatements()) {
             renamePattern(p, env);
         }

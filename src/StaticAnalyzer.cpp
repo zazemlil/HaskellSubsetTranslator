@@ -84,6 +84,17 @@ void StaticAnalyzer::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         }
     }
 
+    if (node->getNodeType() == "LIST_COMPREHENSION") {
+        for (auto& q : node->getStatement(1)->getStatements()) {
+            if (q->getNodeType() == "<-") {
+                auto pattern = q->getStatement(0);
+                if (!isPattern(pattern)) {
+                    throw std::runtime_error("Invalid pattern in generator.");
+                }
+            }
+        }
+    }
+
     for (auto& child : node->getStatements()) {
         analyzeNode(child);
     }
@@ -108,7 +119,7 @@ void StaticAnalyzer::checkContiguity(const std::vector<std::shared_ptr<syntax_tr
 
         if (lastPos.count(name) && lastPos[name] != i - 1) {
             throw std::runtime_error(
-                "Non-contiguous definitions for function '" + name + "'"
+                "Non-contiguous definitions for function '" + name + "'."
             );
         }
 
@@ -121,6 +132,58 @@ size_t StaticAnalyzer::getLambdaAbstractionArity(const std::shared_ptr<syntax_tr
         return 1 + getLambdaAbstractionArity(node->getStatement(1));
     }
     return 0;
+}
+
+bool StaticAnalyzer::isPattern(const std::shared_ptr<syntax_tree::ASTNode> &node) {
+    if (!node) return false;
+
+    const std::string type = node->getNodeType();
+
+    if (type == "Identifier")
+        return true;
+
+    if (type == "_")
+        return true;
+
+    if (type == "LiteralInt" ||
+        type == "LiteralFloat" ||
+        type == "LiteralString" ||
+        type == "LiteralChar")
+        return true;
+
+    if (type == "CONSTRUCTOR" || type == "CONSTRUCTOR_PATTERN") {
+        for (auto& child : node->getStatements()) {
+            if (!isPattern(child))
+                return false;
+        }
+        return true;
+    }
+
+    if (type == "TUPLE" || type == "TUPLE_PATTERN") {
+        for (auto& child : node->getStatements()) {
+            if (!isPattern(child))
+                return false;
+        }
+        return true;
+    }
+
+    if (type == "LIST_NODE" || type == "LIST_PATTERN") {
+        for (auto& child : node->getStatements()) {
+            if (!isPattern(child))
+                return false;
+        }
+        return true;
+    }
+
+    if (type == ":") {
+        if (node->getStatementCount() != 2)
+            return false;
+
+        return isPattern(node->getStatement(0)) &&
+               isPattern(node->getStatement(1));
+    }
+
+    return false;
 }
 
 void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::ASTNode>> &decls) {
@@ -138,12 +201,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
     for (auto& n : decls) {
         if (n->getNodeType() == "DEF" || n->getNodeType() == "=") {
             auto id = n->getStatement(0);
-            // if (id->getStatementCount() > 0) {
-            //     if (id->getStatement(0)->getNodeType() == "PATTERNS") {
-            //         expectedArity = id->getStatement(0)->getStatementCount();
-            //     }
-            // }
-            expectedArity = id->getStatementCount(); //
+            expectedArity = id->getStatementCount();
             break;
         }
     }
@@ -162,20 +220,12 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
                 auto nameNode = decls[0]->getStatement(0);
                 auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
                 throw std::runtime_error(
-                    "Multiple definitions of '" + id->getValue() + "' signature"
+                    "Multiple definitions of '" + id->getValue() + "' signature."
                 );
             }
             
         } else if (decl->getNodeType() == "DEF" || decl->getNodeType() == "=") {
             auto id = decl->getStatement(0);
-            // if (id->getStatementCount() > 0) {
-            //     if (id->getStatement(0)->getNodeType() == "PATTERNS") {
-            //         arity = id->getStatement(0)->getStatementCount();
-            //     }
-            // }
-            // else {
-            //     arity = 0;
-            // }
             arity = id->getStatementCount();
         }
 
@@ -184,7 +234,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
             auto nameNode = decl->getStatement(0);
             auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
             throw std::runtime_error(
-                "Multiple definitions of '" + id->getValue() + "'"
+                "Multiple definitions of '" + id->getValue() + "'."
             );
         }
     }
@@ -193,7 +243,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
         auto nameNode = decls[0]->getStatement(0);
         auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
         throw std::runtime_error(
-            "Multiple definitions of '" + id->getValue() + "' constant"
+            "Multiple definitions of '" + id->getValue() + "' constant."
         );
     }
 
@@ -204,7 +254,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
                     auto nameNode = n->getStatement(0);
                     auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
                     throw std::runtime_error(
-                        "Arity mismatch in function '" + id->getValue() + "'"
+                        "Arity mismatch in function '" + id->getValue() + "'."
                     );
                 }
             }
@@ -215,7 +265,7 @@ void StaticAnalyzer::checkArity(const std::vector<std::shared_ptr<syntax_tree::A
         auto nameNode = decls[0]->getStatement(0);
         auto id = std::dynamic_pointer_cast<syntax_tree::Identifier>(nameNode);
         throw std::runtime_error(
-            "The type signature for '" + id->getValue() + "' lacks an accompanying binding"
+            "The type signature for '" + id->getValue() + "' lacks an accompanying binding."
         );
     }
 }
@@ -247,7 +297,6 @@ PatternKind StaticAnalyzer::getPatternKind(std::shared_ptr<syntax_tree::ASTNode>
 std::vector<std::shared_ptr<syntax_tree::ASTNode>> 
     StaticAnalyzer::extractPatterns(std::shared_ptr<syntax_tree::ASTNode> decl) 
 {
-    //auto& stmts = decl->getStatement(0)->getStatement(0)->getStatements();
     auto& stmts = decl->getStatement(0)->getStatements();
     return stmts;
 }
@@ -283,16 +332,6 @@ bool StaticAnalyzer::patternCovers(std::shared_ptr<syntax_tree::ASTNode> p1, std
         else if (p1->getStatementCount() < 2) {
             return true;
         }
-
-        // auto args1 = p1->getStatement(1)->getStatements();
-        // auto args2 = p2->getStatement(1)->getStatements();
-
-        // if (args1.size() != args2.size())
-        //     return false;
-
-        // for (size_t i=0;i<args1.size();i++)
-        //     if (!patternCovers(args1[i], args2[i]))
-        //         return false;
 
         for (size_t i=1;i<p1->getStatementCount();i++)
             if (!patternCovers(p1->getStatement(i), p2->getStatement(i)))
@@ -361,7 +400,7 @@ void StaticAnalyzer::checkPatternRedundancy(std::string name, const std::vector<
         if (redundant) {
 
             throw std::runtime_error(
-                "Redundant pattern in function definition '" + name + "'");
+                "Redundant pattern in function definition '" + name + "'.");
         }
 
         seenRows.push_back(row);
