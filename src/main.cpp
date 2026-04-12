@@ -1,5 +1,6 @@
 #include "AST.h"
 #include "Renamer.h"
+#include "ScopeChecker.h"
 #include "StaticAnalyzer.h"
 #include "Translator.h"
 
@@ -34,13 +35,13 @@ int main(int argc, char* argv[]) {
 
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " [params] <input_file> [<output_file>]" << std::endl;
-        return -1;
+        return 1;
     }
 
     auto [ast, dataDeclarations] = analyze(argv[1], !s_flag);
     if (ast.isEmpty()) {
         std::cerr << "Error: Input file is empty.\n";
-        return -1;
+        return 2;
     }
 
     if (t_flag) {
@@ -58,6 +59,25 @@ int main(int argc, char* argv[]) {
     renamer->rename(ast.getRoot());
     delete renamer;
 
+    if (t_flag) {
+        std::cout << "-------------------------------------------------\n";
+        std::cout << "----------------- AST (renamed) -----------------\n";
+        std::cout << "-------------------------------------------------\n";
+        ast.print();
+    }
+
+    ScopeChecker* scopeChecker = new ScopeChecker();
+    try {
+        scopeChecker->analyze(ast.getRoot());
+        delete scopeChecker;
+    } catch(const std::exception& e) {
+        if (!a_flag) {
+            std::cerr << "Scope Error: " << e.what() << '\n';
+        }
+        delete scopeChecker;
+        return 3;
+    }
+
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
     syntax_tree::AST ir;
     std::shared_ptr<syntax_tree::ASTNode> signatures;
@@ -73,7 +93,7 @@ int main(int argc, char* argv[]) {
             std::cerr << "Error: " << e.what() << '\n';
         } 
         delete staticAnalyzer;
-        return -2;
+        return 4;
     }
 
     if (ir_flag) {
