@@ -60,12 +60,12 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         return;
     }
 
-    if (type == "DEFINITIONS" || type == "LET" || type == "WHERE" || type == "LC_LET") {
+    if (type == "DEFINITIONS" || type == "LET" || type == "WHERE") {
         enterScope();
         
         // Проход 1: Собираем все имена функций/переменных в текущем скоупе
         std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls;
-        if (type == "DEFINITIONS" || type == "LC_LET") decls = node->getStatements();
+        if (type == "DEFINITIONS") decls = node->getStatements();
         else if (type == "LET") decls = node->getStatement(0)->getStatements();
         else if (type == "WHERE") decls = node->getStatement(1)->getStatements();
 
@@ -97,25 +97,28 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (type == "LIST_COMPREHENSION") {
         enterScope();
         
-        // Обходим квалификаторы (Child 1) слева направо
         auto& qualifiers = node->getStatement(1)->getStatements();
         for (auto& qualifier : qualifiers) {
             if (qualifier->getNodeType() == "<-") {
-                // Сначала анализируем правую часть (источник списка), 
-                // так как она НЕ видит переменные из левой части текущего генератора.
                 analyzeNode(qualifier->getStatement(1));
-                
-                // Затем собираем паттерны из левой части (добавляем их в Scope),
-                // чтобы они были доступны для последующих квалификаторов и головного выражения.
                 collectPatterns(qualifier->getStatement(0));
-            } else {
-                // Если это guard (охранное выражение), просто проверяем его.
+            } 
+            else if (qualifier->getNodeType() == "LC_LET") {
+                for (auto& decl : qualifier->getStatements()) {
+                    if (decl->getNodeType() == "DEF" || decl->getNodeType() == "=") {
+                         collectPatterns(decl->getStatement(0));
+                    }
+                }
+                for (auto& decl : qualifier->getStatements()) {
+                    analyzeNode(decl);
+                }
+            } 
+            else {
+                // guards
                 analyzeNode(qualifier);
             }
         }
         
-        // Теперь, когда все переменные генераторов находятся в Scope, 
-        // мы можем безопасно проверить головное выражение (Child 0).
         analyzeNode(node->getStatement(0));
         
         exitScope();

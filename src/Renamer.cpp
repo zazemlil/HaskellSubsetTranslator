@@ -38,7 +38,11 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
     }
 
     if (type == "LET" || type == "LC_LET") {
-        auto newEnv = env;
+        // Для LET создаем копию окружения, чтобы переменные не утекли за пределы 'in'.
+        // Для LC_LET модифицируем переданное окружение по ссылке (env), так как новые
+        // переменные должны быть видны в последующих квалификаторах и в головном выражении.
+        std::unordered_map<std::string, std::string> localEnv = env;
+        std::unordered_map<std::string, std::string>& activeEnv = (type == "LET") ? localEnv : env;
 
         std::shared_ptr<ASTNode> defs;
         if (type == "LET") {
@@ -58,11 +62,11 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
 
             if (tmpEnv.find(id->getValue()) == tmpEnv.end()) {
                 std::string newName = freshName(id->getValue());
-                newEnv[id->getValue()] = newName;
+                activeEnv[id->getValue()] = newName;
                 tmpEnv[id->getValue()] = newName;
             }
 
-            id->setValue(newEnv[id->getValue()]);
+            id->setValue(activeEnv[id->getValue()]);
         }
 
         // сигнатуры 
@@ -72,20 +76,20 @@ void Renamer::renameNode(std::shared_ptr<ASTNode> node, std::unordered_map<std::
 
                 auto id = std::dynamic_pointer_cast<Identifier>(nameNode);
 
-                if (newEnv.count(id->getValue())) {
-                    id->setValue(newEnv[id->getValue()]);
+                if (activeEnv.count(id->getValue())) {
+                    id->setValue(activeEnv[id->getValue()]);
                 }
             }
         }
 
         // объявления
         for (auto& d : defs->getStatements()) {
-            renameNode(d, newEnv);
+            renameNode(d, activeEnv);
         }
 
         if (type == "LET") {
             // тело let
-            renameNode(node->getStatement(1), newEnv);
+            renameNode(node->getStatement(1), activeEnv);
         }
         return;
     }
