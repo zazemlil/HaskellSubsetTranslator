@@ -1,5 +1,10 @@
 e0 = [x*c | [x] <- [1, 2], let c = 123];
 
+f x y = case (x, y) of {
+    (0, 0) -> -1;
+    (x, b) -> 1;
+};
+
 -- + if -> case
 -- + List -> :
 -- + List pattern -> :

@@ -36,7 +36,7 @@ void ScopeChecker::collectPatterns(std::shared_ptr<syntax_tree::ASTNode> node) {
         auto idNode = std::dynamic_pointer_cast<syntax_tree::Identifier>(node);
         declareSymbol(idNode->getValue());
     }
-    // Здесь также стоит добавить рекурсивный обход для TUPLE_PATTERN, LIST_PATTERN и т.д.
+    
     for (auto& child : node->getStatements()) {
         collectPatterns(child);
     }
@@ -51,6 +51,10 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (!node) return;
     std::string type = node->getNodeType();
 
+    if (type == "SIGNATURE") {
+        return; 
+    }
+
     if (type == "Identifier") {
         auto idNode = std::dynamic_pointer_cast<syntax_tree::Identifier>(node);
         std::string name = idNode->getValue();
@@ -63,7 +67,6 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
     if (type == "DEFINITIONS" || type == "LET" || type == "WHERE") {
         enterScope();
         
-        // Проход 1: Собираем все имена функций/переменных в текущем скоупе
         std::vector<std::shared_ptr<syntax_tree::ASTNode>> decls;
         if (type == "DEFINITIONS") decls = node->getStatements();
         else if (type == "LET") decls = node->getStatement(0)->getStatements();
@@ -71,12 +74,10 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
 
         for (auto& decl : decls) {
             if (decl->getNodeType() == "DEF" || decl->getNodeType() == "=") {
-                 // Левая часть выражения содержит определяемое имя
                  collectPatterns(decl->getStatement(0));
             }
         }
 
-        // Проход 2: Проверяем тела
         for (auto& child : node->getStatements()) {
             analyzeNode(child);
         }
@@ -85,12 +86,21 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
         return;
     }
 
-    if (type == "λ") { // Лямбда-выражение
-        enterScope();
-        // У лямбды первый аргумент - паттерн, второй - тело
-        collectPatterns(node->getStatement(0));
-        analyzeNode(node->getStatement(1));
-        exitScope();
+    if (type == "CASE") {
+        analyzeNode(node->getStatement(0));
+
+        auto alts = node->getStatement(1);
+        for (auto& alt : alts->getStatements()) {
+            if (alt->getNodeType() == "ALT") {
+                enterScope();
+                
+                collectPatterns(alt->getStatement(0));
+                
+                analyzeNode(alt->getStatement(1));
+                
+                exitScope();
+            }
+        }
         return;
     }
 
@@ -113,14 +123,21 @@ void ScopeChecker::analyzeNode(std::shared_ptr<syntax_tree::ASTNode> node) {
                     analyzeNode(decl);
                 }
             } 
-            else {
-                // guards
+            else { // Guard
                 analyzeNode(qualifier);
             }
         }
         
         analyzeNode(node->getStatement(0));
         
+        exitScope();
+        return;
+    }
+
+    if (type == "λ") {
+        enterScope();
+        collectPatterns(node->getStatement(0));
+        analyzeNode(node->getStatement(1));
         exitScope();
         return;
     }
