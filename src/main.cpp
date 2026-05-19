@@ -55,28 +55,28 @@ int main(int argc, char* argv[]) {
         dataDeclarations.print();
     }
 
-    Renamer* renamer = new Renamer();
-    renamer->rename(ast.getRoot());
-    delete renamer;
+    // Renamer* renamer = new Renamer();
+    // renamer->rename(ast.getRoot());
+    // delete renamer;
 
-    if (t_flag) {
-        std::cout << "-------------------------------------------------\n";
-        std::cout << "----------------- AST (renamed) -----------------\n";
-        std::cout << "-------------------------------------------------\n";
-        ast.print();
-    }
+    // if (t_flag) {
+    //     std::cout << "-------------------------------------------------\n";
+    //     std::cout << "----------------- AST (renamed) -----------------\n";
+    //     std::cout << "-------------------------------------------------\n";
+    //     ast.print();
+    // }
 
-    ScopeChecker* scopeChecker = new ScopeChecker();
-    try {
-        scopeChecker->analyze(ast.getRoot());
-        delete scopeChecker;
-    } catch(const std::exception& e) {
-        if (!a_flag) {
-            std::cerr << "Scope Error: " << e.what() << '\n';
-        }
-        delete scopeChecker;
-        return 3;
-    }
+    // ScopeChecker* scopeChecker = new ScopeChecker();
+    // try {
+    //     scopeChecker->analyze(ast.getRoot());
+    //     delete scopeChecker;
+    // } catch(const std::exception& e) {
+    //     if (!a_flag) {
+    //         std::cerr << "Scope Error: " << e.what() << '\n';
+    //     }
+    //     delete scopeChecker;
+    //     return 3;
+    // }
 
     StaticAnalyzer* staticAnalyzer = new StaticAnalyzer();
     syntax_tree::AST ir;

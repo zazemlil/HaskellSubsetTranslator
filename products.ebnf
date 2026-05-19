@@ -84,8 +84,10 @@ QUALIFIERS ::= QUALIFIER QUALIFIERS_TAIL
         | ε
 QUALIFIERS_TAIL ::= "," QUALIFIER QUALIFIERS_TAIL
         | ε
-QUALIFIER ::= id "<-" EXPR
+QUALIFIER ::= expr "<-" EXPR
+        | "_" "<-" EXPR
         | "let" BIND
+        | "let" "{" BINDINGS "}"
         | EXPR
 #} 3
 
