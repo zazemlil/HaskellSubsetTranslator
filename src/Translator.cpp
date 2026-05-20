@@ -8,7 +8,7 @@ syntax_tree::AST Translator::translate(syntax_tree::AST ir) {
 void Translator::translateNode(std::shared_ptr<syntax_tree::ASTNode> node, int index, std::shared_ptr<syntax_tree::ASTNode> parent) {
     if (node->getNodeType() == "DEF") {
         if (parent->getNodeType() == "DEFINITIONS") {
-            translateGlobalDef(node, index, parent);
+            //translateGlobalDef(node, index, parent); // fix
         }
     }
     if (node->getNodeType() == "LIST_COMPREHENSION") {
@@ -204,12 +204,14 @@ std::shared_ptr<syntax_tree::ASTNode> Translator::translateLetWhere(std::shared_
     call1->addStatement(lam1);
 
     if (isRec) {
-        auto call2 = std::make_shared<syntax_tree::Call>("CALL");
-        auto fix = std::make_shared<syntax_tree::Identifier>("Identifier", "fix");
-        call2->addStatement(fix);
-        call2->addStatement(lam2);
+        // fix
+        // auto call2 = std::make_shared<syntax_tree::Call>("CALL");
+        // auto fix = std::make_shared<syntax_tree::Identifier>("Identifier", "fix");
+        // call2->addStatement(fix);
+        // call2->addStatement(lam2);
 
-        call1->addStatement(call2);
+        // call1->addStatement(call2);
+        call1->addStatement(lam2->getStatement(1)); //
     }
     else {
         call1->addStatement(lam2->getStatement(1));
